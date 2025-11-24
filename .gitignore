@@ -61,8 +61,6 @@ backend/target/
 backend/.mvn/wrapper/maven-wrapper.jar
 backend/!**/src/main/**/target/
 backend/!**/src/test/**/target/
-backend/mvnw
-backend/mvnw.cmd
 backend/.mvn
 
 
