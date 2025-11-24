@@ -4,7 +4,7 @@ services:
     container_name: team-project
     restart: unless-stopped
     ports:
-      - "27018:27017"
+      - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
@@ -18,4 +18,3 @@ volumes:
 
 networks:
   team-project-network:
-

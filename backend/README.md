@@ -21,4 +21,4 @@ If you prefer running MongoDB via Docker, use the provided compose file:
 docker compose up -d
 ```
 
-This starts a MongoDB 7 container exposed on `27018` and wired with the credentials defined in `docker-compose.yml`. Update `MONGODB_URI` if you need to point the backend at a different host or port.
+This starts a MongoDB 7 container exposed on `27017` and wired with the credentials defined in `docker-compose.yml`. Update `MONGODB_URI` if you need to point the backend at a different host or port.
