@@ -31,6 +31,14 @@ npm install
 npm run dev
 ```
 
+### Tests
+
+- Backend: `cd backend && ./mvnw test` (runs Spring Boot tests with Testcontainers)
+
 ### Docker Support
 
 The backend ships with a `docker-compose.yml` for MongoDB. Start it from `backend/` using `docker compose up -d` and set `MONGODB_URI` if you need to override defaults.
+
+### Swagger UI
+
+- http://localhost:8080/swagger-ui/index.html
