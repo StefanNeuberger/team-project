@@ -21,7 +21,7 @@ jobs:
           cache: "maven"
 
       - name: Build and run tests
-        run: mvn clean verify
+        run: mvn -f backend/pom.xml clean verify
 
       - name: Upload test reports
         if: failure()
