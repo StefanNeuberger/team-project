@@ -10,7 +10,6 @@ export default defineConfig({
       target: "src/api/generated",
       client: "react-query",
       baseUrl: "http://localhost:8080",
-      httpClient: "fetch",
     },
   },
 });
