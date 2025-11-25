@@ -74,6 +74,9 @@
             <artifactId>mongodb</artifactId>
             <scope>test</scope>
         </dependency>
+        <properties>
+  <sonar.organization>stefanneuberger</sonar.organization>
+</properties>
     </dependencies>
 
     <build>
