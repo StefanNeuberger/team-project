@@ -3,11 +3,11 @@ package com.team18.backend.controller;
 import com.team18.backend.model.Shop;
 import com.team18.backend.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -36,12 +36,12 @@ public class ShopController {
             description = "Returns every shop currently stored in the system."
     )
     @ApiResponse(
-        responseCode = "200",
-        description = "Successfully retrieved list of shops",
-        content = @Content(
-            mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = Shop.class))
-        )
+            responseCode = "200",
+            description = "Successfully retrieved list of shops",
+            content = @Content(
+                    mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = Shop.class))
+            )
     )
     public ResponseEntity<List<Shop>> getAllShops() {
         return ResponseEntity.ok( shopService.getAllShops() );
@@ -88,6 +88,11 @@ public class ShopController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid input",
+                    content = @Content
+            ),
+            @ApiResponse(  // ← Add this!
+                    responseCode = "409",
+                    description = "Shop name already exists",
                     content = @Content
             )
     })
