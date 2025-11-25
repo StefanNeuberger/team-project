@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -34,15 +35,13 @@ public class ShopController {
             summary = "Get all shops",
             description = "Returns every shop currently stored in the system."
     )
-    @ApiResponses(
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "List of shops",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Shop.class)
-                    )
-            )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Successfully retrieved list of shops",
+        content = @Content(
+            mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = Shop.class))
+        )
     )
     public ResponseEntity<List<Shop>> getAllShops() {
         return ResponseEntity.ok( shopService.getAllShops() );
