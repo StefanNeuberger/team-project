@@ -25,7 +25,7 @@ The app will be available at `http://localhost:5173`
 
 ## API Client Generation
 
-This project uses [Orval](https://orval.dev/) to generate a type-safe React Query client from the backend's OpenAPI specification.
+This project uses [Orval](https://orval.dev/) to generate a type-safe React Query client with Axios from the backend's OpenAPI specification.
 
 ### Usage
 
@@ -59,6 +59,13 @@ npm run generate:api
 
 This will:
 
-- Fetch the latest OpenAPI spec from `http://localhost:8080/v3/api-docs`
-- Save it as `openapi.json`
-- Generate type-safe React Query hooks in `src/api/generated/`
+1. Fetch the latest OpenAPI spec from `http://localhost:8080/v3/api-docs`
+2. Save it as `openapi.json`
+3. Generate type-safe React Query hooks with Axios in `src/api/generated/`
+
+### Tech Stack
+
+- **HTTP Client**: Axios (automatic error handling, JSON parsing, interceptors)
+- **Data Fetching**: React Query (caching, refetching, mutations)
+- **Type Safety**: TypeScript types generated from OpenAPI spec
+- **Validation**: Zod schemas for form validation
