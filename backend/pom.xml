@@ -28,6 +28,7 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <sonar.organization>stefanneuberger</sonar.organization>
     </properties>
     <dependencies>
         <dependency>
@@ -74,9 +75,7 @@
             <artifactId>mongodb</artifactId>
             <scope>test</scope>
         </dependency>
-        <properties>
-  <sonar.organization>stefanneuberger</sonar.organization>
-</properties>
+        
     </dependencies>
 
     <build>
