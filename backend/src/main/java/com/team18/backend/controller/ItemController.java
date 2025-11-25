@@ -1,5 +1,6 @@
 package com.team18.backend.controller;
 
+import com.team18.backend.dto.ItemDTO;
 import com.team18.backend.model.Item;
 import com.team18.backend.service.ItemService;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Item createItem( @RequestBody Item item ) {
+    public Item createItem( @RequestBody ItemDTO item ) {
         return itemService.createItem( item );
     }
 

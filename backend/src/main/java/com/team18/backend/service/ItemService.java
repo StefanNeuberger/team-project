@@ -1,5 +1,6 @@
 package com.team18.backend.service;
 
+import com.team18.backend.dto.ItemDTO;
 import com.team18.backend.model.Item;
 import com.team18.backend.repository.ItemRepo;
 import org.springframework.stereotype.Service;
@@ -23,8 +24,9 @@ public class ItemService {
         return itemRepo.findById( id ).orElseThrow( () -> new RuntimeException( "Item not found: " + id ) );
     }
 
-    public Item createItem( Item item ) {
-        return itemRepo.save( item );
+    public Item createItem( ItemDTO item ) {
+        Item newItem = new Item( null, item.getSku(), item.getName() );
+        return itemRepo.save( newItem );
     }
 
     public Item updateItemById( String id, Item item ) {

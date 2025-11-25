@@ -1,5 +1,6 @@
 package com.team18.backend.service;
 
+import com.team18.backend.dto.ItemDTO;
 import com.team18.backend.model.Item;
 import com.team18.backend.repository.ItemRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,10 +127,11 @@ class ItemServiceTest {
         @DisplayName("Should return newly created item")
         void createItem() {
             Item newItem = new Item( "1", "SKU123", "Test Item" );
+            ItemDTO newItemDTO = new ItemDTO( "SKU123", "Test Item" );
 
             when( mockedItemRepo.save( newItem ) ).thenReturn( new Item( "1", "SKU123", "Test Item" ) );
 
-            Item actualItem = mockedItemService.createItem( newItem );
+            Item actualItem = mockedItemService.createItem( newItemDTO );
 
             assertEquals( newItem, actualItem );
             verify( mockedItemRepo ).save( newItem );
