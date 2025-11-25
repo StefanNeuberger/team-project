@@ -1,11 +1,13 @@
 package com.team18.backend.dto;
 
 import com.team18.backend.model.BaseModel;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.Objects;
 
 public class ItemDTO extends BaseModel {
     private String sku;
+    @NotBlank
     private String name;
 
     public ItemDTO( String sku, String name ) {

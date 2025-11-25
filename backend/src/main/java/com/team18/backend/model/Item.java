@@ -1,5 +1,6 @@
 package com.team18.backend.model;
 
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Objects;
@@ -8,6 +9,7 @@ import java.util.Objects;
 public class Item extends BaseModel {
 
     private String sku;
+    @NotBlank
     private String name;
 
     public Item( String id, String sku, String name ) {

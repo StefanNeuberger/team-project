@@ -1,6 +1,7 @@
 package com.team18.backend.service;
 
 import com.team18.backend.dto.ItemDTO;
+import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.Item;
 import com.team18.backend.repository.ItemRepo;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class ItemService {
     }
 
     public Item findItemById( String id ) {
-        return itemRepo.findById( id ).orElseThrow( () -> new RuntimeException( "Item not found: " + id ) );
+        return itemRepo.findById( id ).orElseThrow( () -> new ResourceNotFoundException( "Item not found: " + id ) );
     }
 
     public Item createItem( ItemDTO item ) {
@@ -30,7 +31,7 @@ public class ItemService {
     }
 
     public Item updateItemById( String id, Item item ) {
-        Item existingItem = itemRepo.findById( id ).orElseThrow( () -> new RuntimeException( "Item not found: " + id ) );
+        Item existingItem = itemRepo.findById( id ).orElseThrow( () -> new ResourceNotFoundException( "Item not found: " + id ) );
 
         if ( item.getName() != null ) {
             existingItem.setName( item.getName() );
@@ -43,14 +44,12 @@ public class ItemService {
         return itemRepo.save( existingItem );
     }
 
-    public boolean deleteItemById( String id ) {
-        Item existingItem = itemRepo.findById( id ).orElseThrow( () -> new RuntimeException( "Item not found: " + id ) );
+    public void deleteItemById( String id ) {
+        Item existingItem = itemRepo.findById( id ).orElseThrow( () -> new ResourceNotFoundException( "Item not found: " + id ) );
         itemRepo.delete( existingItem );
-        return true;
     }
 
-    public boolean deleteAllItems() {
+    public void deleteAllItems() {
         itemRepo.deleteAll();
-        return true;
     }
 }

@@ -1,6 +1,7 @@
 package com.team18.backend.service;
 
 import com.team18.backend.dto.ItemDTO;
+import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.Item;
 import com.team18.backend.repository.ItemRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +12,9 @@ import org.mockito.Mockito;
 
 import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -76,36 +79,33 @@ class ItemServiceTest {
 
             when( mockedItemRepo.findById( notExistingItemId ) ).thenReturn( Optional.empty() );
 
-            assertThrows( RuntimeException.class, () ->
+            assertThrows( ResourceNotFoundException.class, () ->
                     mockedItemService.updateItemById( notExistingItemId, updatedItem ) );
         }
     }
 
-    @Nested
-    class deleteAllItemTests {
-        @Test
-        @DisplayName("Should return true when all items deleted")
-        void deleteAllItems() {
-            boolean isDeleted = mockedItemService.deleteAllItems();
-
-            assertTrue( isDeleted );
-            verify( mockedItemRepo ).deleteAll();
-        }
-    }
 
     @Nested
     class deleteItemTests {
         @Test
-        @DisplayName("Should return true when item deleted by id")
-        void deleteItem() {
+        @DisplayName("Should return nothing when all items deleted")
+        void deleteAllItems() {
+
+            assertDoesNotThrow( () -> mockedItemService.deleteAllItems() );
+            verify( mockedItemRepo ).deleteAll();
+        }
+
+        @Test
+        @DisplayName("Should delete item successfully")
+        void deleteItemById() {
             String itemId = "1";
             Item existingItem = new Item( itemId, "SKU123", "Test Item" );
 
             when( mockedItemRepo.findById( itemId ) ).thenReturn( Optional.of( existingItem ) );
 
-            boolean isDeleted = mockedItemService.deleteItemById( itemId );
+            assertDoesNotThrow( () -> mockedItemService.deleteItemById( itemId ) );
 
-            assertTrue( isDeleted );
+            verify( mockedItemRepo ).findById( itemId );
             verify( mockedItemRepo ).delete( existingItem );
         }
 
@@ -116,7 +116,7 @@ class ItemServiceTest {
 
             when( mockedItemRepo.findById( notExistingItemId ) ).thenReturn( Optional.empty() );
 
-            assertThrows( RuntimeException.class, () ->
+            assertThrows( ResourceNotFoundException.class, () ->
                     mockedItemService.deleteItemById( notExistingItemId ) );
         }
     }

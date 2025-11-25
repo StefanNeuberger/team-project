@@ -3,13 +3,23 @@ package com.team18.backend.controller;
 import com.team18.backend.dto.ItemDTO;
 import com.team18.backend.model.Item;
 import com.team18.backend.service.ItemService;
-import org.springframework.http.HttpStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/item")
+@Tag(name = "Items", description = "CRUD operations for items")
+@Validated
 public class ItemController {
 
     private final ItemService itemService;
@@ -18,30 +28,121 @@ public class ItemController {
         this.itemService = itemService;
     }
 
+
     @GetMapping
-    public List<Item> findAllItems() {
-        return itemService.findAllItems();
+    @Operation(
+            summary = "Get all Items",
+            description = "Returns every Item currently stored in the system."
+    )
+    @ApiResponses(
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "List of Items",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Item.class)
+                    )
+            )
+    )
+    public ResponseEntity<List<Item>> findAllItems() {
+        return ResponseEntity.ok( itemService.findAllItems() );
     }
 
     @GetMapping("/{id}")
-    public Item findItemById( @PathVariable String id ) {
-        return itemService.findItemById( id );
+    @Operation(
+            summary = "Get Item by ID",
+            description = "Returns a single Item by its unique identifier."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Item found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Item.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Item not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<Item> findItemById( @PathVariable String id ) {
+        return ResponseEntity.ok( itemService.findItemById( id ) );
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Item createItem( @RequestBody ItemDTO item ) {
-        return itemService.createItem( item );
+    @Operation(
+            summary = "Create a Item",
+            description = "Creates a new Item with the provided name."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Item created",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Item.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<Item> createItem( @RequestBody @Valid ItemDTO item ) {
+        Item createdItem = itemService.createItem( item );
+        return ResponseEntity.status( 201 ).body( createdItem );
     }
 
     @PutMapping("/{id}")
-    public Item updateItemById( @PathVariable String id, @RequestBody Item item ) {
-        return itemService.updateItemById( id, item );
+    @Operation(
+            summary = "Update an Item",
+            description = "Updates the Item with the given ID using the provided data."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Item updated",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Item.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<Item> updateItemById( @PathVariable String id, @Valid @RequestBody Item item ) {
+        return ResponseEntity.ok( itemService.updateItemById( id, item ) );
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public boolean deleteItemById( @PathVariable String id ) {
-        return itemService.deleteItemById( id );
+    @Operation(
+            summary = "Delete an Item",
+            description = "Deletes the Item with the given ID from the system."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "203",
+                    description = "Item deleted",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Item.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<Void> deleteItemById( @PathVariable String id ) {
+        itemService.deleteItemById( id );
+        return ResponseEntity.noContent().build();
     }
 }
