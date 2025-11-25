@@ -1,8 +1,10 @@
 import { createBrowserRouter } from "react-router-dom";
+import { ShopList } from "../components/ShopList";
 
 const Home = () => (
-  <section className="flex flex-col items-center justify-center h-screen">
-    <h1 className="text-3xl font-bold">🥦 Hello World 🥦</h1>
+  <section className="flex flex-col items-center justify-center min-h-screen py-8">
+    <h1 className="text-3xl font-bold mb-8">🛍️ Shop Management</h1>
+    <ShopList />
   </section>
 );
 
