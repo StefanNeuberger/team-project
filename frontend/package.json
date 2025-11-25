@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate:openapi": "curl http://localhost:8080/v3/api-docs -o openapi.json",
+    "generate:client": "orval --config orval.config.ts",
+    "generate:api": "npm run generate:openapi && npm run generate:client"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
