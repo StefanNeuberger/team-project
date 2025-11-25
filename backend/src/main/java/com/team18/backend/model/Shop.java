@@ -2,6 +2,8 @@ package com.team18.backend.model;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 
 
@@ -9,7 +11,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(description = "Shop entity")
 public class Shop extends BaseModel {
 
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
+    @NotBlank(message = "Shop name is required")
+    @Size(min = 2, max = 100, message = "Shop name must be between 2 and 100 characters")
+    @Schema(
+        description = "Shop name",
+        example = "Tech Store",
+        requiredMode = Schema.RequiredMode.REQUIRED,
+        nullable = false,
+        minLength = 2,
+        maxLength = 100
+    )
     private String name;
 
     public Shop() {
