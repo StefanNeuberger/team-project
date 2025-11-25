@@ -1,8 +1,18 @@
 package com.team18.backend.model;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "greetings")
-public record Greeting(@Id String id, String message) {}
+public class Greeting extends BaseModel {
+    private final String message;
+
+    public Greeting( String id, String message ) {
+        super( id );
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+}
 

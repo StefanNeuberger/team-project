@@ -1,6 +1,6 @@
 package com.team18.backend.greeting;
 
-import com.team18.backend.TestcontainersConfiguration;
+import com.team18.backend.UnitTestContainersConfiguration;
 import com.team18.backend.repository.GreetingRepository;
 
 import com.team18.backend.model.Greeting;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-@Import(TestcontainersConfiguration.class)
+@Import(UnitTestContainersConfiguration.class)
 class GreetingRepositoryTest {
 
     @Autowired
@@ -25,10 +25,16 @@ class GreetingRepositoryTest {
     void savesAndRetrievesGreetingViaMongoContainer() {
         Greeting saved = greetingRepository.save( new Greeting( null, "Hello, Testcontainers!" ) );
 
-        assertThat( saved.id() ).isNotNull();
-        Optional<Greeting> expected = greetingRepository.findById( saved.id() );
+        assertThat( saved.getId() ).isNotNull();
+        Optional<Greeting> expected = greetingRepository.findById( saved.getId() );
         assertThat( expected ).isPresent();
-        assertThat( expected.get().message() ).isEqualTo( "Hello, Testcontainers!" );
+
+        assertThat( expected.get())
+                .extracting( "id", "message" )
+                .contains( saved.getId(), saved.getMessage() );
+
+        assertThat( expected.get().getCreatedDate() ).isNotNull();
+        assertThat( expected.get().getLastModifiedDate() ).isNotNull().isEqualTo( expected.get().getCreatedDate() );
     }
 }
 
