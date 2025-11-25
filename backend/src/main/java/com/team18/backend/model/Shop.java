@@ -8,6 +8,10 @@ public class Shop extends BaseModel {
 
     private String name;
 
+    public Shop() {
+        super( null );
+    }
+
     public Shop( String id, String name ) {
         super( id );
         this.name = name;
