@@ -1,5 +1,6 @@
 package com.team18.backend.exception;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -35,6 +36,43 @@ public class GlobalExceptionHandler {
                 errors
         );
         return new ResponseEntity<>( errorResponse, HttpStatus.BAD_REQUEST );
+    }
+
+
+    /**
+     * Handle DuplicateKeyException - returns 409 Conflict
+     * Occurs when trying to insert a document with a duplicate unique key
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateKeyException( DuplicateKeyException ex ) {
+        String message = "A resource with this value already exists";
+        String errorMsg = ex.getMessage();
+        
+        // Try to extract field name from MongoDB error message
+        // Message format: "... dup key: { fieldName: \"value\" }"
+        if ( errorMsg != null && errorMsg.contains( "dup key:" ) ) {
+            try {
+                int dupKeyIndex = errorMsg.indexOf( "dup key:" );
+                int startBrace = errorMsg.indexOf( "{", dupKeyIndex );
+                int endBrace = errorMsg.indexOf( "}", startBrace );
+                
+                if ( startBrace != -1 && endBrace != -1 ) {
+                    String keyPart = errorMsg.substring( startBrace + 1, endBrace ).trim();
+                    String fieldName = keyPart.split( ":" )[0].trim();
+                    message = String.format( "A resource with this %s already exists", fieldName );
+                }
+            } catch ( Exception e ) {
+                // If parsing fails, use generic message
+            }
+        }
+        
+        ErrorResponse errorResponse = new ErrorResponse(
+                message,
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                Instant.now()
+        );
+        return new ResponseEntity<>( errorResponse, HttpStatus.CONFLICT );
     }
 
     /**
