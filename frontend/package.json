@@ -13,6 +13,7 @@
     "generate:api": "npm run generate:openapi && npm run generate:client"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/vite": "^4.1.17",
     "@tanstack/react-query": "^5.90.11",
