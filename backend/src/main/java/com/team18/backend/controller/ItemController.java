@@ -122,8 +122,8 @@ public class ItemController {
                     content = @Content
             )
     })
-    public ResponseEntity<Item> updateItemById( @PathVariable String id, @Valid @RequestBody Item item ) {
-        return ResponseEntity.ok( itemService.updateItemById( id, item ) );
+    public ResponseEntity<Item> updateItemById( @PathVariable String id, @Valid @RequestBody ItemDTO itemDTO ) {
+        return ResponseEntity.ok( itemService.updateItemById( id, itemDTO ) );
     }
 
     @DeleteMapping("/{id}")

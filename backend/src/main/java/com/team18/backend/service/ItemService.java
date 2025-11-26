@@ -30,15 +30,15 @@ public class ItemService {
         return itemRepo.save( newItem );
     }
 
-    public Item updateItemById( String id, Item item ) {
+    public Item updateItemById( String id, ItemDTO itemDTO ) {
         Item existingItem = itemRepo.findById( id ).orElseThrow( () -> new ResourceNotFoundException( "Item not found: " + id ) );
 
-        if ( item.getName() != null ) {
-            existingItem.setName( item.getName() );
+        if ( itemDTO.name() != null ) {
+            existingItem.setName( itemDTO.name() );
         }
 
-        if ( item.getSku() != null ) {
-            existingItem.setSku( item.getSku() );
+        if ( itemDTO.sku() != null ) {
+            existingItem.setSku( itemDTO.sku() );
         }
 
         return itemRepo.save( existingItem );

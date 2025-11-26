@@ -63,10 +63,12 @@ class ItemServiceTest {
             Item existingItem = new Item( itemId, "SKU123", "Old Name" );
             Item updatedItem = new Item( itemId, "SKU123", "New Name" );
 
-            when( mockedItemRepo.findById( itemId ) ).thenReturn( Optional.of( existingItem ) );
-            when( mockedItemRepo.save( existingItem ) ).thenReturn( updatedItem );
+            ItemDTO itemInputDTO = new ItemDTO( "SKU123", "New Name" );
 
-            Item actualItem = mockedItemService.updateItemById( itemId, updatedItem );
+            when( mockedItemRepo.findById( itemId ) ).thenReturn( Optional.of( existingItem ) );
+            when( mockedItemRepo.save( any( Item.class ) ) ).thenReturn( updatedItem );
+
+            Item actualItem = mockedItemService.updateItemById( itemId, itemInputDTO );
 
             assertEquals( updatedItem, actualItem );
             verify( mockedItemRepo ).save( existingItem );
@@ -76,7 +78,7 @@ class ItemServiceTest {
         @DisplayName("Should throw exception when item not found")
         void updateItemByIdNotFound() {
             String notExistingItemId = "999";
-            Item updatedItem = new Item( notExistingItemId, "SKU999", "New Name" );
+            ItemDTO updatedItem = new ItemDTO( "SKU999", "New Name" );
 
             when( mockedItemRepo.findById( notExistingItemId ) ).thenReturn( Optional.empty() );
 
