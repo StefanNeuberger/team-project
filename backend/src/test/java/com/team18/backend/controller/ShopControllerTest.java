@@ -138,9 +138,10 @@ class ShopControllerTest {
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( requestBody ) )
                 .andExpect( status().isBadRequest() )
-                .andExpect( jsonPath( "$.message" ).value( "Validation failed for one or more fields" ) )
+                .andExpect( jsonPath( "$.message" ).value( "Validation failed" ) )
                 .andExpect( jsonPath( "$.status" ).value( 400 ) )
-                .andExpect( jsonPath( "$.errors.name" ).exists() );
+                .andExpect( jsonPath( "$.fieldErrors[0].field" ).value( "name" ) )
+                .andExpect( jsonPath( "$.fieldErrors[0].message" ).exists() );
     }
 
     @Test
@@ -156,9 +157,10 @@ class ShopControllerTest {
                         .contentType( MediaType.APPLICATION_JSON )
                         .content( requestBody ) )
                 .andExpect( status().isBadRequest() )
-                .andExpect( jsonPath( "$.message" ).value( "Validation failed for one or more fields" ) )
+                .andExpect( jsonPath( "$.message" ).value( "Validation failed" ) )
                 .andExpect( jsonPath( "$.status" ).value( 400 ) )
-                .andExpect( jsonPath( "$.errors.name" ).exists() );
+                .andExpect( jsonPath( "$.fieldErrors[0].field" ).value( "name" ) )
+                .andExpect( jsonPath( "$.fieldErrors[0].message" ).exists() );
     }
 }
 

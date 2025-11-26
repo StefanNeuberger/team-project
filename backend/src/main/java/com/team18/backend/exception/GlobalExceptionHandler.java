@@ -3,40 +3,37 @@ package com.team18.backend.exception;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
-     * Handle validation errors for request bodies.
-     * Returns a detailed error response with field-level validation errors.
+     * Handle validation errors - returns 400 Bad Request
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationExceptions( MethodArgumentNotValidException ex ) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach( ( error ) -> {
-            String fieldName = ( ( FieldError ) error ).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put( fieldName, errorMessage );
-        } );
+    public ResponseEntity<FieldValidationErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        List<FieldValidationError> fieldErrors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> new FieldValidationError(error.getField(), error.getDefaultMessage()))
+                .collect(Collectors.toList());
 
-        ValidationErrorResponse errorResponse = new ValidationErrorResponse(
-                "Validation failed for one or more fields",
+        FieldValidationErrorResponse errorResponse = new FieldValidationErrorResponse(
+                "Validation failed",
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad Request",
                 Instant.now(),
-                errors
+                fieldErrors
         );
-        return new ResponseEntity<>( errorResponse, HttpStatus.BAD_REQUEST );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
 

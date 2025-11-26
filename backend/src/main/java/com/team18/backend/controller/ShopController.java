@@ -1,5 +1,7 @@
 package com.team18.backend.controller;
 
+import com.team18.backend.exception.ErrorResponse;
+import com.team18.backend.exception.FieldValidationErrorResponse;
 import com.team18.backend.model.Shop;
 import com.team18.backend.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,14 +37,22 @@ public class ShopController {
             summary = "Get all shops",
             description = "Returns every shop currently stored in the system."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Successfully retrieved list of shops",
-            content = @Content(
-                    mediaType = "application/json",
-                    array = @ArraySchema(schema = @Schema(implementation = Shop.class))
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved list of shops",
+                    content = @Content(
+                            array = @ArraySchema(schema = @Schema(implementation = Shop.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Unexpected server error",
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
-    )
+    })
     public ResponseEntity<List<Shop>> getAllShops() {
         return ResponseEntity.ok( shopService.getAllShops() );
     }
@@ -57,14 +67,15 @@ public class ShopController {
                     responseCode = "200",
                     description = "Shop found",
                     content = @Content(
-                            mediaType = "application/json",
                             schema = @Schema(implementation = Shop.class)
                     )
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Shop not found",
-                    content = @Content
+                    content = @Content(
+                            schema = @Schema(implementation = ErrorResponse.class)
+                    )
             )
     })
     public ResponseEntity<Shop> getShopById( @PathVariable String id ) {
@@ -77,24 +88,12 @@ public class ShopController {
             description = "Creates a new shop with the provided name."
     )
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Shop created",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Shop.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid input",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "Shop name already exists",
-                    content = @Content
-            )
+            @ApiResponse(responseCode = "201", description = "Shop created",
+                    content = @Content(schema = @Schema(implementation = Shop.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = @Content(schema = @Schema(implementation = FieldValidationErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Duplicate key error",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })
     public ResponseEntity<Shop> createShop(
             @Valid @RequestBody CreateShopRequest request
