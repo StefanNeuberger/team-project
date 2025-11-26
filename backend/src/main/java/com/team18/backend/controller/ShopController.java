@@ -1,11 +1,11 @@
 package com.team18.backend.controller;
 
 import com.team18.backend.exception.ErrorResponse;
-import com.team18.backend.exception.ValidationErrorResponse;
+import com.team18.backend.exception.FieldValidationErrorResponse;
 import com.team18.backend.model.Shop;
 import com.team18.backend.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.ArraySchema; 
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -91,7 +91,7 @@ public class ShopController {
             @ApiResponse(responseCode = "201", description = "Shop created",
                     content = @Content(schema = @Schema(implementation = Shop.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input",
-                    content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))),
+                    content = @Content(schema = @Schema(implementation = FieldValidationErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "Duplicate key error",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
     })

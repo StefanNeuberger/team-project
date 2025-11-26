@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import java.util.List;
 
-public record ValidationErrorResponse(
+public record FieldValidationErrorResponse(
         @Schema(description = "Human readable error message")
         String message,
         @Schema(description = "HTTP status code")
