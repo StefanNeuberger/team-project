@@ -134,16 +134,7 @@ public class ItemController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "204",
-                    description = "Item deleted",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Item.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid input",
-                    content = @Content
+                    description = "Item deleted"
             ),
             @ApiResponse(
                     responseCode = "404",
@@ -164,11 +155,7 @@ public class ItemController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "204",
-                    description = "All Items deleted",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Item.class)
-                    )
+                    description = "All Items deleted"
             )
     })
     public ResponseEntity<Void> deleteAllItems() {

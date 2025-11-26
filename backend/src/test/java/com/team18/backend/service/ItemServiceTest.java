@@ -51,6 +51,8 @@ class ItemServiceTest {
             String notExistingItemId = "999";
 
             when( mockedItemRepo.findById( notExistingItemId ) ).thenReturn( Optional.empty() );
+
+            assertThrows( ResourceNotFoundException.class, () -> mockedItemService.findItemById( notExistingItemId ) );
         }
     }
 

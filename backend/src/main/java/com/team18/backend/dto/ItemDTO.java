@@ -4,10 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record ItemDTO( @NotBlank(message = "item name is required field")
+public record ItemDTO( @NotBlank(message = "item name must not be empty")
                        @Size(min = 2, max = 100, message = "name must be between 2 and 100 characters")
                        @Schema(
-                               description = "Name of the itemDto",
+                               description = "Name of the item",
                                example = "Widget A",
                                requiredMode = Schema.RequiredMode.REQUIRED,
                                nullable = false,
