@@ -1,13 +1,17 @@
 package com.team18.backend.controller;
 
+import com.team18.backend.TestContainersConfiguration;
 import com.team18.backend.exception.StorageException;
 import com.team18.backend.model.Photo;
 import com.team18.backend.model.enums.OwnerType;
+import com.team18.backend.repository.PhotoRepository;
 import com.team18.backend.service.PhotoService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Import(TestContainersConfiguration.class)
 class PhotoControllerTest {
 
     @Autowired
@@ -40,6 +45,14 @@ class PhotoControllerTest {
 
     @MockitoBean
     private PhotoService photoService;
+
+    @Autowired
+    private PhotoRepository photoRepository;
+
+    @BeforeEach
+    void setUp() {
+        photoRepository.deleteAll();
+    }
 
     @Test
     void uploadPhoto_whenValid_shouldReturnPhotoJson() throws Exception {

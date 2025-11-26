@@ -24,7 +24,7 @@ import java.util.Optional;
 @Service
 public class FileSystemStorageService implements StorageService {
 
-    @Value("${app.storage.location:backend/uploads}")
+    @Value("${app.storage.location:/backend/uploads}")
     private String storageLocation;
 
     @PostConstruct
