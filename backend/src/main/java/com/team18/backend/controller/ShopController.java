@@ -5,7 +5,7 @@ import com.team18.backend.exception.FieldValidationErrorResponse;
 import com.team18.backend.model.Shop;
 import com.team18.backend.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema; 
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
