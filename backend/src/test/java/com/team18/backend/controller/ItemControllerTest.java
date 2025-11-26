@@ -113,7 +113,7 @@ class ItemControllerTest {
                             .content( requestBody ) )
                     .andExpect( status().isBadRequest() )
                     .andDo( print() )
-                    .andExpect( jsonPath( "$.message" ).value( "Validation failed for one or more fields" ) )
+                    .andExpect( jsonPath( "$.message" ).value( "Validation failed" ) )
                     .andExpect( jsonPath( "$.status" ).value( 400 ) );
 
         }
@@ -187,7 +187,7 @@ class ItemControllerTest {
                             .content( requestBody ) )
                     .andExpect( status().isBadRequest() )
                     .andDo( print() )
-                    .andExpect( jsonPath( "$.message" ).value( "Validation failed for one or more fields" ) )
+                    .andExpect( jsonPath( "$.message" ).value( "Validation failed" ) )
                     .andExpect( jsonPath( "$.status" ).value( 400 ) );
 
         }
