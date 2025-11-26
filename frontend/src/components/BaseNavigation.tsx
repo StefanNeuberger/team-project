@@ -19,7 +19,10 @@ const navigationLinks: navigationLinkType[] = [
     { name: 'Items', href: '/items' },
 ];
 
-export default function BaseNavigation( { isMobile, toggleMenu }: { isMobile?: boolean, toggleMenu?: () => void } ) {
+export default function BaseNavigation( { isMobile, toggleMenu }: Readonly<{
+    isMobile?: boolean,
+    toggleMenu?: () => void
+}> ) {
 
     const handleLinkClick = () => {
         if ( isMobile && toggleMenu ) {
@@ -29,25 +32,26 @@ export default function BaseNavigation( { isMobile, toggleMenu }: { isMobile?: b
 
     const { pathname } = useLocation();
 
-    return (
-        <>
-            <NavigationMenu className={ "items-start" } orientation={ `${ isMobile ? `vertical` : `horizontal` }` }>
-                <NavigationMenuList className={ `${ isMobile ? `flex-col items-start` : `` }` }>
-                    { navigationLinks.map( ( { name, href } ) => (
-                        <NavigationMenuItem key={ name }>
-                            <NavigationMenuLink data-active={ pathname === href }
-                                                className={ "data-[active=true]:text-accent-foreground" } asChild>
-                                <NavLink onClick={ handleLinkClick } to={ href }
-                                         className="">
-                                    { name }
-                                </NavLink>
-                            </NavigationMenuLink>
-                            <Separator orientation={ "vertical" }/>
-                        </NavigationMenuItem>
-                    ) ) }
-                </NavigationMenuList>
-            </NavigationMenu>
+    const orientation = isMobile ? 'vertical' : 'horizontal';
 
-        </>
+    const mobileClasses = isMobile ? 'flex-col items-start' : '';
+
+    return (
+        <NavigationMenu className={ "items-start" } orientation={ orientation }>
+            <NavigationMenuList className={ mobileClasses }>
+                { navigationLinks.map( ( { name, href } ) => (
+                    <NavigationMenuItem key={ name }>
+                        <NavigationMenuLink data-active={ pathname === href }
+                                            className={ "data-[active=true]:text-accent-foreground" } asChild>
+                            <NavLink onClick={ handleLinkClick } to={ href }
+                                     className="">
+                                { name }
+                            </NavLink>
+                        </NavigationMenuLink>
+                        <Separator orientation={ "vertical" }/>
+                    </NavigationMenuItem>
+                ) ) }
+            </NavigationMenuList>
+        </NavigationMenu>
     )
 }

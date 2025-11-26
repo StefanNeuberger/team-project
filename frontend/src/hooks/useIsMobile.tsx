@@ -16,7 +16,7 @@ export const useIsMobile = (): UseIsMobileReturn => {
     useEffect( () => {
         const checkIsMobile = () => {
             // Check using media query
-            const mediaQuery = window.matchMedia( `(max-width: ${ mobileBreakpoint }px)` );
+            const mediaQuery = globalThis.matchMedia( `(max-width: ${ mobileBreakpoint }px)` );
 
             // Check using user agent (additional detection)
             const userAgent = navigator.userAgent.toLowerCase();
@@ -31,7 +31,7 @@ export const useIsMobile = (): UseIsMobileReturn => {
 
             // Combine both checks - prioritize media query but consider user agent
             const isMobileDevice = mediaQuery.matches ||
-                ( isMobileUA && window.innerWidth <= 768 );
+                ( isMobileUA && globalThis.innerWidth <= 768 );
 
             setIsMobile( isMobileDevice );
             setIsLoading( false );
@@ -41,7 +41,7 @@ export const useIsMobile = (): UseIsMobileReturn => {
         checkIsMobile();
 
         // Listen for media query changes
-        const mediaQuery = window.matchMedia( `(max-width: ${ mobileBreakpoint }px)` );
+        const mediaQuery = globalThis.matchMedia( `(max-width: ${ mobileBreakpoint }px)` );
         const handleChange = () => checkIsMobile();
 
         if ( mediaQuery.addEventListener ) {
@@ -51,8 +51,8 @@ export const useIsMobile = (): UseIsMobileReturn => {
             mediaQuery.addListener( handleChange );
         }
 
-        // Listen for window resize
-        window.addEventListener( 'resize', checkIsMobile );
+        // Listen for globalThis resize
+        globalThis.addEventListener( 'resize', checkIsMobile );
 
         return () => {
             if ( mediaQuery.removeEventListener ) {
@@ -60,7 +60,7 @@ export const useIsMobile = (): UseIsMobileReturn => {
             } else {
                 mediaQuery.removeListener( handleChange );
             }
-            window.removeEventListener( 'resize', checkIsMobile );
+            globalThis.removeEventListener( 'resize', checkIsMobile );
         };
     }, [] );
 

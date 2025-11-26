@@ -26,6 +26,7 @@ export default function MobileNavigation() {
                 { isOpen &&
                     <div
                         onClick={ handleToggle }
+                        aria-label={ "backdrop" }
                         className={ "fixed h-full w-full left-0 top-0 bg-transparent backdrop-blur-xs" }>
                         <motion.div
                             onClick={ handleStopPropagation }
