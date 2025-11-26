@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -20,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class FileSystemStorageService implements StorageService {
@@ -41,33 +41,48 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public String store(MultipartFile file, OwnerType ownerType, String filename) {
-        try {
-            if (file.isEmpty()) {
-                throw new StorageException("Cannot save an empty file");
-            }
-
-            String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
-            String finalFileName = filename + "." + extension;
-            Path rootLocation = Paths.get(getRootLocation(ownerType));
-
-            Path destinationFile = rootLocation
-                    .resolve(Paths.get(finalFileName))
-                    .normalize()
-                    .toAbsolutePath();
-
-            if (!destinationFile.getParent().equals(rootLocation.toAbsolutePath())) {
-                throw new StorageException("Cannot store file outside specified directory");
-            }
-
-            try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
-            }
-
-            return finalFileName;
-        } catch (IOException e) {
-            throw new StorageException("Failed to store file", e);
+    public String store(MultipartFile file, OwnerType ownerType, String suggestedFilename) {
+        if (file == null || file.isEmpty()) {
+            throw new StorageException("Cannot save an empty file");
         }
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            if (extension.length() > 10 || extension.matches(".*[\\\\/].*")) {
+                extension = "";
+            }
+        }
+
+        String safeFilename = UUID.randomUUID().toString() + extension;
+
+        if (suggestedFilename != null && !suggestedFilename.isBlank()) {
+            String sanitized = suggestedFilename
+                    .replaceAll("[^a-zA-Z0-9_.-]", "_")
+                    .replaceAll("(\\.{2,})", "")
+                    .replaceAll("^[./\\\\]+", "")
+                    .trim();
+
+            if (sanitized.length() >= 3) {
+                safeFilename = sanitized + extension;
+            }
+        }
+
+        Path rootLocation = Paths.get(getRootLocation(ownerType));
+        Path destinationFile = rootLocation.resolve(safeFilename).normalize();
+
+        if (!destinationFile.toAbsolutePath().startsWith(rootLocation.toAbsolutePath())) {
+            throw new StorageException("Invalid path detected");
+        }
+
+        try (InputStream inputStream = file.getInputStream()) {
+            Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new StorageException("Failed to store file: " + safeFilename, e);
+        }
+
+        return safeFilename;
     }
 
 
