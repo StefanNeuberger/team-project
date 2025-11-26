@@ -115,6 +115,11 @@ public class ItemController {
                     responseCode = "400",
                     description = "Invalid input",
                     content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Item not found",
+                    content = @Content
             )
     })
     public ResponseEntity<Item> updateItemById( @PathVariable String id, @Valid @RequestBody Item item ) {
@@ -128,7 +133,7 @@ public class ItemController {
     )
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "203",
+                    responseCode = "204",
                     description = "Item deleted",
                     content = @Content(
                             mediaType = "application/json",
@@ -139,10 +144,35 @@ public class ItemController {
                     responseCode = "400",
                     description = "Invalid input",
                     content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Item not found",
+                    content = @Content
             )
     })
     public ResponseEntity<Void> deleteItemById( @PathVariable String id ) {
         itemService.deleteItemById( id );
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping
+    @Operation(
+            summary = "Delete all Items",
+            description = "Deletes all Items from the system."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "All Items deleted",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Item.class)
+                    )
+            )
+    })
+    public ResponseEntity<Void> deleteAllItems() {
+        itemService.deleteAllItems();
         return ResponseEntity.noContent().build();
     }
 }

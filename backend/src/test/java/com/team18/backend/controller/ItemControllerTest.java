@@ -58,6 +58,19 @@ class ItemControllerTest {
                     .andExpect( jsonPath( "$.error" ).value( "Not Found" ) );
 
         }
+
+        @Test
+        @DisplayName("should delete all items")
+        void deleteAllItems() throws Exception {
+            Item item1 = new Item( null, "SKU001", "Test Item 1" );
+            Item item2 = new Item( null, "SKU002", "Test Item 2" );
+
+            itemRepo.save( item1 );
+            itemRepo.save( item2 );
+
+            mockMvc.perform( delete( "/api/item" ) )
+                    .andExpect( status().isNoContent() );
+        }
     }
 
     @Nested
