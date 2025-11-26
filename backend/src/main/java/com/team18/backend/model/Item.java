@@ -9,7 +9,7 @@ import java.util.Objects;
 public class Item extends BaseModel {
 
     private String sku;
-    @NotBlank
+    @NotBlank(message = "name must not be empty")
     private String name;
 
     public Item( String id, String sku, String name ) {

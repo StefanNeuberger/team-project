@@ -26,7 +26,7 @@ public class ItemService {
     }
 
     public Item createItem( ItemDTO item ) {
-        Item newItem = new Item( null, item.getSku(), item.getName() );
+        Item newItem = new Item( null, item.sku(), item.name() );
         return itemRepo.save( newItem );
     }
 

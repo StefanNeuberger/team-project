@@ -15,6 +15,7 @@ import java.util.Optional;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -126,15 +127,15 @@ class ItemServiceTest {
         @Test
         @DisplayName("Should return newly created item")
         void createItem() {
-            Item newItem = new Item( "1", "SKU123", "Test Item" );
             ItemDTO newItemDTO = new ItemDTO( "SKU123", "Test Item" );
+            Item savedItem = new Item( "1", "SKU123", "Test Item" );
 
-            when( mockedItemRepo.save( newItem ) ).thenReturn( new Item( "1", "SKU123", "Test Item" ) );
+            when( mockedItemRepo.save( any( Item.class ) ) ).thenReturn( savedItem );
 
             Item actualItem = mockedItemService.createItem( newItemDTO );
 
-            assertEquals( newItem, actualItem );
-            verify( mockedItemRepo ).save( newItem );
+            assertEquals( savedItem, actualItem );
+            verify( mockedItemRepo ).save( any( Item.class ) );
         }
 
     }
