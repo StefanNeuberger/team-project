@@ -3,15 +3,19 @@ package com.team18.backend.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
 @Document(collection = "shipments")
 @Schema(description = "Shipment entity")
+@CompoundIndex(def = "{'warehouseId': 1, 'status': 1}")
 public class Shipment extends BaseModel {
 
     @NotBlank(message = "Warehouse ID is required")
+    @Indexed
     @Schema(
             description = "Delivery destination warehouse ID",
             requiredMode = Schema.RequiredMode.REQUIRED,
@@ -28,6 +32,7 @@ public class Shipment extends BaseModel {
     private LocalDate expectedArrivalDate;
 
     @NotNull(message = "Status is required")
+    @Indexed
     @Schema(
             description = "Shipment status",
             requiredMode = Schema.RequiredMode.REQUIRED,
