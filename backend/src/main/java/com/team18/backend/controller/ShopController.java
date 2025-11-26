@@ -90,7 +90,7 @@ public class ShopController {
                     description = "Invalid input",
                     content = @Content
             ),
-            @ApiResponse(  // ← Add this!
+            @ApiResponse(
                     responseCode = "409",
                     description = "Shop name already exists",
                     content = @Content
