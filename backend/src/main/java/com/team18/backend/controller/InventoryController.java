@@ -1,11 +1,11 @@
 package com.team18.backend.controller;
 
-import com.team18.backend.dto.warehouse.WarehouseCreateDTO;
-import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
-import com.team18.backend.dto.warehouse.WarehouseUpdateDTO;
+import com.team18.backend.dto.inventory.InventoryCreateDTO;
+import com.team18.backend.dto.inventory.InventoryResponseDTO;
+import com.team18.backend.dto.inventory.InventoryUpdateDTO;
 import com.team18.backend.exception.ErrorResponse;
 import com.team18.backend.exception.ResourceNotFoundException;
-import com.team18.backend.service.WarehouseService;
+import com.team18.backend.service.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(
-        path = "/api/warehouses",
+        path = "/api/inventory",
         consumes = MediaType.APPLICATION_JSON_VALUE,
         produces = MediaType.APPLICATION_JSON_VALUE,
         headers = {
@@ -29,48 +29,48 @@ import java.util.List;
                 "Accept=" + MediaType.APPLICATION_JSON_VALUE
         }
 )
-@Tag(name = "Warehouses", description = "CRUD endpoint for warehouses")
-public class WarehouseController {
+@Tag(name = "Inventory", description = "CRUD endpoint for inventory")
+public class InventoryController {
 
-    private final WarehouseService service;
+    private final InventoryService service;
 
-    public WarehouseController( WarehouseService service ) {
+    public InventoryController( InventoryService service ) {
         this.service = service;
     }
 
     @Operation(
-            summary = "Get all warehouses",
-            description = "Returns a list of all saved warehouses"
+            summary = "Get all inventory",
+            description = "Returns a list of all saved inventory"
     )
     @ApiResponse(
             responseCode = "200",
-            description = "List of Warehouse",
+            description = "List of inventory",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = WarehouseResponseDTO.class)
+                    schema = @Schema(implementation = InventoryResponseDTO.class)
             )
     )
     @GetMapping(path = "", consumes = MediaType.ALL_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<WarehouseResponseDTO>> getAll() {
-        return ResponseEntity.ok( service.getAllWarehouses() );
+    public ResponseEntity<List<InventoryResponseDTO>> getAll() {
+        return ResponseEntity.ok( service.getAllInventory() );
     }
 
     @Operation(
-            summary = "Get warehouse by id",
-            description = "Returns a single Warehouse by its id"
+            summary = "Get inventory by id",
+            description = "Returns a single Inventory by its id"
     )
     @ApiResponse(
             responseCode = "200",
-            description = "Warehouse found",
+            description = "Inventory found",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = WarehouseResponseDTO.class)
+                    schema = @Schema(implementation = InventoryResponseDTO.class)
             )
     )
     @ApiResponse(
             responseCode = "404",
-            description = "Warehouse not found",
+            description = "Inventory not found",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ErrorResponse.class)
@@ -78,43 +78,44 @@ public class WarehouseController {
 
     )
     @GetMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<WarehouseResponseDTO> get( @PathVariable String id ) throws ResourceNotFoundException {
-        return ResponseEntity.ok( service.getWarehouseById( id ) );
+    public ResponseEntity<InventoryResponseDTO> get( @PathVariable String id ) throws ResourceNotFoundException {
+        return ResponseEntity.ok( service.getInventoryById( id ) );
     }
 
     @Operation(
-            summary = "Create Warehouse",
-            description = "Creates a new warehouse and returns the saved entity"
+            summary = "Create Inventory",
+            description = "Creates a new inventory and returns the saved entity"
     )
     @ApiResponse(
             responseCode = "201",
-            description = "Warehouse created",
+            description = "Inventory created",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = WarehouseResponseDTO.class)
+                    schema = @Schema(implementation = InventoryResponseDTO.class)
             )
     )
     @PostMapping(path = "")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<WarehouseResponseDTO> post( @Valid @RequestBody WarehouseCreateDTO warehouse ) {
-        return ResponseEntity.status( HttpStatus.CREATED ).body( service.createWarehouse( warehouse ) );
+    public ResponseEntity<InventoryResponseDTO> post( @Valid @RequestBody InventoryCreateDTO inventoryCreateDTO ) {
+        return ResponseEntity
+                .status( HttpStatus.CREATED )
+                .body( service.createInventory( inventoryCreateDTO ) );
     }
 
     @Operation(
-            summary = "Update Warehouse",
-            description = "Updates a warehouse and returns the updated entity"
+            summary = "Update Inventory",
+            description = "Updates a inventory and returns the updated entity"
     )
     @ApiResponse(
             responseCode = "200",
-            description = "Warehouse updated",
+            description = "Inventory updated",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = WarehouseResponseDTO.class)
+                    schema = @Schema(implementation = InventoryResponseDTO.class)
             )
     )
     @ApiResponse(
             responseCode = "404",
-            description = "Warehouse not found",
+            description = "Inventory not found",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ErrorResponse.class)
@@ -122,22 +123,24 @@ public class WarehouseController {
 
     )
     @PatchMapping("/{id}")
-    public ResponseEntity<WarehouseResponseDTO> patch( @PathVariable String id, @Valid @RequestBody WarehouseUpdateDTO warehouse )
-            throws ResourceNotFoundException {
-        return ResponseEntity.ok( service.updateWarehouse( id, warehouse ) );
+    public ResponseEntity<InventoryResponseDTO> patch(
+            @PathVariable String id,
+            @Valid @RequestBody InventoryUpdateDTO inventoryUpdateDTO
+    ) throws ResourceNotFoundException {
+        return ResponseEntity.ok().body( service.updateInventory( id, inventoryUpdateDTO ) );
     }
 
     @Operation(
-            summary = "Delete Warehouse",
-            description = "Deletes a warehouse by its id and returns true"
+            summary = "Delete Inventory",
+            description = "Deletes a inventory by its id and returns true"
     )
     @ApiResponse(
             responseCode = "204",
-            description = "Warehouse deleted"
+            description = "Inventory deleted"
     )
     @ApiResponse(
             responseCode = "404",
-            description = "Warehouse not found",
+            description = "Inventory not found",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ErrorResponse.class)
@@ -145,8 +148,7 @@ public class WarehouseController {
 
     )
     @DeleteMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Boolean delete( @PathVariable String id ) throws ResourceNotFoundException {
-        return service.deleteWarehouse( id );
+    public ResponseEntity<Boolean> delete( @PathVariable String id ) throws ResourceNotFoundException {
+        return ResponseEntity.status( HttpStatus.NO_CONTENT ).body( service.deleteInventory( id ) );
     }
 }

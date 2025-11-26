@@ -1,11 +1,10 @@
-package com.team18.backend.dto;
+package com.team18.backend.dto.warehouse;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 public record WarehouseCreateDTO(
         @NotBlank(message = "Warehouse name is required")
@@ -17,6 +16,13 @@ public record WarehouseCreateDTO(
                 minLength = 1
         )
         String name,
+        @NotBlank(message = "Shop id is required")
+        @Schema(
+                description = "Related shop entity",
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                nullable = false
+        )
+        String shopId,
         @Nullable
         @Schema(
                 description = "Latitude of the warehouse location",

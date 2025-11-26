@@ -1,5 +1,6 @@
-package com.team18.backend.dto;
+package com.team18.backend.dto.warehouse;
 
+import com.team18.backend.model.Shop;
 import com.team18.backend.model.Warehouse;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ public class WarehouseMapper {
         return new WarehouseResponseDTO(
                 warehouse.getId(),
                 warehouse.getName(),
+                warehouse.getShop(),
                 warehouse.getLat(),
                 warehouse.getLng(),
                 warehouse.getStreet(),
@@ -28,9 +30,10 @@ public class WarehouseMapper {
         return warehouses.stream().map( this::toWarehouseResponseDTO ).toList();
     }
 
-    public Warehouse toWarehouse( WarehouseCreateDTO warehouseCreateDTO ) {
+    public Warehouse toWarehouse( WarehouseCreateDTO warehouseCreateDTO, Shop shop ) {
         return new Warehouse(
                 warehouseCreateDTO.name(),
+                shop,
                 warehouseCreateDTO.lat(),
                 warehouseCreateDTO.lng(),
                 warehouseCreateDTO.street(),
@@ -43,10 +46,11 @@ public class WarehouseMapper {
         );
     }
 
-    public Warehouse toWarehouse( Warehouse warehouse, WarehouseUpdateDTO warehouseUpdateDTO ) {
+    public Warehouse toWarehouse( Warehouse warehouse, WarehouseUpdateDTO warehouseUpdateDTO, Shop shop ) {
         return new Warehouse(
                 warehouse.getId(),
                 warehouseUpdateDTO.name() != null ? warehouseUpdateDTO.name() : warehouse.getName(),
+                shop != null ? shop : warehouse.getShop(),
                 warehouseUpdateDTO.lat() != null ? warehouseUpdateDTO.lat() : warehouse.getLat(),
                 warehouseUpdateDTO.lng() != null ? warehouseUpdateDTO.lng() : warehouse.getLng(),
                 warehouseUpdateDTO.street() != null ? warehouseUpdateDTO.street() : warehouse.getStreet(),

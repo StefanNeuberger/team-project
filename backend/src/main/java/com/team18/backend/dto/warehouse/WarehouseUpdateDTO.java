@@ -1,4 +1,4 @@
-package com.team18.backend.dto;
+package com.team18.backend.dto.warehouse;
 
 import com.team18.backend.dto.validators.NullOrMin;
 import com.team18.backend.dto.validators.NullOrNotBlank;
@@ -16,6 +16,13 @@ public record WarehouseUpdateDTO(
                 minLength = 1
         )
         String name,
+        @Nullable
+        @Schema(
+                description = "Related shop entity",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+                nullable = true
+        )
+        String shopId,
         @Nullable
         @Schema(
                 description = "Latitude of the warehouse location",

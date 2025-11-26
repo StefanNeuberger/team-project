@@ -1,9 +1,11 @@
-package com.team18.backend.dto;
+package com.team18.backend.dto.warehouse;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.team18.backend.model.Shop;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record WarehouseResponseDTO(
+        @Schema(description = "The unique identifier of this entity.", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
         String id,
         @Schema(
                 description = "Warehouse name",
@@ -13,6 +15,13 @@ public record WarehouseResponseDTO(
                 minLength = 1
         )
         String name,
+        @Schema(
+                description = "Related shop entity",
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                nullable = false,
+                accessMode = Schema.AccessMode.READ_ONLY
+        )
+        Shop shop,
         @JsonIgnore
         @Schema(hidden = true)
         Double lat,

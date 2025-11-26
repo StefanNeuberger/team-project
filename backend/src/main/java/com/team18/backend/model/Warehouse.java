@@ -5,16 +5,12 @@ import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import java.time.Instant;
 
 @Document(value = "warehouses")
 public class Warehouse extends BaseModel {
-
-    // TODO:
-
-    // @DocumentReference
-    // private final Shop shop;
 
     @Indexed(unique = true)
     @TextIndexed
@@ -26,6 +22,14 @@ public class Warehouse extends BaseModel {
             minLength = 1
     )
     private String name;
+
+    @DocumentReference
+    @Schema(
+            description = "Related shop entity",
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            nullable = false
+    )
+    private Shop shop;
 
     @Schema(
             description = "Latitude of the warehouse location",
@@ -105,6 +109,7 @@ public class Warehouse extends BaseModel {
     public Warehouse(
             String id,
             String name,
+            Shop shop,
             Double lat,
             Double lng,
             String street,
@@ -119,6 +124,7 @@ public class Warehouse extends BaseModel {
     ) {
         super( id, createdDate, lastModifiedDate );
         this.name = name;
+        this.shop = shop;
         this.lat = lat;
         this.lng = lng;
         this.street = street;
@@ -136,6 +142,7 @@ public class Warehouse extends BaseModel {
 
     public Warehouse(
             String name,
+            Shop shop,
             Double lat,
             Double lng,
             String street,
@@ -148,6 +155,7 @@ public class Warehouse extends BaseModel {
     ) {
         super( null );
         this.name = name;
+        this.shop = shop;
         this.lat = lat;
         this.lng = lng;
         this.street = street;
@@ -162,6 +170,7 @@ public class Warehouse extends BaseModel {
     public Warehouse(
             String id,
             String name,
+            Shop shop,
             Double lat,
             Double lng,
             String street,
@@ -174,6 +183,7 @@ public class Warehouse extends BaseModel {
     ) {
         super( id );
         this.name = name;
+        this.shop = shop;
         this.lat = lat;
         this.lng = lng;
         this.street = street;
@@ -183,6 +193,10 @@ public class Warehouse extends BaseModel {
         this.state = state;
         this.country = country;
         this.maxCapacity = maxCapacity;
+    }
+
+    public Shop getShop() {
+        return shop;
     }
 
     public Double getLat() {

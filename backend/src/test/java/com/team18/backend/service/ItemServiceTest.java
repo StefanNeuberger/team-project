@@ -1,6 +1,6 @@
 package com.team18.backend.service;
 
-import com.team18.backend.dto.ItemDTO;
+import com.team18.backend.dto.item.ItemDTO;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.Item;
 import com.team18.backend.repository.ItemRepo;

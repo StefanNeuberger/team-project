@@ -1,16 +1,19 @@
 package com.team18.backend.controller;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.team18.backend.TestContainersConfiguration;
-import com.team18.backend.dto.warehouse.WarehouseCreateDTO;
-import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
-import com.team18.backend.dto.warehouse.WarehouseUpdateDTO;
+import com.team18.backend.dto.inventory.InventoryCreateDTO;
+import com.team18.backend.dto.inventory.InventoryResponseDTO;
+import com.team18.backend.dto.inventory.InventoryUpdateDTO;
+import com.team18.backend.model.Item;
 import com.team18.backend.model.Shop;
+import com.team18.backend.model.Warehouse;
+import com.team18.backend.repository.ItemRepo;
 import com.team18.backend.repository.ShopRepository;
-import com.team18.backend.service.WarehouseService;
+import com.team18.backend.repository.WarehouseRepository;
+import com.team18.backend.service.InventoryService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,26 +27,29 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.List;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(TestContainersConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class WarehouseControllerTest {
+class InventoryControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    private WarehouseService warehouseService;
-
-    @Autowired
     private ShopRepository shopRepository;
 
-    private static ObjectMapper mapper;
-    private static Shop shop;
-    private static WarehouseCreateDTO newWarehouse;
+    @Autowired
+    private WarehouseRepository warehouseRepository;
+
+    @Autowired
+    private ItemRepo itemRepo;
+
+    @Autowired
+    private InventoryService inventoryService;
+
+    private static ObjectMapper mapper = new ObjectMapper();
+    private static InventoryCreateDTO newInventory;
 
     @BeforeAll
     static void beforeAll() {
@@ -54,23 +60,39 @@ class WarehouseControllerTest {
 
     @BeforeEach
     void setUp() {
-        shop = shopRepository.save(
+        Shop shop = shopRepository.save(
                 new Shop(
                         "Test Shop"
                 )
         );
 
-        newWarehouse = new WarehouseCreateDTO(
-                "Warehouse EU East",
-                shop.getId(),
-                52.179262, 20.9359542,
-                "Muszkieterow",
-                "26-32",
-                "Warszawa",
-                "02-273",
-                "",
-                "Poland",
-                4328974
+        Warehouse warehouse = warehouseRepository.save(
+                new Warehouse(
+                        "Warehouse EU East",
+                        shop,
+                        52.179262, 20.9359542,
+                        "Muszkieterow",
+                        "26-32",
+                        "Warszawa",
+                        "02-273",
+                        "",
+                        "Poland",
+                        4328974
+                )
+        );
+
+        Item item = itemRepo.save(
+                new Item(
+                        null,
+                        "SKU-TEST",
+                        "TEST"
+                )
+        );
+
+        newInventory = new InventoryCreateDTO(
+                warehouse.getId(),
+                item.getId(),
+                231312
         );
     }
 
@@ -78,7 +100,7 @@ class WarehouseControllerTest {
     void getAll_ShouldReturnEmptyList_WhenCalled() throws Exception {
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .get( "/api/warehouses" )
+                                .get( "/api/inventory" )
                 )
                 .andExpect(
                         MockMvcResultMatchers
@@ -99,13 +121,11 @@ class WarehouseControllerTest {
 
     @Test
     void getAll_ShouldReturnSingleInList_WhenCalled() throws Exception {
-        WarehouseResponseDTO warehouse = warehouseService.createWarehouse( newWarehouse );
-
-        String jsonContent = mapper.writeValueAsString( List.of( warehouse ) );
+        InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .get( "/api/warehouses" )
+                                .get( "/api/inventory" )
                 )
                 .andExpect(
                         MockMvcResultMatchers
@@ -118,19 +138,25 @@ class WarehouseControllerTest {
                 )
                 .andExpect(
                         MockMvcResultMatchers
-                                .content().json( jsonContent )
+                                .jsonPath( "$[0].warehouse.id" ).value( inventoryResponseDTO.warehouse().getId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$[0].item.id" ).value( inventoryResponseDTO.item().getId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$[0].quantity" ).value( inventoryResponseDTO.quantity() )
                 );
     }
 
     @Test
-    void get_ShouldReturnSingleWareHouse_WhenCalled() throws Exception {
-        WarehouseResponseDTO warehouse = warehouseService.createWarehouse( newWarehouse );
-
-        String jsonContent = mapper.writeValueAsString( warehouse );
+    void get_ShouldReturnSingleInventory_WhenCalled() throws Exception {
+        InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .get( "/api/warehouses/" + warehouse.id() )
+                                .get( "/api/inventory/" + inventoryResponseDTO.id() )
                 )
                 .andExpect(
                         MockMvcResultMatchers
@@ -143,17 +169,25 @@ class WarehouseControllerTest {
                 )
                 .andExpect(
                         MockMvcResultMatchers
-                                .content().json( jsonContent )
+                                .jsonPath( "$.warehouse.id" ).value( inventoryResponseDTO.warehouse().getId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.item.id" ).value( inventoryResponseDTO.item().getId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.quantity" ).value( inventoryResponseDTO.quantity() )
                 );
     }
 
     @Test
     void get_ShouldReturnError_WhenCalled() throws Exception {
-        warehouseService.createWarehouse( newWarehouse );
+        inventoryService.createInventory( newInventory );
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .get( "/api/warehouses/fakeid" )
+                                .get( "/api/inventory/fakeid" )
                 )
                 .andExpect(
                         MockMvcResultMatchers
@@ -172,11 +206,11 @@ class WarehouseControllerTest {
 
     @Test
     void post_ShouldReturnCreatedItem_WhenCalled() throws Exception {
-        String jsonContent = mapper.writeValueAsString( newWarehouse );
+        String jsonContent = mapper.writeValueAsString( newInventory );
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .post( "/api/warehouses" )
+                                .post( "/api/inventory" )
                                 .contentType( MediaType.APPLICATION_JSON )
                                 .content( jsonContent )
                 )
@@ -192,6 +226,18 @@ class WarehouseControllerTest {
                 .andExpect(
                         MockMvcResultMatchers
                                 .jsonPath( "$.id" ).isNotEmpty()
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.warehouse.id" ).value( newInventory.warehouseId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.item.id" ).value( newInventory.itemId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.quantity" ).value( newInventory.quantity() )
                 );
     }
 
@@ -200,12 +246,13 @@ class WarehouseControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .post( "/api/warehouses" )
+                                .post( "/api/inventory" )
                                 .contentType( MediaType.APPLICATION_JSON )
                                 .content( """
                                           {
-                                            "name": "",
-                                            "maxCapacity": "0"
+                                            "warehouseId": null,
+                                            "itemId": null,
+                                            "quantity": "0"
                                           }
                                         """ )
                 )
@@ -220,16 +267,17 @@ class WarehouseControllerTest {
 
     @Test
     void update_ShouldFail_WhenCalled() throws Exception {
-        WarehouseResponseDTO warehouse = warehouseService.createWarehouse( newWarehouse );
+        InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .patch( "/api/warehouses/" + warehouse.id() )
+                                .patch( "/api/inventory/" + inventoryResponseDTO.id() )
                                 .contentType( MediaType.APPLICATION_JSON )
                                 .content( """
                                           {
-                                            "name": "",
-                                            "maxCapacity": "0"
+                                            "warehouseId": null,
+                                            "itemId": null,
+                                            "quantity": "0"
                                           }
                                         """ )
                 )
@@ -243,28 +291,20 @@ class WarehouseControllerTest {
     }
 
     @Test
-    void update_ShouldReturnUpdatedWarehouse_WhenCalled() throws Exception {
-        WarehouseResponseDTO warehouse = warehouseService.createWarehouse( newWarehouse );
+    void update_ShouldReturnUpdatedInventory_WhenCalled() throws Exception {
+        InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
 
-        WarehouseUpdateDTO warehouseUpdateDTO = new WarehouseUpdateDTO(
-                "Update",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
+        InventoryUpdateDTO inventoryUpdateDTO = new InventoryUpdateDTO(
+                inventoryResponseDTO.warehouse().getId(),
+                inventoryResponseDTO.item().getId(),
+                1232138
         );
 
-        String jsonContent = mapper.writeValueAsString( warehouseUpdateDTO );
+        String jsonContent = mapper.writeValueAsString( inventoryUpdateDTO );
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .patch( "/api/warehouses/" + warehouse.id() )
+                                .patch( "/api/inventory/" + inventoryResponseDTO.id() )
                                 .contentType( MediaType.APPLICATION_JSON )
                                 .content( jsonContent )
                 )
@@ -277,20 +317,72 @@ class WarehouseControllerTest {
                                 .contentType( MediaType.APPLICATION_JSON )
                 ).andExpect(
                         MockMvcResultMatchers
-                                .jsonPath( "$.id" ).value( warehouse.id() )
+                                .jsonPath( "$.id" ).value( inventoryResponseDTO.id() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.warehouse.id" ).value( newInventory.warehouseId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.item.id" ).value( newInventory.itemId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.quantity" ).value( inventoryUpdateDTO.quantity() )
+                );
+    }
+
+    @Test
+    void update_ShouldReturnUpdatedInventory_WhenCalledWithNullValues() throws Exception {
+        InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
+
+        InventoryUpdateDTO inventoryUpdateDTO = new InventoryUpdateDTO(
+                null,
+                null,
+                null
+        );
+
+        String jsonContent = mapper.writeValueAsString( inventoryUpdateDTO );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .patch( "/api/inventory/" + inventoryResponseDTO.id() )
+                                .contentType( MediaType.APPLICATION_JSON )
+                                .content( jsonContent )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .status().isOk()
                 ).andExpect(
                         MockMvcResultMatchers
-                                .jsonPath( "$.name" ).value( warehouseUpdateDTO.name() )
+                                .content()
+                                .contentType( MediaType.APPLICATION_JSON )
+                ).andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.id" ).value( inventoryResponseDTO.id() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.warehouse.id" ).value( newInventory.warehouseId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.item.id" ).value( newInventory.itemId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.quantity" ).value( inventoryResponseDTO.quantity() )
                 );
     }
 
     @Test
     void delete_ShouldReturnTrue_WhenCalled() throws Exception {
-        WarehouseResponseDTO warehouse = warehouseService.createWarehouse( newWarehouse );
+        InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .delete( "/api/warehouses/" + warehouse.id() )
+                                .delete( "/api/inventory/" + inventoryResponseDTO.id() )
                 )
                 .andExpect(
                         MockMvcResultMatchers
@@ -300,11 +392,11 @@ class WarehouseControllerTest {
 
     @Test
     void delete_ShouldFail_WhenCalled() throws Exception {
-        warehouseService.createWarehouse( newWarehouse );
+        inventoryService.createInventory( newInventory );
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .delete( "/api/warehouses/fakeid" )
+                                .delete( "/api/inventory/fakeid" )
                 )
                 .andExpect(
                         MockMvcResultMatchers
