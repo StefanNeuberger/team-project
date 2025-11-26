@@ -41,7 +41,7 @@ class ItemControllerTest {
             Item item = new Item( null, "SKU001", "Test Item 1" );
             item = itemRepo.save( item );
 
-            mockMvc.perform( delete( "/api/item/" + item.getId() ) )
+            mockMvc.perform( delete( "/api/items/" + item.getId() ) )
                     .andExpect( status().isNoContent() );
         }
 
@@ -50,7 +50,7 @@ class ItemControllerTest {
         void deleteItemById_notFound() throws Exception {
             String nonExistingId = "666";
 
-            mockMvc.perform( delete( "/api/item/" + nonExistingId )
+            mockMvc.perform( delete( "/api/items/" + nonExistingId )
                             .contentType( MediaType.APPLICATION_JSON ) )
                     .andExpect( status().isNotFound() )
                     .andExpect( jsonPath( "$.message" ).value( "Item not found: " + nonExistingId ) )
@@ -68,7 +68,7 @@ class ItemControllerTest {
             itemRepo.save( item1 );
             itemRepo.save( item2 );
 
-            mockMvc.perform( delete( "/api/item" ) )
+            mockMvc.perform( delete( "/api/items" ) )
                     .andExpect( status().isNoContent() );
         }
     }
@@ -88,7 +88,7 @@ class ItemControllerTest {
                     """;
 
 
-            mockMvc.perform( post( "/api/item" )
+            mockMvc.perform( post( "/api/items" )
                             .contentType( MediaType.APPLICATION_JSON )
                             .content( requestBody ) )
                     .andExpect( status().isCreated() )
@@ -108,7 +108,7 @@ class ItemControllerTest {
                     """;
 
 
-            mockMvc.perform( post( "/api/item" )
+            mockMvc.perform( post( "/api/items" )
                             .contentType( MediaType.APPLICATION_JSON )
                             .content( requestBody ) )
                     .andExpect( status().isBadRequest() )
@@ -136,7 +136,7 @@ class ItemControllerTest {
                     }
                     """;
 
-            mockMvc.perform( put( "/api/item/" + item.getId() )
+            mockMvc.perform( put( "/api/items/" + item.getId() )
                             .contentType( MediaType.APPLICATION_JSON )
                             .content( requestBody ) )
                     .andExpect( status().isOk() )
@@ -158,7 +158,7 @@ class ItemControllerTest {
                     """;
 
 
-            mockMvc.perform( put( "/api/item/" + nonExistingId )
+            mockMvc.perform( put( "/api/items/" + nonExistingId )
                             .contentType( MediaType.APPLICATION_JSON )
                             .content( requestBody ) )
                     .andExpect( status().isNotFound() )
@@ -182,7 +182,7 @@ class ItemControllerTest {
                     """;
 
 
-            mockMvc.perform( put( "/api/item/" + item.getId() )
+            mockMvc.perform( put( "/api/items/" + item.getId() )
                             .contentType( MediaType.APPLICATION_JSON )
                             .content( requestBody ) )
                     .andExpect( status().isBadRequest() )
@@ -205,7 +205,7 @@ class ItemControllerTest {
             itemRepo.save( item2 );
 
             // When & Then
-            mockMvc.perform( get( "/api/item" ) )
+            mockMvc.perform( get( "/api/items" ) )
                     .andExpect( status().isOk() )
                     .andExpect( jsonPath( "$.length()" ).value( 2 ) )
                     .andExpect( jsonPath( "$[0].name" ).value( "Test Item 1" ) )
@@ -218,7 +218,7 @@ class ItemControllerTest {
         @DisplayName("should return empty list when no items exist")
         void findAllItems_shouldReturnEmpty() throws Exception {
 
-            mockMvc.perform( get( "/api/item" ) )
+            mockMvc.perform( get( "/api/items" ) )
                     .andExpect( status().isOk() )
                     .andExpect( jsonPath( "$.length()" ).value( 0 ) )
                     .andExpect( jsonPath( "$" ).isArray() )
@@ -231,7 +231,7 @@ class ItemControllerTest {
             Item item = new Item( null, "SKU001", "Test Item 1" );
             item = itemRepo.save( item );
 
-            mockMvc.perform( get( "/api/item/" + item.getId() ) )
+            mockMvc.perform( get( "/api/items/" + item.getId() ) )
                     .andExpect( status().isOk() )
                     .andExpect( jsonPath( "$.name" ).value( "Test Item 1" ) );
         }
@@ -241,7 +241,7 @@ class ItemControllerTest {
         void findItemById_notFound() throws Exception {
             String nonExistingId = "666";
 
-            mockMvc.perform( get( "/api/item/" + nonExistingId )
+            mockMvc.perform( get( "/api/items/" + nonExistingId )
                             .contentType( MediaType.APPLICATION_JSON ) )
                     .andExpect( status().isNotFound() )
                     .andExpect( jsonPath( "$.message" ).value( "Item not found: " + nonExistingId ) )
