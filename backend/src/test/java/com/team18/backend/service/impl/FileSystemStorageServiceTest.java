@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -107,24 +108,6 @@ class FileSystemStorageServiceTest {
     }
 
     @Test
-    void store_shouldRejectPathTraversal() throws IOException {
-        MultipartFile mockFile = mock(MultipartFile.class);
-
-        when(mockFile.isEmpty()).thenReturn(false);
-        when(mockFile.getOriginalFilename()).thenReturn("malicious.png");
-
-        when(mockFile.getInputStream())
-                .thenReturn(new ByteArrayInputStream("xxx".getBytes()));
-
-        assertThrows(StorageException.class, () ->
-                storageService.store(
-                        mockFile,
-                        OwnerType.ITEM,
-                        "../escape"
-                ));
-    }
-
-    @Test
     void store_shouldThrowExceptionOnIOFailure() throws IOException {
         MultipartFile mockFile = mock(MultipartFile.class);
 
@@ -135,6 +118,27 @@ class FileSystemStorageServiceTest {
         assertThrows(StorageException.class, () ->
                 storageService.store(mockFile, OwnerType.ITEM, "avatar"));
     }
+
+    @Test
+    void store_shouldSanitizeDangerousFilename() throws IOException {
+        MultipartFile mockFile = mock(MultipartFile.class);
+
+        when(mockFile.isEmpty()).thenReturn(false);
+        when(mockFile.getOriginalFilename()).thenReturn("evil.txt");
+        when(mockFile.getInputStream())
+                .thenReturn(new ByteArrayInputStream("malicious".getBytes()));
+
+        String dangerousFilename = "../../evil_file";
+        String savedName = storageService.store(mockFile, OwnerType.ITEM, dangerousFilename);
+
+        assertFalse(savedName.contains(".."));
+        assertFalse(savedName.contains("/"));
+        assertFalse(savedName.contains("\\"));
+
+        Path savedFile = Paths.get(tempDir.toString(), "item", savedName);
+        assertTrue(Files.exists(savedFile));
+    }
+
 
     @Test
     void loadAsResource_shouldReturnResourceForExistingFile() throws IOException {
