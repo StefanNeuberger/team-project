@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/item")
+@RequestMapping("/api/items")
 @Tag(name = "Items", description = "CRUD operations for items")
 @Validated
 public class ItemController {
