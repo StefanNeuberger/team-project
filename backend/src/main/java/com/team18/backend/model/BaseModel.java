@@ -1,8 +1,7 @@
 package com.team18.backend.model;
 
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.LastModifiedDate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.data.annotation.*;
 import org.springframework.data.domain.Persistable;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -24,7 +23,7 @@ import java.time.Instant;
  * @author Team18
  * @version 1.0
  */
-public class BaseModel implements Persistable<String>{
+public class BaseModel implements Persistable<String> {
 
     /**
      * The unique identifier of this entity.
@@ -54,8 +53,22 @@ public class BaseModel implements Persistable<String>{
      *
      * @param id the unique identifier for this entity
      */
-    public BaseModel(String id) {
+    public BaseModel( String id ) {
         this.id = id;
+    }
+
+
+    /**
+     * Constructs a new BaseModel with the specified ID, createdDate and lastModifiedDate
+     *
+     * @param id               the unique identifier for this entity
+     * @param createdDate      creation timestamp for this entity
+     * @param lastModifiedDate last modified timestamp for this entity
+     */
+    public BaseModel( String id, Instant createdDate, Instant lastModifiedDate ) {
+        this.id = id;
+        this.createdDate = createdDate;
+        this.lastModifiedDate = lastModifiedDate;
     }
 
     /**
@@ -68,8 +81,9 @@ public class BaseModel implements Persistable<String>{
      * @return {@code true} if the entity is new, {@code false} otherwise
      */
     @Override
+    @JsonIgnore
     public boolean isNew() {
-        return this.createdDate == null;
+        return this.id == null;
     }
 
     /**
@@ -108,7 +122,7 @@ public class BaseModel implements Persistable<String>{
      *
      * @param lastModifiedDate the new modification timestamp
      */
-    public void setLastModifiedDate(Instant lastModifiedDate) {
+    public void setLastModifiedDate( Instant lastModifiedDate ) {
         this.lastModifiedDate = lastModifiedDate;
     }
 
@@ -120,7 +134,7 @@ public class BaseModel implements Persistable<String>{
      *
      * @param createdDate the new creation timestamp
      */
-    public void setCreatedDate(Instant createdDate) {
+    public void setCreatedDate( Instant createdDate ) {
         this.createdDate = createdDate;
     }
 
