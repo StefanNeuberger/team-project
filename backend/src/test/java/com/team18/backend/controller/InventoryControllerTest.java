@@ -187,7 +187,7 @@ class InventoryControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .get( "/api/warehouses/fakeid" )
+                                .get( "/api/inventory/fakeid" )
                 )
                 .andExpect(
                         MockMvcResultMatchers
@@ -291,7 +291,7 @@ class InventoryControllerTest {
     }
 
     @Test
-    void update_ShouldReturnUpdatedWarehouse_WhenCalled() throws Exception {
+    void update_ShouldReturnUpdatedInventory_WhenCalled() throws Exception {
         InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
 
         InventoryUpdateDTO inventoryUpdateDTO = new InventoryUpdateDTO(
@@ -334,7 +334,7 @@ class InventoryControllerTest {
     }
 
     @Test
-    void update_ShouldReturnUpdatedWarehouse_WhenCalledWithNullValues() throws Exception {
+    void update_ShouldReturnUpdatedInventory_WhenCalledWithNullValues() throws Exception {
         InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
 
         InventoryUpdateDTO inventoryUpdateDTO = new InventoryUpdateDTO(
@@ -396,7 +396,7 @@ class InventoryControllerTest {
 
         mockMvc.perform(
                         MockMvcRequestBuilders
-                                .delete( "/api/warehouses/fakeid" )
+                                .delete( "/api/inventory/fakeid" )
                 )
                 .andExpect(
                         MockMvcResultMatchers

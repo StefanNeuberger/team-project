@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public record WarehouseCreateDTO(
@@ -17,9 +16,7 @@ public record WarehouseCreateDTO(
                 minLength = 1
         )
         String name,
-        @NotNull
-        @NotBlank
-        @NotEmpty
+        @NotBlank(message = "Shop id is required")
         @Schema(
                 description = "Related shop entity",
                 requiredMode = Schema.RequiredMode.REQUIRED,

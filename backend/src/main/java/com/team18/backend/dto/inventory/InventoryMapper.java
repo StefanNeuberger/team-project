@@ -34,13 +34,17 @@ public class InventoryMapper {
     }
 
     public Inventory toInventory( Inventory inventory, InventoryUpdateDTO inventoryUpdateDTO, Warehouse warehouse, Item item ) {
-        return new Inventory(
+        Inventory mappedInventory = new Inventory(
                 inventory.getId(),
                 warehouse != null ? warehouse : inventory.getWarehouse(),
                 item != null ? item : inventory.getItem(),
-                inventoryUpdateDTO.quantity() != null ? inventoryUpdateDTO.quantity() : inventory.getQuantity(),
-                inventory.getCreatedDate(),
-                inventory.getLastModifiedDate()
+                inventoryUpdateDTO.quantity() != null ? inventoryUpdateDTO.quantity() : inventory.getQuantity()
         );
+
+        mappedInventory.setCreatedDate( inventory.getCreatedDate() );
+        mappedInventory.setLastModifiedDate( inventory.getLastModifiedDate() );
+
+        return mappedInventory;
+
     }
 }

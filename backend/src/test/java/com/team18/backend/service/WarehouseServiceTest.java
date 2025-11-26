@@ -59,7 +59,7 @@ class WarehouseServiceTest {
                 fixedTestId,
                 "Warehouse EU East",
                 shop,
-                52.179262, 20.9359542,
+                null, null,
                 "Muszkieterow",
                 "26-32",
                 "Warszawa",
@@ -201,6 +201,9 @@ class WarehouseServiceTest {
                 .extracting( "name" )
                 .isEqualTo( warehouseResponseDTO.name() );
 
+        assertThat( actual.getGeoLocation() )
+                .isEqualTo( warehouseResponseDTO.getGeoLocation() );
+
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).insert( Mockito.any( Warehouse.class ) );
         Mockito.verify( shopRepository, Mockito.times( 1 ) ).findById( fixedTestId );
     }
@@ -222,14 +225,14 @@ class WarehouseServiceTest {
                 21356
         );
 
-        Warehouse updatedWarehouse = mapper.toWarehouse( warehouse, warehouseUpdateDTO, null );
+        Warehouse updatedWarehouse = mapper.toWarehouse( warehouseWithId, warehouseUpdateDTO, null );
         WarehouseResponseDTO updatedWarehouseResponse = mapper.toWarehouseResponseDTO( updatedWarehouse );
 
-        Mockito.when( warehouseRepository.insert( Mockito.any( Warehouse.class ) ) ).thenReturn( warehouse );
-        Mockito.when( warehouseRepository.findById( fixedTestId ) ).thenReturn( Optional.of( warehouse ) );
+        Mockito.when( warehouseRepository.insert( Mockito.any( Warehouse.class ) ) ).thenReturn( warehouseWithId );
+        Mockito.when( warehouseRepository.findById( fixedTestId ) ).thenReturn( Optional.of( warehouseWithId ) );
         Mockito.when( warehouseRepository.save( Mockito.any( Warehouse.class ) ) ).thenReturn( updatedWarehouse );
 
-        warehouseRepository.insert( warehouse );
+        warehouseRepository.insert( warehouseWithId );
         warehouseRepository.findById( fixedTestId ).orElseThrow();
 
         //WHEN
@@ -240,6 +243,9 @@ class WarehouseServiceTest {
                 .isNotNull()
                 .extracting( "name" )
                 .isEqualTo( updatedWarehouseResponse.name() );
+
+        assertThat( actual.getGeoLocation() )
+                .isEqualTo( new Double[]{ 0.0, 0.0 } );
 
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).insert( Mockito.any( Warehouse.class ) );
         Mockito.verify( warehouseRepository, Mockito.times( 2 ) ).findById( fixedTestId );

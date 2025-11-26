@@ -7,18 +7,14 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public record InventoryCreateDTO(
-        @NotNull
-        @NotBlank
-        @NotEmpty
+        @NotBlank(message = "Warehouse id is required")
         @Schema(
                 description = "Related warehouse entity",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 nullable = false
         )
         String warehouseId,
-        @NotNull
-        @NotBlank
-        @NotEmpty
+        @NotBlank(message = "Item id is required")
         @Schema(
                 description = "Related item entity",
                 requiredMode = Schema.RequiredMode.REQUIRED,

@@ -23,6 +23,7 @@ import java.time.Instant;
  * @author Team18
  * @version 1.0
  */
+
 public class BaseModel implements Persistable<String> {
 
     /**
@@ -38,7 +39,7 @@ public class BaseModel implements Persistable<String> {
      */
     @Schema(description = "The timestamp when this entity was created.", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     @CreatedDate
-    private Instant createdDate = null;
+    private Instant createdDate;
 
     /**
      * The timestamp of the last modification of this entity.
@@ -46,7 +47,10 @@ public class BaseModel implements Persistable<String> {
      */
     @Schema(description = "The timestamp of the last modification of this entity.", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     @LastModifiedDate
-    private Instant lastModifiedDate = null;
+    private Instant lastModifiedDate;
+
+    protected BaseModel() {
+    }
 
     /**
      * Constructs a new BaseModel with the specified ID.

@@ -155,7 +155,7 @@ class InventoryServiceTest {
     }
 
     @Test
-    void getInventoryById_ShouldReturnThrow_WhenCalled() {
+    void getInventoryById_ShouldThrow_WhenCalled() {
         //GIVEN
         String fakeId = "fake-id";
 
@@ -232,10 +232,10 @@ class InventoryServiceTest {
         inventoryRepository.findById( fixedTestId );
 
         //WHEN
-        InventoryResponseDTO acual = assertDoesNotThrow( () -> inventoryService.updateInventory( fixedTestId, inventoryUpdateDTO ) );
+        InventoryResponseDTO actual = assertDoesNotThrow( () -> inventoryService.updateInventory( fixedTestId, inventoryUpdateDTO ) );
 
         //THEN
-        assertThat( acual )
+        assertThat( actual )
                 .isNotNull()
                 .extracting( "quantity" )
                 .isEqualTo( inventoryUpdateDTO.quantity() );
@@ -249,8 +249,8 @@ class InventoryServiceTest {
     }
 
     @Test
-    void updateInventory_ShouldReturnThrow_WhenCalled() {
-        //GIVE
+    void updateInventory_ShouldThrow_WhenCalled() {
+        //GIVEN
         String fakeId = "fake-id";
         InventoryUpdateDTO inventoryUpdateDTO = new InventoryUpdateDTO(
                 null,
