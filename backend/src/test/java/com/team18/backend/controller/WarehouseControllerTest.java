@@ -56,8 +56,6 @@ class WarehouseControllerTest {
         );
     }
 
-    //TODO: Integrationtests
-
     @Test
     void getAll_ShouldReturnEmptyList_WhenCalled() throws Exception {
         mockMvc.perform(
@@ -133,7 +131,7 @@ class WarehouseControllerTest {
 
     @Test
     void get_ShouldReturnError_WhenCalled() throws Exception {
-        WarehouseResponseDTO warehouse = warehouseService.createWarehouse( newWarehouse );
+        warehouseService.createWarehouse( newWarehouse );
 
         mockMvc.perform(
                         MockMvcRequestBuilders
@@ -277,7 +275,7 @@ class WarehouseControllerTest {
 
     @Test
     void delete_ShouldFail_WhenCalled() throws Exception {
-        WarehouseResponseDTO warehouse = warehouseService.createWarehouse( newWarehouse );
+        warehouseService.createWarehouse( newWarehouse );
 
         mockMvc.perform(
                         MockMvcRequestBuilders

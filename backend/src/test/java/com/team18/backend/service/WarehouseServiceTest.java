@@ -220,7 +220,7 @@ class WarehouseServiceTest {
         Mockito.when( warehouseRepository.save( Mockito.any( Warehouse.class ) ) ).thenReturn( updatedWarehouse );
 
         warehouseRepository.insert( warehouse );
-        Warehouse current = warehouseRepository.findById( fixedTestId ).orElseThrow();
+        warehouseRepository.findById( fixedTestId ).orElseThrow();
         WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
@@ -253,10 +253,6 @@ class WarehouseServiceTest {
                 null,
                 21356
         );
-
-        Warehouse updatedWarehouse = mapper.toWarehouse( warehouse, warehouseUpdateDTO );
-        WarehouseResponseDTO updatedWarehouseResponse = mapper.toWarehouseResponseDTO( updatedWarehouse );
-
 
         Mockito.when( warehouseRepository.insert( Mockito.any( Warehouse.class ) ) ).thenReturn( warehouse );
         Mockito.when( warehouseRepository.findById( fakeId ) ).thenReturn( Optional.empty() );
@@ -295,7 +291,7 @@ class WarehouseServiceTest {
         Boolean isDelete = assertDoesNotThrow( () -> warehouseService.deleteWarehouse( fixedTestId ) );
 
         //THEN
-        assertThat( isDelete );
+        assertThat( isDelete ).isTrue();
 
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).insert( Mockito.any( Warehouse.class ) );
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).findById( fixedTestId );
