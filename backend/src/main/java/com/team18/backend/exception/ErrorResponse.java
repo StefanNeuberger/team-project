@@ -14,6 +14,7 @@ public record ErrorResponse(
         @Schema(example = "Not Found")
         String error,
 
+        @Schema(description = "Timestamp when the error occurred")
         Instant timestamp
 ) {
 }
