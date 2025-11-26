@@ -3,6 +3,7 @@ package com.team18.backend.controller;
 import com.team18.backend.model.Shop;
 import com.team18.backend.service.ShopService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,14 +35,12 @@ public class ShopController {
             summary = "Get all shops",
             description = "Returns every shop currently stored in the system."
     )
-    @ApiResponses(
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "List of shops",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Shop.class)
-                    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Successfully retrieved list of shops",
+            content = @Content(
+                    mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = Shop.class))
             )
     )
     public ResponseEntity<List<Shop>> getAllShops() {
@@ -89,6 +88,11 @@ public class ShopController {
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid input",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Shop name already exists",
                     content = @Content
             )
     })

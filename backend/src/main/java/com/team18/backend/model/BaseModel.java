@@ -4,6 +4,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Persistable;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 
 import java.time.Instant;
 
@@ -28,12 +30,14 @@ public class BaseModel implements Persistable<String>{
      * The unique identifier of this entity.
      */
     @Id
+    @Schema(description = "The unique identifier of this entity.", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     private String id;
 
     /**
      * The timestamp when this entity was created.
      * Automatically set by Spring Data when the entity is first persisted.
      */
+    @Schema(description = "The timestamp when this entity was created.", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     @CreatedDate
     private Instant createdDate = null;
 
@@ -41,6 +45,7 @@ public class BaseModel implements Persistable<String>{
      * The timestamp of the last modification of this entity.
      * Automatically set by Spring Data on every update.
      */
+    @Schema(description = "The timestamp of the last modification of this entity.", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
     @LastModifiedDate
     private Instant lastModifiedDate = null;
 
