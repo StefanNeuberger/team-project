@@ -22,7 +22,7 @@ public class Item extends BaseModel {
     )
     private String sku;
 
-    @NotBlank(message = "item name must not be empty")
+    @NotBlank(message = "Item name must not be empty")
     @Size(min = 2, max = 100, message = "name must be between 2 and 100 characters")
     @Indexed(unique = true)
     @Schema(

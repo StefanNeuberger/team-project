@@ -4,45 +4,47 @@ import com.team18.backend.dto.ItemDTO;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.Item;
 import com.team18.backend.repository.ItemRepo;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ItemServiceTest {
 
+    @Mock
     ItemRepo mockedItemRepo;
+    @InjectMocks
     ItemService mockedItemService;
-
-    @BeforeEach
-    void setUp() {
-        mockedItemRepo = Mockito.mock( ItemRepo.class );
-        mockedItemService = new ItemService( mockedItemRepo );
-    }
 
     @Nested
     class FindItemById {
         @Test
         @DisplayName("Should return item when found by id")
         void findItemById() {
+            // GIVEN
             String itemId = "1";
             Item expectedItem = new Item( itemId, "SKU123", "Test Item" );
 
             when( mockedItemRepo.findById( itemId ) ).thenReturn( Optional.of( expectedItem ) );
 
+            // When
             Item actualItem = mockedItemService.findItemById( itemId );
 
-            assertEquals( expectedItem, actualItem );
+            // Then
+            assertThat( actualItem ).isEqualTo( expectedItem );
         }
 
         @Test
@@ -52,12 +54,12 @@ class ItemServiceTest {
 
             when( mockedItemRepo.findById( notExistingItemId ) ).thenReturn( Optional.empty() );
 
-            assertThrows( ResourceNotFoundException.class, () -> mockedItemService.findItemById( notExistingItemId ) );
+            assertThatThrownBy( () -> mockedItemService.findItemById( notExistingItemId ) ).isInstanceOf( ResourceNotFoundException.class );
         }
     }
 
     @Nested
-    class updateItemByIdTests {
+    class UpdateItemByIdTests {
         @Test
         @DisplayName("Should return item when updated successfully")
         void updateItemById() {
@@ -72,26 +74,26 @@ class ItemServiceTest {
 
             Item actualItem = mockedItemService.updateItemById( itemId, itemInputDTO );
 
-            assertEquals( updatedItem, actualItem );
+            assertThat( actualItem ).isEqualTo( updatedItem );
             verify( mockedItemRepo ).save( existingItem );
         }
 
         @Test
         @DisplayName("Should throw exception when item not found")
-        void updateItemByIdNotFound() {
+        void UpdateItemByIdNotFound() {
             String notExistingItemId = "999";
             ItemDTO updatedItem = new ItemDTO( "SKU999", "New Name" );
 
             when( mockedItemRepo.findById( notExistingItemId ) ).thenReturn( Optional.empty() );
 
-            assertThrows( ResourceNotFoundException.class, () ->
-                    mockedItemService.updateItemById( notExistingItemId, updatedItem ) );
+
+            assertThatThrownBy( () -> mockedItemService.updateItemById( notExistingItemId, updatedItem ) ).isInstanceOf( ResourceNotFoundException.class );
         }
     }
 
 
     @Nested
-    class deleteItemTests {
+    class DeleteItemTests {
         @Test
         @DisplayName("Should return nothing when all items deleted")
         void deleteAllItems() {
@@ -121,8 +123,8 @@ class ItemServiceTest {
 
             when( mockedItemRepo.findById( notExistingItemId ) ).thenReturn( Optional.empty() );
 
-            assertThrows( ResourceNotFoundException.class, () ->
-                    mockedItemService.deleteItemById( notExistingItemId ) );
+
+            assertThatThrownBy( () -> mockedItemService.deleteItemById( notExistingItemId ) ).isInstanceOf( ResourceNotFoundException.class );
         }
     }
 
@@ -130,7 +132,7 @@ class ItemServiceTest {
     class createItemTests {
         @Test
         @DisplayName("Should return newly created item")
-        void createItem() {
+        void CreateItem() {
             ItemDTO newItemDTO = new ItemDTO( "SKU123", "Test Item" );
             Item savedItem = new Item( "1", "SKU123", "Test Item" );
 
@@ -138,7 +140,7 @@ class ItemServiceTest {
 
             Item actualItem = mockedItemService.createItem( newItemDTO );
 
-            assertEquals( savedItem, actualItem );
+            assertThat( actualItem ).isEqualTo( savedItem );
             verify( mockedItemRepo ).save( any( Item.class ) );
         }
 

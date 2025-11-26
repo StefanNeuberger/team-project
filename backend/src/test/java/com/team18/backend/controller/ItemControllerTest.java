@@ -123,7 +123,7 @@ class ItemControllerTest {
     @Nested
     class UpdateItemTests {
         @Test
-        @DisplayName("should return updated item when successfull")
+        @DisplayName("should return updated item when successful")
         void updateItemById() throws Exception {
             String updatedName = "Test Item 2";
             Item item = new Item( null, "SKU001", "Test Item 1" );
