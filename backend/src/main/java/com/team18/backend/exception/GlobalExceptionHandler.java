@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.List;
@@ -99,6 +100,28 @@ public class GlobalExceptionHandler {
                 Instant.now()
         );
         return new ResponseEntity<>( errorResponse, HttpStatus.INTERNAL_SERVER_ERROR );
+    }
+
+    @ExceptionHandler(StorageException.class)
+    public ResponseEntity<ErrorResponse> handleStorageException( StorageException ex ) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Unable to save or retrieve resources at this time",
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                Instant.now()
+        );
+        return new ResponseEntity<>( errorResponse, HttpStatus.INTERNAL_SERVER_ERROR );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Invalid request",
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                Instant.now()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     /**
