@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
@@ -19,12 +18,12 @@ public class GlobalExceptionHandler {
      * Handle validation errors - returns 400 Bad Request
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<FieldValidationErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<FieldValidationErrorResponse> handleValidationException( MethodArgumentNotValidException ex ) {
         List<FieldValidationError> fieldErrors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> new FieldValidationError(error.getField(), error.getDefaultMessage()))
-                .collect(Collectors.toList());
+                .map( error -> new FieldValidationError( error.getField(), error.getDefaultMessage() ) )
+                .collect( Collectors.toList() );
 
         FieldValidationErrorResponse errorResponse = new FieldValidationErrorResponse(
                 "Validation failed",
@@ -33,7 +32,7 @@ public class GlobalExceptionHandler {
                 Instant.now(),
                 fieldErrors
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>( errorResponse, HttpStatus.BAD_REQUEST );
     }
 
 
@@ -114,17 +113,6 @@ public class GlobalExceptionHandler {
                 Instant.now()
         );
         return new ResponseEntity<>( errorResponse, HttpStatus.INTERNAL_SERVER_ERROR );
-    }
-
-    @ExceptionHandler(WarehouseNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleWarehouseNotFound( WarehouseNotFoundException ex ) {
-        return new ErrorResponse(
-                ex.getMessage(),
-                HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                Instant.now()
-        );
     }
 }
 

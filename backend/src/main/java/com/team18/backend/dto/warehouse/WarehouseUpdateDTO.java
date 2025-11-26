@@ -18,6 +18,13 @@ public record WarehouseUpdateDTO(
         String name,
         @Nullable
         @Schema(
+                description = "Related shop entity",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+                nullable = true
+        )
+        String shopId,
+        @Nullable
+        @Schema(
                 description = "Latitude of the warehouse location",
                 example = "12.43424",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED,

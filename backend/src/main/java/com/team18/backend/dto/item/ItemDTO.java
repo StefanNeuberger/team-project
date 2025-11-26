@@ -1,4 +1,4 @@
-package com.team18.backend.dto;
+package com.team18.backend.dto.item;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

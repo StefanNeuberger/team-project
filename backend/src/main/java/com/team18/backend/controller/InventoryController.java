@@ -3,7 +3,6 @@ package com.team18.backend.controller;
 import com.team18.backend.dto.inventory.InventoryCreateDTO;
 import com.team18.backend.dto.inventory.InventoryResponseDTO;
 import com.team18.backend.dto.inventory.InventoryUpdateDTO;
-import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
 import com.team18.backend.exception.ErrorResponse;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.service.InventoryService;

@@ -4,8 +4,11 @@ import com.team18.backend.dto.warehouse.WarehouseCreateDTO;
 import com.team18.backend.dto.warehouse.WarehouseMapper;
 import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
 import com.team18.backend.dto.warehouse.WarehouseUpdateDTO;
-import com.team18.backend.exception.WarehouseNotFoundException;
+import com.team18.backend.exception.ResourceNotFoundException;
+import com.team18.backend.model.Shop;
 import com.team18.backend.model.Warehouse;
+import com.team18.backend.repository.InventoryRepository;
+import com.team18.backend.repository.ShopRepository;
 import com.team18.backend.repository.WarehouseRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,16 +25,27 @@ import static org.junit.jupiter.api.Assertions.*;
 class WarehouseServiceTest {
 
     private static final WarehouseRepository warehouseRepository = Mockito.mock( WarehouseRepository.class );
-    private static WarehouseMapper mapper;
+    private static final ShopRepository shopRepository = Mockito.mock( ShopRepository.class );
+    private static final InventoryRepository inventoryRepository = Mockito.mock( InventoryRepository.class );
+    private static WarehouseMapper mapper = new WarehouseMapper();
+    private static final WarehouseService warehouseService = new WarehouseService( warehouseRepository, shopRepository, inventoryRepository, mapper );
 
     private static final String fixedTestId = "test-id";
+    private static Shop shop;
     private static Warehouse warehouse;
     private static Warehouse warehouseWithId;
 
     @BeforeAll
     static void setUp() {
+
+        shop = new Shop(
+                fixedTestId,
+                "Test shop"
+        );
+
         warehouse = new Warehouse(
                 "Warehouse EU East",
+                shop,
                 52.179262, 20.9359542,
                 "Muszkieterow",
                 "26-32",
@@ -41,10 +55,10 @@ class WarehouseServiceTest {
                 "Poland",
                 4328974
         );
-        mapper = new WarehouseMapper();
         warehouseWithId = new Warehouse(
                 fixedTestId,
                 "Warehouse EU East",
+                shop,
                 52.179262, 20.9359542,
                 "Muszkieterow",
                 "26-32",
@@ -58,7 +72,7 @@ class WarehouseServiceTest {
 
     @BeforeEach
     void resetMocks() {
-        Mockito.reset( warehouseRepository );
+        Mockito.reset( warehouseRepository, shopRepository, inventoryRepository );
     }
 
     @Test
@@ -69,8 +83,6 @@ class WarehouseServiceTest {
 
         Mockito.when( warehouseRepository.save( warehouse ) ).thenReturn( warehouse );
         Mockito.when( warehouseRepository.findAll() ).thenReturn( warehouses );
-
-        WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
         warehouseRepository.save( warehouse );
@@ -93,7 +105,6 @@ class WarehouseServiceTest {
         List<Warehouse> warehouses = new ArrayList<>();
         Mockito.when( warehouseRepository.findAll() ).thenReturn( warehouses );
 
-        WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
         List<WarehouseResponseDTO> actual = warehouseService.getAllWarehouses();
@@ -114,7 +125,6 @@ class WarehouseServiceTest {
         Mockito.when( warehouseRepository.save( warehouseWithId ) ).thenReturn( warehouseWithId );
         Mockito.when( warehouseRepository.findById( fixedTestId ) ).thenReturn( Optional.of( warehouseWithId ) );
 
-        WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
         warehouseRepository.save( warehouseWithId );
@@ -140,12 +150,11 @@ class WarehouseServiceTest {
         Mockito.when( warehouseRepository.save( warehouseWithId ) ).thenReturn( warehouseWithId );
         Mockito.when( warehouseRepository.findById( fakeId ) ).thenReturn( Optional.empty() );
 
-        WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
         warehouseRepository.save( warehouseWithId );
 
-        WarehouseNotFoundException ex = assertThrows( WarehouseNotFoundException.class, () -> {
+        ResourceNotFoundException ex = assertThrows( ResourceNotFoundException.class, () -> {
             warehouseService.getWarehouseById( fakeId );
         } );
 
@@ -153,8 +162,8 @@ class WarehouseServiceTest {
         assertThat( ex )
                 .isNotNull();
 
-        assertThat( ex.getMessage() )
-                .isEqualTo( new WarehouseNotFoundException( fakeId ).getMessage() );
+        assertThat( ex )
+                .isInstanceOf( ResourceNotFoundException.class );
 
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).save( warehouseWithId );
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).findById( fakeId );
@@ -165,6 +174,7 @@ class WarehouseServiceTest {
         //GIVEN
         WarehouseCreateDTO warehouseCreateDTO = new WarehouseCreateDTO(
                 warehouse.getName(),
+                warehouse.getShop().getId(),
                 warehouse.getLat(),
                 warehouse.getLng(),
                 warehouse.getStreet(),
@@ -176,13 +186,11 @@ class WarehouseServiceTest {
                 warehouse.getMaxCapacity()
         );
 
-        Warehouse newWarehouse = mapper.toWarehouse( warehouseCreateDTO );
+        Warehouse newWarehouse = mapper.toWarehouse( warehouseCreateDTO, shop );
 
         WarehouseResponseDTO warehouseResponseDTO = mapper.toWarehouseResponseDTO( newWarehouse );
-
+        Mockito.when( shopRepository.findById( fixedTestId ) ).thenReturn( Optional.of( shop ) );
         Mockito.when( warehouseRepository.insert( Mockito.any( Warehouse.class ) ) ).thenReturn( newWarehouse );
-
-        WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
         WarehouseResponseDTO actual = warehouseService.createWarehouse( warehouseCreateDTO );
@@ -194,6 +202,7 @@ class WarehouseServiceTest {
                 .isEqualTo( warehouseResponseDTO.name() );
 
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).insert( Mockito.any( Warehouse.class ) );
+        Mockito.verify( shopRepository, Mockito.times( 1 ) ).findById( fixedTestId );
     }
 
     @Test
@@ -209,10 +218,11 @@ class WarehouseServiceTest {
                 null,
                 null,
                 null,
+                null,
                 21356
         );
 
-        Warehouse updatedWarehouse = mapper.toWarehouse( warehouse, warehouseUpdateDTO );
+        Warehouse updatedWarehouse = mapper.toWarehouse( warehouse, warehouseUpdateDTO, null );
         WarehouseResponseDTO updatedWarehouseResponse = mapper.toWarehouseResponseDTO( updatedWarehouse );
 
         Mockito.when( warehouseRepository.insert( Mockito.any( Warehouse.class ) ) ).thenReturn( warehouse );
@@ -221,7 +231,6 @@ class WarehouseServiceTest {
 
         warehouseRepository.insert( warehouse );
         warehouseRepository.findById( fixedTestId ).orElseThrow();
-        WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
         WarehouseResponseDTO actual = assertDoesNotThrow( () -> warehouseService.updateWarehouse( fixedTestId, warehouseUpdateDTO ) );
@@ -251,6 +260,7 @@ class WarehouseServiceTest {
                 null,
                 null,
                 null,
+                null,
                 21356
         );
 
@@ -258,10 +268,9 @@ class WarehouseServiceTest {
         Mockito.when( warehouseRepository.findById( fakeId ) ).thenReturn( Optional.empty() );
 
         warehouseRepository.insert( warehouse );
-        WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
-        WarehouseNotFoundException ex = assertThrows( WarehouseNotFoundException.class, () -> {
+        ResourceNotFoundException ex = assertThrows( ResourceNotFoundException.class, () -> {
             warehouseService.updateWarehouse( fakeId, warehouseUpdateDTO );
         } );
 
@@ -269,8 +278,8 @@ class WarehouseServiceTest {
         assertThat( ex )
                 .isNotNull();
 
-        assertThat( ex.getMessage() )
-                .isEqualTo( new WarehouseNotFoundException( fakeId ).getMessage() );
+        assertThat( ex )
+                .isInstanceOf( ResourceNotFoundException.class );
 
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).insert( Mockito.any( Warehouse.class ) );
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).findById( fakeId );
@@ -284,8 +293,6 @@ class WarehouseServiceTest {
         Mockito.when( warehouseRepository.findById( fixedTestId ) ).thenReturn( Optional.of( warehouse ) );
 
         warehouseRepository.insert( warehouse );
-
-        WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
         Boolean isDelete = assertDoesNotThrow( () -> warehouseService.deleteWarehouse( fixedTestId ) );
@@ -309,10 +316,9 @@ class WarehouseServiceTest {
 
         warehouseRepository.insert( warehouse );
 
-        WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
-        WarehouseNotFoundException ex = assertThrows( WarehouseNotFoundException.class, () -> {
+        ResourceNotFoundException ex = assertThrows( ResourceNotFoundException.class, () -> {
             warehouseService.deleteWarehouse( fakeId );
         } );
 
@@ -320,8 +326,8 @@ class WarehouseServiceTest {
         assertThat( ex )
                 .isNotNull();
 
-        assertThat( ex.getMessage() )
-                .isEqualTo( new WarehouseNotFoundException( fakeId ).getMessage() );
+        assertThat( ex )
+                .isInstanceOf( ResourceNotFoundException.class );
 
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).insert( Mockito.any( Warehouse.class ) );
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).findById( fakeId );

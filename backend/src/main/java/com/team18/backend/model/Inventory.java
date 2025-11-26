@@ -3,13 +3,28 @@ package com.team18.backend.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import java.time.Instant;
 
 @Document(value = "inventory")
 public class Inventory extends BaseModel {
 
-    //TODO: DocumentReferences to Product and Warehouse
+    @Schema(
+            description = "Related warehouse entity",
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            nullable = false
+    )
+    @DocumentReference
+    private Warehouse warehouse;
+
+    @Schema(
+            description = "Related item entity",
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            nullable = false
+    )
+    @DocumentReference
+    private Item item;
 
     @Schema(
             description = "Quantity of the related item",
@@ -21,8 +36,10 @@ public class Inventory extends BaseModel {
     private int quantity;
 
     @PersistenceCreator
-    public Inventory( String id, int quantity, Instant createdDate, Instant lastModifiedDate ) {
+    public Inventory( String id, Warehouse warehouse, Item item, int quantity, Instant createdDate, Instant lastModifiedDate ) {
         super( id, createdDate, lastModifiedDate );
+        this.warehouse = warehouse;
+        this.item = item;
         this.quantity = quantity;
     }
 
@@ -30,14 +47,26 @@ public class Inventory extends BaseModel {
         super( null );
     }
 
-    public Inventory( String id, int quantity ) {
+    public Inventory( String id, Warehouse warehouse, Item item, int quantity ) {
         super( id );
+        this.warehouse = warehouse;
+        this.item = item;
         this.quantity = quantity;
     }
 
-    public Inventory( int quantity ) {
+    public Inventory( Warehouse warehouse, Item item, int quantity ) {
         super( null );
+        this.warehouse = warehouse;
+        this.item = item;
         this.quantity = quantity;
+    }
+
+    public Warehouse getWarehouse() {
+        return warehouse;
+    }
+
+    public Item getItem() {
+        return item;
     }
 
     public int getQuantity() {

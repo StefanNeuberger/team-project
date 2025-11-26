@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 public record WarehouseCreateDTO(
@@ -16,6 +17,15 @@ public record WarehouseCreateDTO(
                 minLength = 1
         )
         String name,
+        @NotNull
+        @NotBlank
+        @NotEmpty
+        @Schema(
+                description = "Related shop entity",
+                requiredMode = Schema.RequiredMode.REQUIRED,
+                nullable = false
+        )
+        String shopId,
         @Nullable
         @Schema(
                 description = "Latitude of the warehouse location",

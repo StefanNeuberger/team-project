@@ -6,7 +6,11 @@ import com.team18.backend.dto.inventory.InventoryResponseDTO;
 import com.team18.backend.dto.inventory.InventoryUpdateDTO;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.Inventory;
+import com.team18.backend.model.Item;
+import com.team18.backend.model.Warehouse;
 import com.team18.backend.repository.InventoryRepository;
+import com.team18.backend.repository.ItemRepo;
+import com.team18.backend.repository.WarehouseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +21,14 @@ public class InventoryService {
 
     private final InventoryRepository repository;
     private final InventoryMapper mapper;
+    private final WarehouseRepository warehouseRepository;
+    private final ItemRepo itemRepo;
 
-    public InventoryService( InventoryRepository repository, InventoryMapper mapper ) {
+    public InventoryService( InventoryRepository repository, InventoryMapper mapper, WarehouseRepository warehouseRepository, ItemRepo itemRepo ) {
         this.repository = repository;
         this.mapper = mapper;
+        this.warehouseRepository = warehouseRepository;
+        this.itemRepo = itemRepo;
     }
 
     public List<InventoryResponseDTO> getAllInventory() {
@@ -35,8 +43,17 @@ public class InventoryService {
         return mapper.toInventoryResponseDTO( inventory );
     }
 
-    public InventoryResponseDTO createInventory( InventoryCreateDTO inventoryCreateDTO ) {
-        Inventory newInventory = mapper.toInventory( inventoryCreateDTO );
+    public InventoryResponseDTO createInventory( InventoryCreateDTO inventoryCreateDTO ) throws ResourceNotFoundException {
+        Warehouse warehouse = warehouseRepository.findById( inventoryCreateDTO.warehouseId() )
+                .orElseThrow(
+                        () -> new ResourceNotFoundException( "Could not find warehouse with id: " + inventoryCreateDTO.warehouseId() )
+                );
+        Item item = itemRepo.findById( inventoryCreateDTO.itemId() )
+                .orElseThrow(
+                        () -> new ResourceNotFoundException( "Could not find item with id: " + inventoryCreateDTO.itemId() )
+                );
+
+        Inventory newInventory = mapper.toInventory( inventoryCreateDTO, warehouse, item );
         Inventory inventory = repository.insert( newInventory );
         return mapper.toInventoryResponseDTO( inventory );
     }
@@ -45,8 +62,21 @@ public class InventoryService {
         Inventory current = repository.findById( id ).orElseThrow(
                 () -> new ResourceNotFoundException( "Could not find inventory with id: " + id )
         );
+        String warehouseId = inventoryUpdateDTO.warehouseId();
+        String itemId = inventoryUpdateDTO.itemId();
 
-        Inventory updatedInventory = mapper.toInventory( current, inventoryUpdateDTO );
+        Warehouse warehouse = warehouseId != null ? warehouseRepository.findById( inventoryUpdateDTO.warehouseId() )
+                .orElseThrow(
+                        () -> new ResourceNotFoundException( "Could not find warehouse with id: " + inventoryUpdateDTO.warehouseId() )
+                ) : null;
+
+        Item item = itemId != null ? itemRepo.findById( inventoryUpdateDTO.itemId() )
+                .orElseThrow(
+                        () -> new ResourceNotFoundException( "Could not find item with id: " + inventoryUpdateDTO.itemId() )
+                ) : null;
+
+
+        Inventory updatedInventory = mapper.toInventory( current, inventoryUpdateDTO, warehouse, item );
         Inventory savedInventory = repository.save( updatedInventory );
 
         return mapper.toInventoryResponseDTO( savedInventory );
@@ -61,4 +91,5 @@ public class InventoryService {
         repository.delete( current );
         return true;
     }
+
 }
