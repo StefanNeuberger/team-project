@@ -1,9 +1,9 @@
 package com.team18.backend.service;
 
-import com.team18.backend.dto.WarehouseCreateDTO;
-import com.team18.backend.dto.WarehouseMapper;
-import com.team18.backend.dto.WarehouseResponseDTO;
-import com.team18.backend.dto.WarehouseUpdateDTO;
+import com.team18.backend.dto.warehouse.WarehouseCreateDTO;
+import com.team18.backend.dto.warehouse.WarehouseMapper;
+import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
+import com.team18.backend.dto.warehouse.WarehouseUpdateDTO;
 import com.team18.backend.exception.WarehouseNotFoundException;
 import com.team18.backend.model.Warehouse;
 import com.team18.backend.repository.WarehouseRepository;

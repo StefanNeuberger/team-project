@@ -1,9 +1,10 @@
-package com.team18.backend.dto;
+package com.team18.backend.dto.warehouse;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public record WarehouseResponseDTO(
+        @Schema(description = "The unique identifier of this entity.", requiredMode = Schema.RequiredMode.REQUIRED, nullable = false)
         String id,
         @Schema(
                 description = "Warehouse name",

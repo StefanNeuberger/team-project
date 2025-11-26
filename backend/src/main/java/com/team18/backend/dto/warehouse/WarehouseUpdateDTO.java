@@ -1,19 +1,18 @@
-package com.team18.backend.dto;
+package com.team18.backend.dto.warehouse;
 
+import com.team18.backend.dto.validators.NullOrMin;
+import com.team18.backend.dto.validators.NullOrNotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.data.mongodb.core.index.Indexed;
 
-public record WarehouseCreateDTO(
-        @NotBlank(message = "Warehouse name is required")
+
+public record WarehouseUpdateDTO(
+        @NullOrNotBlank
         @Schema(
                 description = "Warehouse name",
                 example = "Warehouse EU East",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                nullable = false,
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+                nullable = true,
                 minLength = 1
         )
         String name,
@@ -81,14 +80,19 @@ public record WarehouseCreateDTO(
                 nullable = true
         )
         String country,
-        @NotNull @Min(1)
+        @NullOrMin(min = 1)
         @Schema(
                 description = "Maximum capacity of a warehouse",
                 example = "223002",
-                requiredMode = Schema.RequiredMode.REQUIRED,
-                nullable = false,
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+                nullable = true,
                 minimum = "1"
         )
         Integer maxCapacity
 ) {
 }
+
+
+
+
+

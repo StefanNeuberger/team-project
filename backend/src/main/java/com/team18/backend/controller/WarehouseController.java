@@ -1,8 +1,8 @@
 package com.team18.backend.controller;
 
-import com.team18.backend.dto.WarehouseCreateDTO;
-import com.team18.backend.dto.WarehouseResponseDTO;
-import com.team18.backend.dto.WarehouseUpdateDTO;
+import com.team18.backend.dto.warehouse.WarehouseCreateDTO;
+import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
+import com.team18.backend.dto.warehouse.WarehouseUpdateDTO;
 import com.team18.backend.exception.ErrorResponse;
 import com.team18.backend.exception.WarehouseNotFoundException;
 import com.team18.backend.service.WarehouseService;
@@ -142,7 +142,7 @@ public class WarehouseController {
             )
 
     )
-    @DeleteMapping(value = "/{id}", consumes = MediaType.ALL_VALUE)
+    @DeleteMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Boolean delete( @PathVariable String id ) throws WarehouseNotFoundException {
         return service.deleteWarehouse( id );

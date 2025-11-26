@@ -1,4 +1,4 @@
-package com.team18.backend.dto;
+package com.team18.backend.dto.warehouse;
 
 import com.team18.backend.model.Warehouse;
 import org.springframework.stereotype.Component;
