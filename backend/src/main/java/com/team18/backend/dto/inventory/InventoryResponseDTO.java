@@ -1,7 +1,7 @@
 package com.team18.backend.dto.inventory;
 
+import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
 import com.team18.backend.model.Item;
-import com.team18.backend.model.Warehouse;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
@@ -20,7 +20,7 @@ public record InventoryResponseDTO(
                 nullable = false,
                 accessMode = Schema.AccessMode.READ_ONLY
         )
-        Warehouse warehouse,
+        WarehouseResponseDTO warehouse,
         @Schema(
                 description = "Related item entity",
                 requiredMode = Schema.RequiredMode.REQUIRED,
