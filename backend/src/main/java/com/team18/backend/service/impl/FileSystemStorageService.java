@@ -50,7 +50,7 @@ public class FileSystemStorageService implements StorageService {
         String extension = "";
         if (originalFilename != null && originalFilename.contains(".")) {
             extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            if (extension.length() > 10 || extension.matches(".*[\\\\/].*")) {
+            if (extension.length() > 10 || extension.contains("/") || extension.contains("\\")) {
                 extension = "";
             }
         }
