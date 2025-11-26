@@ -42,7 +42,7 @@ public record WarehouseResponseDTO(
                 example = "223002",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 nullable = false,
-                minLength = 1
+                minimum = "1"
         )
         Integer maxCapacity
 ) {

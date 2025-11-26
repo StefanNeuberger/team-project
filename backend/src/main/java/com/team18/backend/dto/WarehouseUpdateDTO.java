@@ -86,7 +86,7 @@ public record WarehouseUpdateDTO(
                 example = "223002",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED,
                 nullable = true,
-                minLength = 1
+                minimum = "1"
         )
         Integer maxCapacity
 ) {

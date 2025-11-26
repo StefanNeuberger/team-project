@@ -4,7 +4,7 @@ import com.team18.backend.dto.WarehouseCreateDTO;
 import com.team18.backend.dto.WarehouseMapper;
 import com.team18.backend.dto.WarehouseResponseDTO;
 import com.team18.backend.dto.WarehouseUpdateDTO;
-import com.team18.backend.exceptions.WarehouseNotFound;
+import com.team18.backend.exception.WarehouseNotFoundException;
 import com.team18.backend.model.Warehouse;
 import com.team18.backend.repository.WarehouseRepository;
 import org.springframework.stereotype.Service;
@@ -29,8 +29,8 @@ public class WarehouseService {
         return mapper.toWarehouseResponseDTOList( warehouses );
     }
 
-    public WarehouseResponseDTO getWarehouseById( String id ) throws WarehouseNotFound {
-        Warehouse warehouse = repository.findById( id ).orElseThrow( () -> new WarehouseNotFound( id ) );
+    public WarehouseResponseDTO getWarehouseById( String id ) throws WarehouseNotFoundException {
+        Warehouse warehouse = repository.findById( id ).orElseThrow( () -> new WarehouseNotFoundException( id ) );
         return mapper.toWarehouseResponseDTO( warehouse );
     }
 
@@ -40,10 +40,10 @@ public class WarehouseService {
         return mapper.toWarehouseResponseDTO( insertedWarehouse );
     }
 
-    public WarehouseResponseDTO updateWarehouse( String id, WarehouseUpdateDTO warehouse ) throws WarehouseNotFound {
+    public WarehouseResponseDTO updateWarehouse( String id, WarehouseUpdateDTO warehouse ) throws WarehouseNotFoundException {
         Warehouse current = repository.findById( id )
                 .orElseThrow(
-                        () -> new WarehouseNotFound( id )
+                        () -> new WarehouseNotFoundException( id )
                 );
 
         Warehouse updatedWarehouse = mapper.toWarehouse( current, warehouse );
@@ -52,9 +52,9 @@ public class WarehouseService {
     }
 
     @Transactional
-    public Boolean deleteWarehouse( String id ) throws WarehouseNotFound {
+    public Boolean deleteWarehouse( String id ) throws WarehouseNotFoundException {
         Warehouse toDelete = repository.findById( id )
-                .orElseThrow( () -> new WarehouseNotFound( id ) );
+                .orElseThrow( () -> new WarehouseNotFoundException( id ) );
 
         repository.delete( toDelete );
 

@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.index.Indexed;
 
 public record WarehouseCreateDTO(
         @NotBlank(message = "Warehouse name is required")
-        @Indexed(unique = true)
         @Schema(
                 description = "Warehouse name",
                 example = "Warehouse EU East",
@@ -88,7 +87,7 @@ public record WarehouseCreateDTO(
                 example = "223002",
                 requiredMode = Schema.RequiredMode.REQUIRED,
                 nullable = false,
-                minLength = 1
+                minimum = "1"
         )
         Integer maxCapacity
 ) {

@@ -2,6 +2,7 @@ package com.team18.backend.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.annotation.PersistenceCreator;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,6 +16,7 @@ public class Warehouse extends BaseModel {
     // @DocumentReference
     // private final Shop shop;
 
+    @Indexed(unique = true)
     @TextIndexed
     @Schema(
             description = "Warehouse name",
@@ -23,7 +25,7 @@ public class Warehouse extends BaseModel {
             nullable = false,
             minLength = 1
     )
-    private final String name;
+    private String name;
 
     @Schema(
             description = "Latitude of the warehouse location",
@@ -31,7 +33,7 @@ public class Warehouse extends BaseModel {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             nullable = true
     )
-    private final Double lat;
+    private Double lat;
 
     @Schema(
             description = "Longitude of the warehouse location",
@@ -39,7 +41,7 @@ public class Warehouse extends BaseModel {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             nullable = true
     )
-    private final Double lng;
+    private Double lng;
 
     @Schema(
             description = "Street name",
@@ -47,7 +49,7 @@ public class Warehouse extends BaseModel {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             nullable = true
     )
-    private final String street;
+    private String street;
 
     @Schema(
             description = "Number of the street",
@@ -55,7 +57,7 @@ public class Warehouse extends BaseModel {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             nullable = true
     )
-    private final String number;
+    private String number;
 
     @Schema(
             description = "City name",
@@ -63,7 +65,7 @@ public class Warehouse extends BaseModel {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             nullable = true
     )
-    private final String city;
+    private String city;
 
     @Schema(
             description = "Postal code",
@@ -71,7 +73,7 @@ public class Warehouse extends BaseModel {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             nullable = true
     )
-    private final String postalCode;
+    private String postalCode;
 
     @Schema(
             description = "State name",
@@ -79,7 +81,7 @@ public class Warehouse extends BaseModel {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             nullable = true
     )
-    private final String state;
+    private String state;
 
     @Schema(
             description = "Country name",
@@ -87,16 +89,16 @@ public class Warehouse extends BaseModel {
             requiredMode = Schema.RequiredMode.NOT_REQUIRED,
             nullable = true
     )
-    private final String country;
+    private String country;
 
     @Schema(
             description = "Maximum capacity of a warehouse",
             example = "223002",
             requiredMode = Schema.RequiredMode.REQUIRED,
             nullable = false,
-            minLength = 1
+            minimum = "1"
     )
-    private final int maxCapacity;
+    private int maxCapacity;
 
 
     @PersistenceCreator
@@ -126,6 +128,10 @@ public class Warehouse extends BaseModel {
         this.state = state;
         this.country = country;
         this.maxCapacity = maxCapacity;
+    }
+
+    public Warehouse() {
+        super( null );
     }
 
     public Warehouse(

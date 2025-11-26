@@ -4,7 +4,7 @@ import com.team18.backend.dto.WarehouseCreateDTO;
 import com.team18.backend.dto.WarehouseMapper;
 import com.team18.backend.dto.WarehouseResponseDTO;
 import com.team18.backend.dto.WarehouseUpdateDTO;
-import com.team18.backend.exceptions.WarehouseNotFound;
+import com.team18.backend.exception.WarehouseNotFoundException;
 import com.team18.backend.model.Warehouse;
 import com.team18.backend.repository.WarehouseRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -145,7 +145,7 @@ class WarehouseServiceTest {
         //WHEN
         warehouseRepository.save( warehouseWithId );
 
-        WarehouseNotFound ex = assertThrows( WarehouseNotFound.class, () -> {
+        WarehouseNotFoundException ex = assertThrows( WarehouseNotFoundException.class, () -> {
             warehouseService.getWarehouseById( fakeId );
         } );
 
@@ -154,7 +154,7 @@ class WarehouseServiceTest {
                 .isNotNull();
 
         assertThat( ex.getMessage() )
-                .isEqualTo( new WarehouseNotFound( fakeId ).getMessage() );
+                .isEqualTo( new WarehouseNotFoundException( fakeId ).getMessage() );
 
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).save( warehouseWithId );
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).findById( fakeId );
@@ -261,7 +261,7 @@ class WarehouseServiceTest {
         WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
-        WarehouseNotFound ex = assertThrows( WarehouseNotFound.class, () -> {
+        WarehouseNotFoundException ex = assertThrows( WarehouseNotFoundException.class, () -> {
             warehouseService.updateWarehouse( fakeId, warehouseUpdateDTO );
         } );
 
@@ -270,7 +270,7 @@ class WarehouseServiceTest {
                 .isNotNull();
 
         assertThat( ex.getMessage() )
-                .isEqualTo( new WarehouseNotFound( fakeId ).getMessage() );
+                .isEqualTo( new WarehouseNotFoundException( fakeId ).getMessage() );
 
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).insert( Mockito.any( Warehouse.class ) );
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).findById( fakeId );
@@ -312,7 +312,7 @@ class WarehouseServiceTest {
         WarehouseService warehouseService = new WarehouseService( warehouseRepository, mapper );
 
         //WHEN
-        WarehouseNotFound ex = assertThrows( WarehouseNotFound.class, () -> {
+        WarehouseNotFoundException ex = assertThrows( WarehouseNotFoundException.class, () -> {
             warehouseService.deleteWarehouse( fakeId );
         } );
 
@@ -321,7 +321,7 @@ class WarehouseServiceTest {
                 .isNotNull();
 
         assertThat( ex.getMessage() )
-                .isEqualTo( new WarehouseNotFound( fakeId ).getMessage() );
+                .isEqualTo( new WarehouseNotFoundException( fakeId ).getMessage() );
 
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).insert( Mockito.any( Warehouse.class ) );
         Mockito.verify( warehouseRepository, Mockito.times( 1 ) ).findById( fakeId );

@@ -3,7 +3,8 @@ package com.team18.backend.controller;
 import com.team18.backend.dto.WarehouseCreateDTO;
 import com.team18.backend.dto.WarehouseResponseDTO;
 import com.team18.backend.dto.WarehouseUpdateDTO;
-import com.team18.backend.exceptions.WarehouseNotFound;
+import com.team18.backend.exception.ErrorResponse;
+import com.team18.backend.exception.WarehouseNotFoundException;
 import com.team18.backend.service.WarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -76,7 +77,7 @@ public class WarehouseController {
 
     )
     @GetMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
-    public WarehouseResponseDTO get( @PathVariable String id ) throws WarehouseNotFound {
+    public WarehouseResponseDTO get( @PathVariable String id ) throws WarehouseNotFoundException {
         return service.getWarehouseById( id );
     }
 
@@ -120,7 +121,7 @@ public class WarehouseController {
 
     )
     @PatchMapping("/{id}")
-    public WarehouseResponseDTO patch( @PathVariable String id, @Valid @RequestBody WarehouseUpdateDTO warehouse ) throws WarehouseNotFound {
+    public WarehouseResponseDTO patch( @PathVariable String id, @Valid @RequestBody WarehouseUpdateDTO warehouse ) throws WarehouseNotFoundException {
         return service.updateWarehouse( id, warehouse );
     }
 
@@ -143,16 +144,7 @@ public class WarehouseController {
     )
     @DeleteMapping(value = "/{id}", consumes = MediaType.ALL_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Boolean delete( @PathVariable String id ) throws WarehouseNotFound {
+    public Boolean delete( @PathVariable String id ) throws WarehouseNotFoundException {
         return service.deleteWarehouse( id );
-    }
-
-    @ExceptionHandler(WarehouseNotFound.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleWarehouseNotFound( WarehouseNotFound e ) {
-        return new ErrorResponse( e.getMessage() );
-    }
-
-    public record ErrorResponse( String message ) {
     }
 }
