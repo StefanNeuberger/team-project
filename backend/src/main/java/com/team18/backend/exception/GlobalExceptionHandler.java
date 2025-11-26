@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
@@ -44,7 +45,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDuplicateKeyException( DuplicateKeyException ex ) {
         String message = "A resource with this value already exists";
         String errorMsg = ex.getMessage();
-        
+
         // Try to extract field name from MongoDB error message
         // Message format: "... dup key: { fieldName: \"value\" }"
         if ( errorMsg != null && errorMsg.contains( "dup key:" ) ) {
@@ -52,7 +53,7 @@ public class GlobalExceptionHandler {
                 int dupKeyIndex = errorMsg.indexOf( "dup key:" );
                 int startBrace = errorMsg.indexOf( "{", dupKeyIndex );
                 int endBrace = errorMsg.indexOf( "}", startBrace );
-                
+
                 if ( startBrace != -1 && endBrace != -1 ) {
                     String keyPart = errorMsg.substring( startBrace + 1, endBrace ).trim();
                     String fieldName = keyPart.split( ":" )[0].trim();
@@ -62,7 +63,7 @@ public class GlobalExceptionHandler {
                 // If parsing fails, use generic message
             }
         }
-        
+
         ErrorResponse errorResponse = new ErrorResponse(
                 message,
                 HttpStatus.CONFLICT.value(),
@@ -113,6 +114,17 @@ public class GlobalExceptionHandler {
                 Instant.now()
         );
         return new ResponseEntity<>( errorResponse, HttpStatus.INTERNAL_SERVER_ERROR );
+    }
+
+    @ExceptionHandler(WarehouseNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleWarehouseNotFound( WarehouseNotFoundException ex ) {
+        return new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                Instant.now()
+        );
     }
 }
 
