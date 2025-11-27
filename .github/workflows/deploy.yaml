@@ -9,6 +9,20 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: password
+          MONGO_INITDB_DATABASE: team-project
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       HEROKU_APP_NAME: teamproject007
       VITE_API_BASE_URL: https://teamproject007-c48cf54d7f7d.herokuapp.com
@@ -32,7 +46,15 @@ jobs:
           cd backend
           java -jar target/backend-0.0.1-SNAPSHOT.jar &
           SPRING_PID=$!
-          sleep 15  # Wait for app to start
+          # Wait for app to start (MongoDB connection + Spring Boot startup)
+          for i in {1..30}; do
+            if curl -f http://localhost:8080/v3/api-docs > /dev/null 2>&1; then
+              echo "App is ready!"
+              break
+            fi
+            echo "Waiting for app to start... ($i/30)"
+            sleep 2
+          done
           curl -f http://localhost:8080/v3/api-docs -o ../frontend/openapi.json || exit 1
           kill $SPRING_PID || true
 
