@@ -4,6 +4,8 @@ import com.team18.backend.dto.ShipmentCreateDTO;
 import com.team18.backend.dto.ShipmentResponseDTO;
 import com.team18.backend.dto.ShipmentStatusUpdateDTO;
 import com.team18.backend.dto.ShipmentUpdateDTO;
+import com.team18.backend.dto.warehouse.WarehouseMapper;
+import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.Shipment;
 import com.team18.backend.model.ShipmentStatus;
@@ -41,6 +43,9 @@ class ShipmentServiceTest {
     @Mock
     private ShopRepository shopRepository;
 
+    @Mock
+    private WarehouseMapper warehouseMapper;
+
     @InjectMocks
     private ShipmentService shipmentService;
 
@@ -61,6 +66,8 @@ class ShipmentServiceTest {
                 LocalDate.of(2025, 12, 1),
                 ShipmentStatus.ORDERED
         );
+        when(warehouseMapper.toWarehouseResponseDTO(any(Warehouse.class)))
+                .thenAnswer(invocation -> mapWarehouse(invocation.getArgument(0)));
     }
 
     @Test
@@ -108,7 +115,7 @@ class ShipmentServiceTest {
         // THEN
         assertThat(actualShipment).isNotNull();
         assertThat(actualShipment.id()).isEqualTo(shipmentId);
-        assertThat(actualShipment.warehouseId()).isEqualTo("warehouse-1");
+        assertThat(actualShipment.warehouse().id()).isEqualTo("warehouse-1");
         assertThat(actualShipment.status()).isEqualTo(ShipmentStatus.ORDERED);
         verify(shipmentRepository).findById(shipmentId);
     }
@@ -139,7 +146,7 @@ class ShipmentServiceTest {
 
         // THEN
         assertThat(actualShipments).hasSize(1);
-        assertThat(actualShipments.get(0).warehouseId()).isEqualTo(warehouseId);
+        assertThat(actualShipments.get(0).warehouse().id()).isEqualTo(warehouseId);
         verify(warehouseRepository).findById(warehouseId);
         verify(shipmentRepository).findByWarehouse(testWarehouse);
     }
@@ -160,7 +167,7 @@ class ShipmentServiceTest {
 
         // THEN
         assertThat(actualShipment).isNotNull();
-        assertThat(actualShipment.warehouseId()).isEqualTo("warehouse-1");
+        assertThat(actualShipment.warehouse().id()).isEqualTo("warehouse-1");
         assertThat(actualShipment.status()).isEqualTo(ShipmentStatus.ORDERED);
         verify(warehouseRepository).findById("warehouse-1");
         verify(shipmentRepository).save(any(Shipment.class));
@@ -277,8 +284,8 @@ class ShipmentServiceTest {
 
         // THEN
         assertThat(result).hasSize(3);
-        assertThat(result).allMatch(dto -> 
-            dto.warehouseId().equals("warehouse-1") || dto.warehouseId().equals("warehouse-2")
+        assertThat(result).allMatch(dto ->
+                dto.warehouse().id().equals("warehouse-1") || dto.warehouse().id().equals("warehouse-2")
         );
         verify(shopRepository).findById(shopId);
         verify(warehouseRepository).findByShop(testShop);
@@ -377,6 +384,23 @@ class ShipmentServiceTest {
         verify(shopRepository).findById(shopId);
         verify(warehouseRepository).findByShop(testShop);
         verify(shipmentRepository).findAllByWarehouseIn(warehouses);
+    }
+
+    private WarehouseResponseDTO mapWarehouse(Warehouse warehouse) {
+        return new WarehouseResponseDTO(
+                warehouse.getId(),
+                warehouse.getName(),
+                warehouse.getShop(),
+                warehouse.getLat(),
+                warehouse.getLng(),
+                warehouse.getStreet(),
+                warehouse.getNumber(),
+                warehouse.getCity(),
+                warehouse.getPostalCode(),
+                warehouse.getState(),
+                warehouse.getCountry(),
+                warehouse.getMaxCapacity()
+        );
     }
 }
 

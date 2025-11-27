@@ -4,6 +4,7 @@ import com.team18.backend.dto.ShipmentCreateDTO;
 import com.team18.backend.dto.ShipmentResponseDTO;
 import com.team18.backend.dto.ShipmentStatusUpdateDTO;
 import com.team18.backend.dto.ShipmentUpdateDTO;
+import com.team18.backend.dto.warehouse.WarehouseMapper;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.Shipment;
 import com.team18.backend.model.Shop;
@@ -22,34 +23,48 @@ public class ShipmentService {
     private final ShipmentRepository repository;
     private final WarehouseRepository warehouseRepository;
     private final ShopRepository shopRepository;
+    private final WarehouseMapper warehouseMapper;
 
     public ShipmentService(
             ShipmentRepository repository,
             WarehouseRepository warehouseRepository,
-            ShopRepository shopRepository
+            ShopRepository shopRepository,
+            WarehouseMapper warehouseMapper
     ) {
         this.repository = repository;
         this.warehouseRepository = warehouseRepository;
         this.shopRepository = shopRepository;
+        this.warehouseMapper = warehouseMapper;
+    }
+
+    private ShipmentResponseDTO toDTO(Shipment shipment) {
+        return new ShipmentResponseDTO(
+                shipment.getId(),
+                warehouseMapper.toWarehouseResponseDTO(shipment.getWarehouse()),
+                shipment.getExpectedArrivalDate(),
+                shipment.getStatus(),
+                shipment.getCreatedDate(),
+                shipment.getLastModifiedDate()
+        );
     }
 
     public List<ShipmentResponseDTO> getAllShipments() {
         return repository.findAll().stream()
-                .map(ShipmentResponseDTO::fromEntity)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     public ShipmentResponseDTO getShipmentById(String id) {
         Shipment shipment = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + id));
-        return ShipmentResponseDTO.fromEntity(shipment);
+        return toDTO(shipment);
     }
 
     public List<ShipmentResponseDTO> getShipmentsByWarehouseId(String warehouseId) {
         Warehouse warehouse = warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with id: " + warehouseId));
         return repository.findByWarehouse(warehouse).stream()
-                .map(ShipmentResponseDTO::fromEntity)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -63,7 +78,7 @@ public class ShipmentService {
         
         // Find all shipments for those warehouses
         return repository.findAllByWarehouseIn(warehouses).stream()
-                .map(ShipmentResponseDTO::fromEntity)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -78,7 +93,7 @@ public class ShipmentService {
                 dto.status()
         );
         Shipment saved = repository.save(shipment);
-        return ShipmentResponseDTO.fromEntity(saved);
+        return toDTO(saved);
     }
 
     public ShipmentResponseDTO updateShipment(String id, ShipmentUpdateDTO dto) {
@@ -100,7 +115,7 @@ public class ShipmentService {
         }
         
         Shipment updated = repository.save(shipment);
-        return ShipmentResponseDTO.fromEntity(updated);
+        return toDTO(updated);
     }
 
     public ShipmentResponseDTO updateShipmentStatus(String id, ShipmentStatusUpdateDTO dto) {
@@ -109,7 +124,7 @@ public class ShipmentService {
         
         shipment.setStatus(dto.status());
         Shipment updated = repository.save(shipment);
-        return ShipmentResponseDTO.fromEntity(updated);
+        return toDTO(updated);
     }
 
     public void deleteShipment(String id) {

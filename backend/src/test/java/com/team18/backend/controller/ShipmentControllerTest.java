@@ -1,6 +1,7 @@
 package com.team18.backend.controller;
 
 import com.team18.backend.dto.ShipmentResponseDTO;
+import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.ShipmentStatus;
 import com.team18.backend.service.ShipmentService;
@@ -36,13 +37,11 @@ class ShipmentControllerTest {
     @Test
     void getAllShipments_shouldReturnListOfShipments_whenShipmentsExist() throws Exception {
         // GIVEN
-        ShipmentResponseDTO shipment1 = new ShipmentResponseDTO(
-                "shipment-1", "warehouse-1", LocalDate.of(2025, 12, 1), 
-                ShipmentStatus.ORDERED, Instant.now(), Instant.now()
+        ShipmentResponseDTO shipment1 = createShipmentResponseDTO(
+                "shipment-1", "warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED
         );
-        ShipmentResponseDTO shipment2 = new ShipmentResponseDTO(
-                "shipment-2", "warehouse-2", LocalDate.of(2025, 12, 5), 
-                ShipmentStatus.IN_DELIVERY, Instant.now(), Instant.now()
+        ShipmentResponseDTO shipment2 = createShipmentResponseDTO(
+                "shipment-2", "warehouse-2", LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY
         );
         List<ShipmentResponseDTO> shipments = List.of(shipment1, shipment2);
         when(shipmentService.getAllShipments()).thenReturn(shipments);
@@ -53,7 +52,7 @@ class ShipmentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0].id").value("shipment-1"))
-                .andExpect(jsonPath("$[0].warehouseId").value("warehouse-1"))
+                .andExpect(jsonPath("$[0].warehouse.id").value("warehouse-1"))
                 .andExpect(jsonPath("$[1].id").value("shipment-2"));
 
         verify(shipmentService).getAllShipments();
@@ -78,9 +77,8 @@ class ShipmentControllerTest {
     void getShipmentById_shouldReturnShipment_whenShipmentExists() throws Exception {
         // GIVEN
         String shipmentId = "shipment-123";
-        ShipmentResponseDTO shipment = new ShipmentResponseDTO(
-                shipmentId, "warehouse-1", LocalDate.of(2025, 12, 1), 
-                ShipmentStatus.ORDERED, Instant.now(), Instant.now()
+        ShipmentResponseDTO shipment = createShipmentResponseDTO(
+                shipmentId, "warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED
         );
         when(shipmentService.getShipmentById(eq(shipmentId))).thenReturn(shipment);
 
@@ -89,7 +87,7 @@ class ShipmentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(shipmentId))
-                .andExpect(jsonPath("$.warehouseId").value("warehouse-1"))
+                .andExpect(jsonPath("$.warehouse.id").value("warehouse-1"))
                 .andExpect(jsonPath("$.status").value("ORDERED"));
 
         verify(shipmentService).getShipmentById(shipmentId);
@@ -117,9 +115,8 @@ class ShipmentControllerTest {
     void getShipmentsByWarehouseId_shouldReturnShipments_whenWarehouseHasShipments() throws Exception {
         // GIVEN
         String warehouseId = "warehouse-1";
-        ShipmentResponseDTO shipment = new ShipmentResponseDTO(
-                "shipment-1", warehouseId, LocalDate.of(2025, 12, 1), 
-                ShipmentStatus.ORDERED, Instant.now(), Instant.now()
+        ShipmentResponseDTO shipment = createShipmentResponseDTO(
+                "shipment-1", warehouseId, LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED
         );
         when(shipmentService.getShipmentsByWarehouseId(warehouseId)).thenReturn(List.of(shipment));
 
@@ -128,7 +125,7 @@ class ShipmentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].warehouseId").value(warehouseId));
+                .andExpect(jsonPath("$[0].warehouse.id").value(warehouseId));
 
         verify(shipmentService).getShipmentsByWarehouseId(warehouseId);
     }
@@ -136,9 +133,8 @@ class ShipmentControllerTest {
     @Test
     void createShipment_shouldReturnCreatedShipment_whenValidRequestProvided() throws Exception {
         // GIVEN
-        ShipmentResponseDTO createdShipment = new ShipmentResponseDTO(
-                "shipment-456", "warehouse-1", LocalDate.of(2025, 12, 1), 
-                ShipmentStatus.ORDERED, Instant.now(), Instant.now()
+        ShipmentResponseDTO createdShipment = createShipmentResponseDTO(
+                "shipment-456", "warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED
         );
         when(shipmentService.createShipment(any())).thenReturn(createdShipment);
 
@@ -156,7 +152,7 @@ class ShipmentControllerTest {
                         .content(requestBody))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value("shipment-456"))
-                .andExpect(jsonPath("$.warehouseId").value("warehouse-1"))
+                .andExpect(jsonPath("$.warehouse.id").value("warehouse-1"))
                 .andExpect(jsonPath("$.status").value("ORDERED"));
 
         verify(shipmentService).createShipment(any());
@@ -234,9 +230,8 @@ class ShipmentControllerTest {
     void updateShipment_shouldReturnUpdatedShipment_whenValidRequestProvided() throws Exception {
         // GIVEN
         String shipmentId = "shipment-123";
-        ShipmentResponseDTO updatedShipment = new ShipmentResponseDTO(
-                shipmentId, "warehouse-1", LocalDate.of(2025, 12, 15), 
-                ShipmentStatus.IN_DELIVERY, Instant.now(), Instant.now()
+        ShipmentResponseDTO updatedShipment = createShipmentResponseDTO(
+                shipmentId, "warehouse-1", LocalDate.of(2025, 12, 15), ShipmentStatus.IN_DELIVERY
         );
         when(shipmentService.updateShipment(eq(shipmentId), any())).thenReturn(updatedShipment);
 
@@ -262,9 +257,8 @@ class ShipmentControllerTest {
     void updateShipmentStatus_shouldReturnUpdatedShipment_whenValidRequestProvided() throws Exception {
         // GIVEN
         String shipmentId = "shipment-123";
-        ShipmentResponseDTO updatedShipment = new ShipmentResponseDTO(
-                shipmentId, "warehouse-1", LocalDate.of(2025, 12, 1), 
-                ShipmentStatus.IN_DELIVERY, Instant.now(), Instant.now()
+        ShipmentResponseDTO updatedShipment = createShipmentResponseDTO(
+                shipmentId, "warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.IN_DELIVERY
         );
         when(shipmentService.updateShipmentStatus(eq(shipmentId), any())).thenReturn(updatedShipment);
 
@@ -337,13 +331,11 @@ class ShipmentControllerTest {
     void getAllShipmentsByShopId_shouldReturnShipments_whenShopHasWarehousesWithShipments() throws Exception {
         // GIVEN
         String shopId = "shop-123";
-        ShipmentResponseDTO shipment1 = new ShipmentResponseDTO(
-                "shipment-1", "warehouse-1", LocalDate.of(2025, 12, 1),
-                ShipmentStatus.ORDERED, Instant.now(), Instant.now()
+        ShipmentResponseDTO shipment1 = createShipmentResponseDTO(
+                "shipment-1", "warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED
         );
-        ShipmentResponseDTO shipment2 = new ShipmentResponseDTO(
-                "shipment-2", "warehouse-2", LocalDate.of(2025, 12, 5),
-                ShipmentStatus.IN_DELIVERY, Instant.now(), Instant.now()
+        ShipmentResponseDTO shipment2 = createShipmentResponseDTO(
+                "shipment-2", "warehouse-2", LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY
         );
         List<ShipmentResponseDTO> shipments = List.of(shipment1, shipment2);
         when(shipmentService.getAllShipmentsByShopId(shopId)).thenReturn(shipments);
@@ -355,9 +347,9 @@ class ShipmentControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isNotEmpty())
                 .andExpect(jsonPath("$[0].id").value("shipment-1"))
-                .andExpect(jsonPath("$[0].warehouseId").value("warehouse-1"))
+                .andExpect(jsonPath("$[0].warehouse.id").value("warehouse-1"))
                 .andExpect(jsonPath("$[1].id").value("shipment-2"))
-                .andExpect(jsonPath("$[1].warehouseId").value("warehouse-2"));
+                .andExpect(jsonPath("$[1].warehouse.id").value("warehouse-2"));
 
         verify(shipmentService).getAllShipmentsByShopId(shopId);
     }
@@ -394,6 +386,38 @@ class ShipmentControllerTest {
                 .andExpect(jsonPath("$").isEmpty());
 
         verify(shipmentService).getAllShipmentsByShopId(shopId);
+    }
+    private ShipmentResponseDTO createShipmentResponseDTO(
+            String shipmentId,
+            String warehouseId,
+            LocalDate expectedArrivalDate,
+            ShipmentStatus status
+    ) {
+        return new ShipmentResponseDTO(
+                shipmentId,
+                createWarehouseResponseDTO(warehouseId),
+                expectedArrivalDate,
+                status,
+                Instant.now(),
+                Instant.now()
+        );
+    }
+
+    private WarehouseResponseDTO createWarehouseResponseDTO(String warehouseId) {
+        return new WarehouseResponseDTO(
+                warehouseId,
+                warehouseId + " Name",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                100
+        );
     }
 }
 

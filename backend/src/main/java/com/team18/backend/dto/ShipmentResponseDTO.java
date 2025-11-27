@@ -1,6 +1,6 @@
 package com.team18.backend.dto;
 
-import com.team18.backend.model.Shipment;
+import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
 import com.team18.backend.model.ShipmentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -13,10 +13,10 @@ public record ShipmentResponseDTO(
         String id,
 
         @Schema(
-                description = "Delivery destination warehouse ID",
+                description = "Delivery destination warehouse",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        String warehouseId,
+        WarehouseResponseDTO warehouse,
 
         @Schema(
                 description = "Expected arrival date",
@@ -35,16 +35,5 @@ public record ShipmentResponseDTO(
 
         @Schema(description = "Last modification timestamp", accessMode = Schema.AccessMode.READ_ONLY)
         Instant lastModifiedDate
-) {
-    public static ShipmentResponseDTO fromEntity( Shipment shipment ) {
-        return new ShipmentResponseDTO(
-                shipment.getId(),
-                shipment.getWarehouse() != null ? shipment.getWarehouse().getId() : null,
-                shipment.getExpectedArrivalDate(),
-                shipment.getStatus(),
-                shipment.getCreatedDate(),
-                shipment.getLastModifiedDate()
-        );
-    }
-}
+) {}
 
