@@ -3,7 +3,11 @@ package com.team18.backend.controller;
 import com.team18.backend.TestContainersConfiguration;
 import com.team18.backend.model.Shipment;
 import com.team18.backend.model.ShipmentStatus;
+import com.team18.backend.model.Shop;
+import com.team18.backend.model.Warehouse;
 import com.team18.backend.repository.ShipmentRepository;
+import com.team18.backend.repository.ShopRepository;
+import com.team18.backend.repository.WarehouseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,28 +34,48 @@ class ShipmentControllerIntegrationTest {
     @Autowired
     private ShipmentRepository shipmentRepository;
 
+    @Autowired
+    private WarehouseRepository warehouseRepository;
+
+    @Autowired
+    private ShopRepository shopRepository;
+
+    private Warehouse testWarehouse;
+
     @BeforeEach
     void setUp() {
         shipmentRepository.deleteAll();
+        warehouseRepository.deleteAll();
+        shopRepository.deleteAll();
+
+        // Create a test shop and warehouse for shipments to reference
+        Shop testShop = shopRepository.save(new Shop("Test Shop"));
+        testWarehouse = warehouseRepository.save(new Warehouse(
+                "Test Warehouse",
+                testShop,
+                0.0, 0.0,
+                "Street", "1", "City", "12345", "State", "Country",
+                100
+        ));
     }
 
     @Test
     void createShipment_shouldReturn201_whenValidShipmentProvided() throws Exception {
         // GIVEN
-        String request = """
+        String request = String.format("""
                 {
-                    "warehouseId": "warehouse-1",
+                    "warehouseId": "%s",
                     "expectedArrivalDate": "2025-12-01",
                     "status": "ORDERED"
                 }
-                """;
+                """, testWarehouse.getId());
 
         // WHEN & THEN
         mockMvc.perform(post("/api/shipments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.warehouseId").value("warehouse-1"))
+                .andExpect(jsonPath("$.warehouseId").value(testWarehouse.getId()))
                 .andExpect(jsonPath("$.status").value("ORDERED"))
                 .andExpect(jsonPath("$.id").exists());
     }
@@ -59,7 +83,7 @@ class ShipmentControllerIntegrationTest {
     @Test
     void updateShipment_shouldReturn200_whenShipmentExists() throws Exception {
         // GIVEN - Create a shipment first
-        Shipment existingShipment = new Shipment("warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
+        Shipment existingShipment = new Shipment(testWarehouse.getId(), LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
         Shipment saved = shipmentRepository.save(existingShipment);
 
         String updateRequest = """
@@ -81,7 +105,7 @@ class ShipmentControllerIntegrationTest {
     @Test
     void updateShipmentStatus_shouldReturn200_whenShipmentExists() throws Exception {
         // GIVEN - Create a shipment first
-        Shipment existingShipment = new Shipment("warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
+        Shipment existingShipment = new Shipment(testWarehouse.getId(), LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
         Shipment saved = shipmentRepository.save(existingShipment);
 
         String statusUpdateRequest = """
@@ -101,7 +125,7 @@ class ShipmentControllerIntegrationTest {
     @Test
     void deleteShipment_shouldReturn204_whenShipmentExists() throws Exception {
         // GIVEN - Create a shipment first
-        Shipment existingShipment = new Shipment("warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
+        Shipment existingShipment = new Shipment(testWarehouse.getId(), LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
         Shipment saved = shipmentRepository.save(existingShipment);
 
         // WHEN & THEN
@@ -112,16 +136,38 @@ class ShipmentControllerIntegrationTest {
     @Test
     void getShipmentsByWarehouseId_shouldReturnShipments_whenWarehouseHasShipments() throws Exception {
         // GIVEN - Create shipments for a warehouse
-        shipmentRepository.save(new Shipment("warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED));
-        shipmentRepository.save(new Shipment("warehouse-1", LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY));
+        String warehouseId = testWarehouse.getId();
+        shipmentRepository.save(new Shipment(warehouseId, LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED));
+        shipmentRepository.save(new Shipment(warehouseId, LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY));
 
         // WHEN & THEN
-        mockMvc.perform(get("/api/shipments/warehouse/warehouse-1")
+        mockMvc.perform(get("/api/shipments/warehouse/{warehouseId}", warehouseId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].warehouseId").value("warehouse-1"))
-                .andExpect(jsonPath("$[1].warehouseId").value("warehouse-1"));
+                .andExpect(jsonPath("$[0].warehouseId").value(warehouseId))
+                .andExpect(jsonPath("$[1].warehouseId").value(warehouseId));
+    }
+
+    @Test
+    void createShipment_shouldReturn404_whenWarehouseDoesNotExist() throws Exception {
+        // GIVEN
+        String request = """
+                {
+                    "warehouseId": "non-existent-warehouse",
+                    "expectedArrivalDate": "2025-12-01",
+                    "status": "ORDERED"
+                }
+                """;
+
+        // WHEN & THEN
+        mockMvc.perform(post("/api/shipments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Warehouse not found with id: non-existent-warehouse"))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"));
     }
 }
 
