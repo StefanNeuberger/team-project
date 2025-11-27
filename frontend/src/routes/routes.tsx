@@ -12,6 +12,7 @@ import InventoryDetailPage from "@/pages/InventoryDetailPage.tsx";
 import ShipmentsPage from "@/pages/ShipmentsPage.tsx";
 import ShipmentDetailPage from "@/pages/ShipmentDetailPage.tsx";
 import ShopLayout from "@/layouts/ShopLayout.tsx";
+import Items from "@/pages/Items.tsx";
 
 
 export const router = createBrowserRouter( [
@@ -61,6 +62,10 @@ export const router = createBrowserRouter( [
                             element: <ShipmentDetailPage/>
                         }
                     ]
+                },
+                {
+                    path: "items",
+                    element: <Items/>
                 }
             ]
         },
