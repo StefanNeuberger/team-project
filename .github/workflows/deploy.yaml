@@ -15,22 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node (frontend tools)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install frontend deps
-        run: |
-          cd frontend
-          npm ci
-
-      - name: Generate client & build frontend (prod)
-        run: |
-          cd frontend
-          NODE_ENV=production npm run generate:client
-          NODE_ENV=production npm run build
-
       - name: Set up Java + Maven cache
         uses: actions/setup-java@v4
         with:
@@ -48,6 +32,31 @@ jobs:
         run: |
           cd backend
           ./mvnw -DskipTests clean package
+
+      - name: Generate OpenAPI spec
+        run: |
+          cd backend
+          java -jar target/backend-0.0.1-SNAPSHOT.jar &
+          SPRING_PID=$!
+          sleep 15  # Wait for app to start
+          curl -f http://localhost:8080/v3/api-docs -o ../frontend/openapi.json || exit 1
+          kill $SPRING_PID || true
+
+      - name: Set up Node (frontend tools)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend deps
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Generate client & build frontend (prod)
+        run: |
+          cd frontend
+          NODE_ENV=production npm run generate:client
+          NODE_ENV=production npm run build
 
       - name: Build Docker image
         run: docker build -t registry.heroku.com/teamproject007/web .
