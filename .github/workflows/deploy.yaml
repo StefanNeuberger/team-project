@@ -15,23 +15,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Java + Maven cache
+      - name: Set up Java + Maven
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
-
-      - name: Cache Maven repo
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-m2-${{ hashFiles('backend/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2-
+          cache: maven
 
       - name: Build backend jar (skip tests for deploy)
         run: |
           cd backend
-          ./mvnw -DskipTests clean package
+          mvn -DskipTests clean package
 
       - name: Generate OpenAPI spec
         run: |
