@@ -142,6 +142,11 @@ public class ShipmentController {
                     responseCode = "400",
                     description = "Invalid input",
                     content = @Content(schema = @Schema(implementation = FieldValidationErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Warehouse not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
     public ResponseEntity<ShipmentResponseDTO> createShipment( @Valid @RequestBody ShipmentCreateDTO request ) {

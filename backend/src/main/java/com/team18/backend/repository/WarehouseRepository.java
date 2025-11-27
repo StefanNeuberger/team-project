@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface WarehouseRepository extends MongoRepository<Warehouse, String> {
-    List<Warehouse> findByShop(Shop shop);
+    List<Warehouse> findByShop( Shop shop );
 }

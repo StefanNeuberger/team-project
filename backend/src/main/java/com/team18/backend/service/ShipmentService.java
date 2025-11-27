@@ -71,6 +71,11 @@ public class ShipmentService {
     }
 
     public ShipmentResponseDTO createShipment(ShipmentCreateDTO dto) {
+        // Validate that the warehouse exists
+        if (!warehouseRepository.existsById(dto.warehouseId())) {
+            throw new ResourceNotFoundException("Warehouse not found with id: " + dto.warehouseId());
+        }
+        
         Shipment shipment = new Shipment(
                 dto.warehouseId(),
                 dto.expectedArrivalDate(),

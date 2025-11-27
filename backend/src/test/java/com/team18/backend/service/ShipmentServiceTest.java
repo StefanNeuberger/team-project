@@ -7,7 +7,11 @@ import com.team18.backend.dto.ShipmentUpdateDTO;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.Shipment;
 import com.team18.backend.model.ShipmentStatus;
+import com.team18.backend.model.Shop;
+import com.team18.backend.model.Warehouse;
 import com.team18.backend.repository.ShipmentRepository;
+import com.team18.backend.repository.ShopRepository;
+import com.team18.backend.repository.WarehouseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,10 +35,17 @@ class ShipmentServiceTest {
     @Mock
     private ShipmentRepository shipmentRepository;
 
+    @Mock
+    private WarehouseRepository warehouseRepository;
+
+    @Mock
+    private ShopRepository shopRepository;
+
     @InjectMocks
     private ShipmentService shipmentService;
 
     private Shipment testShipment;
+    private Shop testShop;
 
     @BeforeEach
     void setUp() {
@@ -44,6 +55,7 @@ class ShipmentServiceTest {
                 LocalDate.of(2025, 12, 1),
                 ShipmentStatus.ORDERED
         );
+        testShop = new Shop("shop-123", "Test Shop");
     }
 
     @Test
@@ -129,6 +141,7 @@ class ShipmentServiceTest {
                 LocalDate.of(2025, 12, 1),
                 ShipmentStatus.ORDERED
         );
+        when(warehouseRepository.existsById("warehouse-1")).thenReturn(true);
         when(shipmentRepository.save(any(Shipment.class))).thenReturn(testShipment);
 
         // WHEN
@@ -138,7 +151,25 @@ class ShipmentServiceTest {
         assertThat(actualShipment).isNotNull();
         assertThat(actualShipment.warehouseId()).isEqualTo("warehouse-1");
         assertThat(actualShipment.status()).isEqualTo(ShipmentStatus.ORDERED);
+        verify(warehouseRepository).existsById("warehouse-1");
         verify(shipmentRepository).save(any(Shipment.class));
+    }
+
+    @Test
+    void createShipment_shouldThrowResourceNotFoundException_whenWarehouseDoesNotExist() {
+        // GIVEN
+        ShipmentCreateDTO dto = new ShipmentCreateDTO(
+                "non-existent-warehouse",
+                LocalDate.of(2025, 12, 1),
+                ShipmentStatus.ORDERED
+        );
+        when(warehouseRepository.existsById("non-existent-warehouse")).thenReturn(false);
+
+        // WHEN & THEN
+        assertThatThrownBy(() -> shipmentService.createShipment(dto))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Warehouse not found with id: non-existent-warehouse");
+        verify(warehouseRepository).existsById("non-existent-warehouse");
     }
 
     @Test
@@ -203,6 +234,137 @@ class ShipmentServiceTest {
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Shipment not found with id: " + shipmentId);
         verify(shipmentRepository).existsById(shipmentId);
+    }
+
+    @Test
+    void getAllShipmentsByShopId_shouldReturnShipments_whenShopAndWarehousesExist() {
+        // GIVEN
+        String shopId = "shop-123";
+        Warehouse warehouse1 = new Warehouse(
+                "warehouse-1", "Warehouse 1", testShop, 
+                0.0, 0.0, "Street", "1", "City", "12345", "State", "Country", 100
+        );
+        Warehouse warehouse2 = new Warehouse(
+                "warehouse-2", "Warehouse 2", testShop,
+                0.0, 0.0, "Street", "2", "City", "12345", "State", "Country", 100
+        );
+        List<Warehouse> warehouses = List.of(warehouse1, warehouse2);
+        
+        Shipment shipment1 = new Shipment("warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
+        Shipment shipment2 = new Shipment("warehouse-2", LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY);
+        Shipment shipment3 = new Shipment("warehouse-1", LocalDate.of(2025, 12, 10), ShipmentStatus.PROCESSED);
+        List<Shipment> shipments = List.of(shipment1, shipment2, shipment3);
+
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(testShop));
+        when(warehouseRepository.findByShop(testShop)).thenReturn(warehouses);
+        when(shipmentRepository.findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2")))
+                .thenReturn(shipments);
+
+        // WHEN
+        List<ShipmentResponseDTO> result = shipmentService.getAllShipmentsByShopId(shopId);
+
+        // THEN
+        assertThat(result).hasSize(3);
+        assertThat(result).allMatch(dto -> 
+            dto.warehouseId().equals("warehouse-1") || dto.warehouseId().equals("warehouse-2")
+        );
+        verify(shopRepository).findById(shopId);
+        verify(warehouseRepository).findByShop(testShop);
+        verify(shipmentRepository).findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2"));
+    }
+
+    @Test
+    void getAllShipmentsByShopId_shouldThrowResourceNotFoundException_whenShopDoesNotExist() {
+        // GIVEN
+        String shopId = "non-existent-shop";
+        when(shopRepository.findById(shopId)).thenReturn(Optional.empty());
+
+        // WHEN & THEN
+        assertThatThrownBy(() -> shipmentService.getAllShipmentsByShopId(shopId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Shop not found with id: " + shopId);
+        verify(shopRepository).findById(shopId);
+    }
+
+    @Test
+    void getAllShipmentsByShopId_shouldReturnEmptyList_whenShopHasNoWarehouses() {
+        // GIVEN
+        String shopId = "shop-123";
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(testShop));
+        when(warehouseRepository.findByShop(testShop)).thenReturn(List.of());
+        when(shipmentRepository.findAllByWarehouseIdIn(List.of())).thenReturn(List.of());
+
+        // WHEN
+        List<ShipmentResponseDTO> result = shipmentService.getAllShipmentsByShopId(shopId);
+
+        // THEN
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+        verify(shopRepository).findById(shopId);
+        verify(warehouseRepository).findByShop(testShop);
+        verify(shipmentRepository).findAllByWarehouseIdIn(List.of());
+    }
+
+    @Test
+    void getAllShipmentsByShopId_shouldReturnEmptyList_whenWarehousesHaveNoShipments() {
+        // GIVEN
+        String shopId = "shop-123";
+        Warehouse warehouse1 = new Warehouse(
+                "warehouse-1", "Warehouse 1", testShop, 
+                0.0, 0.0, "Street", "1", "City", "12345", "State", "Country", 100
+        );
+        Warehouse warehouse2 = new Warehouse(
+                "warehouse-2", "Warehouse 2", testShop,
+                0.0, 0.0, "Street", "2", "City", "12345", "State", "Country", 100
+        );
+        List<Warehouse> warehouses = List.of(warehouse1, warehouse2);
+
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(testShop));
+        when(warehouseRepository.findByShop(testShop)).thenReturn(warehouses);
+        when(shipmentRepository.findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2")))
+                .thenReturn(List.of());
+
+        // WHEN
+        List<ShipmentResponseDTO> result = shipmentService.getAllShipmentsByShopId(shopId);
+
+        // THEN
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+        verify(shopRepository).findById(shopId);
+        verify(warehouseRepository).findByShop(testShop);
+        verify(shipmentRepository).findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2"));
+    }
+
+    @Test
+    void getAllShipmentsByShopId_shouldExtractCorrectWarehouseIds_whenMultipleWarehousesExist() {
+        // GIVEN
+        String shopId = "shop-123";
+        Warehouse warehouse1 = new Warehouse(
+                "warehouse-1", "Warehouse 1", testShop, 
+                0.0, 0.0, "Street", "1", "City", "12345", "State", "Country", 100
+        );
+        Warehouse warehouse2 = new Warehouse(
+                "warehouse-2", "Warehouse 2", testShop,
+                0.0, 0.0, "Street", "2", "City", "12345", "State", "Country", 100
+        );
+        Warehouse warehouse3 = new Warehouse(
+                "warehouse-3", "Warehouse 3", testShop,
+                0.0, 0.0, "Street", "3", "City", "12345", "State", "Country", 100
+        );
+        List<Warehouse> warehouses = List.of(warehouse1, warehouse2, warehouse3);
+
+        when(shopRepository.findById(shopId)).thenReturn(Optional.of(testShop));
+        when(warehouseRepository.findByShop(testShop)).thenReturn(warehouses);
+        when(shipmentRepository.findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2", "warehouse-3")))
+                .thenReturn(List.of());
+
+        // WHEN
+        shipmentService.getAllShipmentsByShopId(shopId);
+
+        // THEN
+        verify(shopRepository).findById(shopId);
+        verify(warehouseRepository).findByShop(testShop);
+        verify(shipmentRepository).findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2", "warehouse-3"));
     }
 }
 
