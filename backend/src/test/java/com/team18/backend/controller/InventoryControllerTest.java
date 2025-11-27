@@ -60,6 +60,11 @@ class InventoryControllerTest {
 
     @BeforeEach
     void setUp() {
+        // Clean up all data to avoid unique constraint violations
+        shopRepository.deleteAll();
+        warehouseRepository.deleteAll();
+        itemRepo.deleteAll();
+        
         Shop shop = shopRepository.save(
                 new Shop(
                         "Test Shop"
