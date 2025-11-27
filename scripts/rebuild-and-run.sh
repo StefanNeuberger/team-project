@@ -31,6 +31,21 @@ else
   echo "⚠️ Skipping backend tests (pass -t|--test to enable)"
 fi
 
+echo "🧬 Generating API client & building frontend..."
+if [[ "${QUIET}" == "true" ]]; then
+  (
+    cd "${ROOT_DIR}/frontend" \
+    && NODE_ENV=development npm run generate:client > /dev/null \
+    && NODE_ENV=development npm run build > /dev/null
+  )
+else
+  (
+    cd "${ROOT_DIR}/frontend" \
+    && NODE_ENV=development npm run generate:client \
+    && NODE_ENV=development npm run build
+  )
+fi
+
 echo "🚧 Building Docker image (frontend + backend)..."
 if [[ "${QUIET}" == "true" ]]; then
   ( cd "${ROOT_DIR}" && docker build -t hanshase/teamproject:latest . ) > /dev/null

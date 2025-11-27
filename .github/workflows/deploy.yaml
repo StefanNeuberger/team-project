@@ -1,0 +1,65 @@
+name: Deploy to Heroku
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HEROKU_APP_NAME: teamproject007
+      VITE_API_BASE_URL: https://teamproject007-c48cf54d7f7d.herokuapp.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node (frontend tools)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend deps
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Generate client & build frontend (prod)
+        run: |
+          cd frontend
+          NODE_ENV=production npm run generate:client
+          NODE_ENV=production npm run build
+
+      - name: Set up Java + Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Cache Maven repo
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2-
+
+      - name: Build backend jar (skip tests for deploy)
+        run: |
+          cd backend
+          ./mvnw -DskipTests clean package
+
+      - name: Build Docker image
+        run: docker build -t registry.heroku.com/teamproject007/web .
+
+      - name: Log in to Heroku container registry
+        run: echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
+
+      - name: Push image to Heroku
+        run: docker push registry.heroku.com/teamproject007/web
+
+      - name: Release on Heroku
+        run: heroku container:release web --app teamproject007
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
