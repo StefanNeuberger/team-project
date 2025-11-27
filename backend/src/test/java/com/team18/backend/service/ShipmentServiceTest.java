@@ -66,13 +66,12 @@ class ShipmentServiceTest {
                 LocalDate.of(2025, 12, 1),
                 ShipmentStatus.ORDERED
         );
-        when(warehouseMapper.toWarehouseResponseDTO(any(Warehouse.class)))
-                .thenAnswer(invocation -> mapWarehouse(invocation.getArgument(0)));
     }
 
     @Test
     void getAllShipments_shouldReturnAllShipments_whenRepositoryHasShipments() {
         // GIVEN
+        stubWarehouseMapper();
         Warehouse warehouse2 = new Warehouse(
                 "warehouse-2", "Warehouse 2", testShop,
                 0.0, 0.0, "Street", "2", "City", "12345", "State", "Country", 100
@@ -106,6 +105,7 @@ class ShipmentServiceTest {
     @Test
     void getShipmentById_shouldReturnShipment_whenShipmentExists() {
         // GIVEN
+        stubWarehouseMapper();
         String shipmentId = "shipment-123";
         when(shipmentRepository.findById(shipmentId)).thenReturn(Optional.of(testShipment));
 
@@ -136,6 +136,7 @@ class ShipmentServiceTest {
     @Test
     void getShipmentsByWarehouseId_shouldReturnShipmentsForWarehouse_whenShipmentsExist() {
         // GIVEN
+        stubWarehouseMapper();
         String warehouseId = "warehouse-1";
         List<Shipment> expectedShipments = List.of(testShipment);
         when(warehouseRepository.findById(warehouseId)).thenReturn(Optional.of(testWarehouse));
@@ -154,6 +155,7 @@ class ShipmentServiceTest {
     @Test
     void createShipment_shouldSaveAndReturnShipment_whenValidDataProvided() {
         // GIVEN
+        stubWarehouseMapper();
         ShipmentCreateDTO dto = new ShipmentCreateDTO(
                 "warehouse-1",
                 LocalDate.of(2025, 12, 1),
@@ -193,6 +195,7 @@ class ShipmentServiceTest {
     @Test
     void updateShipment_shouldUpdateAndReturnShipment_whenShipmentExists() {
         // GIVEN
+        stubWarehouseMapper();
         String shipmentId = "shipment-123";
         ShipmentUpdateDTO dto = new ShipmentUpdateDTO(
                 null,
@@ -214,6 +217,7 @@ class ShipmentServiceTest {
     @Test
     void updateShipmentStatus_shouldUpdateStatusAndReturnShipment_whenShipmentExists() {
         // GIVEN
+        stubWarehouseMapper();
         String shipmentId = "shipment-123";
         ShipmentStatusUpdateDTO dto = new ShipmentStatusUpdateDTO(ShipmentStatus.PROCESSED);
         when(shipmentRepository.findById(shipmentId)).thenReturn(Optional.of(testShipment));
@@ -258,6 +262,7 @@ class ShipmentServiceTest {
     @Test
     void getAllShipmentsByShopId_shouldReturnShipments_whenShopAndWarehousesExist() {
         // GIVEN
+        stubWarehouseMapper();
         String shopId = "shop-123";
         Warehouse warehouse1 = new Warehouse(
                 "warehouse-1", "Warehouse 1", testShop, 
@@ -384,6 +389,11 @@ class ShipmentServiceTest {
         verify(shopRepository).findById(shopId);
         verify(warehouseRepository).findByShop(testShop);
         verify(shipmentRepository).findAllByWarehouseIn(warehouses);
+    }
+
+    private void stubWarehouseMapper() {
+        when(warehouseMapper.toWarehouseResponseDTO(any(Warehouse.class)))
+                .thenAnswer(invocation -> mapWarehouse(invocation.getArgument(0)));
     }
 
     private WarehouseResponseDTO mapWarehouse(Warehouse warehouse) {

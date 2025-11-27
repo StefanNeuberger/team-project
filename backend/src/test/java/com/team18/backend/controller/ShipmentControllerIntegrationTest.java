@@ -75,7 +75,7 @@ class ShipmentControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.warehouseId").value(testWarehouse.getId()))
+                .andExpect(jsonPath("$.warehouse.id").value(testWarehouse.getId()))
                 .andExpect(jsonPath("$.status").value("ORDERED"))
                 .andExpect(jsonPath("$.id").exists());
     }
@@ -145,8 +145,8 @@ class ShipmentControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[0].warehouseId").value(warehouseId))
-                .andExpect(jsonPath("$[1].warehouseId").value(warehouseId));
+                .andExpect(jsonPath("$[0].warehouse.id").value(warehouseId))
+                .andExpect(jsonPath("$[1].warehouse.id").value(warehouseId));
     }
 
     @Test
