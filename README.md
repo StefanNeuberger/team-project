@@ -7,38 +7,44 @@ This repository houses the full-stack application for the Java Bootcamp team pro
 - `backend/` – Spring Boot API connected to MongoDB.
 - `frontend/` – Vite + React client.
 
-### Getting Started
+### Dockerized Build & Run (frontend + backend + MongoDB)
 
-1. Clone the repo and move into the project directory.
-2. Install dependencies per service:
-   - Backend uses the Maven wrapper (`./mvnw`).
-   - Frontend uses Node 18+ with `npm install`.
+1. **Build combined image** (runs frontend build, copies assets into backend, packages jar):
 
-### Running the Backend
+   ```bash
+   docker build -t hanshase/teamproject:latest .
+   ```
 
-```bash
-cd backend
-./mvnw spring-boot:run
-```
+2. **Start MongoDB + app together** (uses the root `docker-compose.yml`):
 
-See `backend/README.md` for Docker instructions and more details.
+   ```bash
+   # Rebuild image and start both containers
+   docker compose up --build
 
-### Running the Frontend
+   # Subsequent runs if nothing changed
+   docker compose up
+   ```
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+   This brings up:
 
-### Tests
+   - `mongo` (MongoDB 7) with credentials defined in `docker-compose.yml`
+   - `app` (Spring Boot) with `SPRING_DATA_MONGODB_URI` pointing to `mongo`
+   - App is exposed at http://localhost:8080
 
-- Backend: `cd backend && ./mvnw test` (runs Spring Boot tests with Testcontainers)
+3. **Teardown**
 
-### Docker Support
+   ```bash
+   docker compose down        # stop containers
+   docker compose down -v     # stop and delete Mongo volume
+   ```
 
-The backend ships with a `docker-compose.yml` for MongoDB. Start it from `backend/` using `docker compose up -d` and set `MONGODB_URI` if you need to override defaults.
+See `backend/README.md` for service-specific notes.
 
-### Swagger UI
+### Shortcut Script
 
-- http://localhost:8080/swagger-ui/index.html
+Use `./scripts/rebuild-and-run.sh` to run the full workflow:
+
+- `./scripts/rebuild-and-run.sh` – build image + run compose (no tests)
+- `./scripts/rebuild-and-run.sh -t` – run tests (`./mvnw clean verify`) before building
+- `./scripts/rebuild-and-run.sh -q` – quiet mode (suppresses docker output)
+- `./scripts/rebuild-and-run.sh -t -q` – run tests + quiet docker output
