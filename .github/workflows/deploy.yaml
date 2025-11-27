@@ -83,6 +83,10 @@ jobs:
       - name: Push image to Heroku
         run: docker push registry.heroku.com/teamproject007/web
 
+      - name: Install Heroku CLI
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+
       - name: Release on Heroku
         run: heroku container:release web --app teamproject007
         env:
