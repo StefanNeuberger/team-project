@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.List;
 
-@SpringBootTest
+@SpringBootTest("spring.shell.interactive.enabled=false")
 @AutoConfigureMockMvc
 @Import(TestContainersConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)

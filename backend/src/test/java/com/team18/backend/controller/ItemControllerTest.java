@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Testcontainers
 @Import(TestContainersConfiguration.class)
 @AutoConfigureMockMvc
-@SpringBootTest
+@SpringBootTest("spring.shell.interactive.enabled=false")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class ItemControllerTest {
 

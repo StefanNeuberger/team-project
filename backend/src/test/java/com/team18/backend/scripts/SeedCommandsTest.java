@@ -10,10 +10,10 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "team18.data-seed.enabled=true")
 @Import(TestContainersConfiguration.class)
+@SpringBootTest("spring.shell.interactive.enabled=false")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class DataSeedTest {
+class SeedCommandsTest {
 
     @Autowired
     private ShopRepository shopRepository;
@@ -30,9 +30,13 @@ class DataSeedTest {
     @Autowired
     private ShipmentRepository shipmentRepository;
 
+    @Autowired
+    private SeedCommands seedCommands;
 
     @Test
     void run() throws Exception {
+
+        assertDoesNotThrow( () -> seedCommands.seedAll() );
         //THEN
         long shopCount = shopRepository.count();
         long warehouseCount = warehouseRepository.count();

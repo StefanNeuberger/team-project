@@ -2,19 +2,17 @@ package com.team18.backend.scripts;
 
 import com.team18.backend.model.*;
 import com.team18.backend.repository.*;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Component;
+import org.springframework.shell.standard.ShellComponent;
+import org.springframework.shell.standard.ShellMethod;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
-@Component
-@ConditionalOnProperty(name = "team18.data-seed.enabled", havingValue = "true", matchIfMissing = false)
-public class DataSeed implements CommandLineRunner {
+@ShellComponent
+public class SeedCommands {
 
     private final ShopRepository shopRepository;
     private final WarehouseRepository warehouseRepository;
@@ -22,7 +20,7 @@ public class DataSeed implements CommandLineRunner {
     private final ItemRepo itemRepo;
     private final InventoryRepository inventoryRepository;
 
-    public DataSeed(
+    public SeedCommands(
             ShopRepository shopRepository,
             WarehouseRepository warehouseRepository,
             ShipmentRepository shipmentRepository,
@@ -36,10 +34,16 @@ public class DataSeed implements CommandLineRunner {
         this.inventoryRepository = inventoryRepository;
     }
 
-    @Override
-    public void run( String... args ) throws Exception {
-        if ( shipmentRepository.count() == 0 ) {
-            System.out.println( "⚠️ No shop found. Seeding initial data..." );
+    @ShellMethod("Seeds the database with a shop, warehouses, items, a inventory and shipments. Database must be empty!")
+    public String seedAll() {
+        long shopCount = shopRepository.count();
+        long warehouseCount = warehouseRepository.count();
+        long itemCount = itemRepo.count();
+        long inventoryCount = inventoryRepository.count();
+        long shipmentCount = shipmentRepository.count();
+
+        if ( shopCount == 0 && warehouseCount == 0 && itemCount == 0 && inventoryCount == 0 && shipmentCount == 0 ) {
+            SecureRandom random = new SecureRandom();
 
             try {
                 // Seed shop
@@ -48,8 +52,6 @@ public class DataSeed implements CommandLineRunner {
                                 "Kaufland"
                         )
                 );
-                System.out.println( "🌱 Seeded shop into MongoDB." );
-
 
                 Warehouse warehouseNorth = new Warehouse(
                         "Warehouse EU North",
@@ -115,10 +117,8 @@ public class DataSeed implements CommandLineRunner {
                                 warehouseWest
                         )
                 );
-                System.out.println( "🌱 Seeded warehouses into MongoDB." );
 
                 // Seed items
-
                 List<Item> items = itemRepo.saveAll(
                         List.of(
                                 new Item(
@@ -378,23 +378,19 @@ public class DataSeed implements CommandLineRunner {
                                 )
                         )
                 );
-                System.out.println( "🌱 Seeded items into MongoDB." );
-
 
                 // Seed inventory
                 inventoryRepository.saveAll(
-                        items.stream().flatMap( item -> {
-                            return warehouses.stream().map( warehouse -> {
-                                int quantity = ThreadLocalRandom.current().nextInt( 20, 2001 );
-                                return new Inventory(
-                                        warehouse,
-                                        item,
-                                        quantity
-                                );
-                            } );
-                        } ).toList()
+                        items.stream().flatMap( item -> warehouses.stream().map( warehouse -> {
+                                    int quantity = 20 + random.nextInt( 2000 - 20 + 1 );
+                                    return new Inventory(
+                                            warehouse,
+                                            item,
+                                            quantity
+                                    );
+                                } )
+                        ).toList()
                 );
-                System.out.println( "🌱 Seeded inventory into MongoDB." );
 
                 // Seed Shipments
                 LocalDate now = LocalDate.now();
@@ -415,8 +411,8 @@ public class DataSeed implements CommandLineRunner {
                         warehouses.stream().flatMap( warehouse -> {
                             List<Shipment> shipmentList = new ArrayList<>();
                             for ( int i = 0; i < 10; i++ ) {
-                                long randomDay = ThreadLocalRandom.current().nextLong( startEpoch, endEpoch + 1 );
-                                int status = ThreadLocalRandom.current().nextInt( 0, 4 );
+                                long randomDay = startEpoch + Math.abs( random.nextLong() ) % ( endEpoch - startEpoch + 1 );
+                                int status = random.nextInt( 4 );
                                 shipmentList.add(
                                         new Shipment(
                                                 warehouse,
@@ -428,11 +424,14 @@ public class DataSeed implements CommandLineRunner {
                             return shipmentList.stream();
                         } ).toList()
                 );
-                System.out.println( "🌱 Seeded shipments into MongoDB." );
+                return "🌱 Seeded new data into MongoDB.";
             } catch ( Exception e ) {
                 System.err.println( "❌ Failed to seed data: " + e.getMessage() );
                 throw new RuntimeException( e );
             }
+        } else {
+            return "✅ MongoDB already contains data. Skipping seeding.";
         }
     }
+
 }
