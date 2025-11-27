@@ -33,11 +33,9 @@ export default function BaseNavigation( { isMobile, toggleMenu }: Readonly<{
 
     const orientation = isMobile ? 'vertical' : 'horizontal';
 
-    const mobileClasses = isMobile ? 'flex-col items-start' : '';
-
     return (
         <NavigationMenu className={ "items-start" } orientation={ orientation }>
-            <NavigationMenuList className={ mobileClasses }>
+            <NavigationMenuList className={ "flex-col items-start md:flex-row" }>
                 { navigationLinks.map( ( { name, href } ) => (
                     <NavigationMenuItem key={ name }>
                         <NavigationMenuLink data-active={ pathname === href }
