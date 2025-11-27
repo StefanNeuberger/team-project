@@ -46,7 +46,9 @@ public class ShipmentService {
     }
 
     public List<ShipmentResponseDTO> getShipmentsByWarehouseId(String warehouseId) {
-        return repository.findByWarehouseId(warehouseId).stream()
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with id: " + warehouseId));
+        return repository.findByWarehouse(warehouse).stream()
                 .map(ShipmentResponseDTO::fromEntity)
                 .collect(Collectors.toList());
     }
@@ -59,25 +61,19 @@ public class ShipmentService {
         // Find all warehouses for this shop
         List<Warehouse> warehouses = warehouseRepository.findByShop(shop);
         
-        // Extract warehouse IDs
-        List<String> warehouseIds = warehouses.stream()
-                .map(Warehouse::getId)
-                .collect(Collectors.toList());
-        
         // Find all shipments for those warehouses
-        return repository.findAllByWarehouseIdIn(warehouseIds).stream()
+        return repository.findAllByWarehouseIn(warehouses).stream()
                 .map(ShipmentResponseDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
     public ShipmentResponseDTO createShipment(ShipmentCreateDTO dto) {
-        // Validate that the warehouse exists
-        if (!warehouseRepository.existsById(dto.warehouseId())) {
-            throw new ResourceNotFoundException("Warehouse not found with id: " + dto.warehouseId());
-        }
+        // Find and validate the warehouse
+        Warehouse warehouse = warehouseRepository.findById(dto.warehouseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with id: " + dto.warehouseId()));
         
         Shipment shipment = new Shipment(
-                dto.warehouseId(),
+                warehouse,
                 dto.expectedArrivalDate(),
                 dto.status()
         );
@@ -88,6 +84,13 @@ public class ShipmentService {
     public ShipmentResponseDTO updateShipment(String id, ShipmentUpdateDTO dto) {
         Shipment shipment = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Shipment not found with id: " + id));
+        
+        // Update warehouse if provided
+        if (dto.warehouseId() != null) {
+            Warehouse warehouse = warehouseRepository.findById(dto.warehouseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Warehouse not found with id: " + dto.warehouseId()));
+            shipment.setWarehouse(warehouse);
+        }
         
         if (dto.expectedArrivalDate() != null) {
             shipment.setExpectedArrivalDate(dto.expectedArrivalDate());

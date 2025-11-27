@@ -46,23 +46,32 @@ class ShipmentServiceTest {
 
     private Shipment testShipment;
     private Shop testShop;
+    private Warehouse testWarehouse;
 
     @BeforeEach
     void setUp() {
+        testShop = new Shop("shop-123", "Test Shop");
+        testWarehouse = new Warehouse(
+                "warehouse-1", "Test Warehouse", testShop,
+                0.0, 0.0, "Street", "1", "City", "12345", "State", "Country", 100
+        );
         testShipment = new Shipment(
                 "shipment-123",
-                "warehouse-1",
+                testWarehouse,
                 LocalDate.of(2025, 12, 1),
                 ShipmentStatus.ORDERED
         );
-        testShop = new Shop("shop-123", "Test Shop");
     }
 
     @Test
     void getAllShipments_shouldReturnAllShipments_whenRepositoryHasShipments() {
         // GIVEN
-        Shipment shipment1 = new Shipment("warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
-        Shipment shipment2 = new Shipment("warehouse-2", LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY);
+        Warehouse warehouse2 = new Warehouse(
+                "warehouse-2", "Warehouse 2", testShop,
+                0.0, 0.0, "Street", "2", "City", "12345", "State", "Country", 100
+        );
+        Shipment shipment1 = new Shipment(testWarehouse, LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
+        Shipment shipment2 = new Shipment(warehouse2, LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY);
         List<Shipment> expectedShipments = List.of(shipment1, shipment2);
         when(shipmentRepository.findAll()).thenReturn(expectedShipments);
 
@@ -122,7 +131,8 @@ class ShipmentServiceTest {
         // GIVEN
         String warehouseId = "warehouse-1";
         List<Shipment> expectedShipments = List.of(testShipment);
-        when(shipmentRepository.findByWarehouseId(warehouseId)).thenReturn(expectedShipments);
+        when(warehouseRepository.findById(warehouseId)).thenReturn(Optional.of(testWarehouse));
+        when(shipmentRepository.findByWarehouse(testWarehouse)).thenReturn(expectedShipments);
 
         // WHEN
         List<ShipmentResponseDTO> actualShipments = shipmentService.getShipmentsByWarehouseId(warehouseId);
@@ -130,7 +140,8 @@ class ShipmentServiceTest {
         // THEN
         assertThat(actualShipments).hasSize(1);
         assertThat(actualShipments.get(0).warehouseId()).isEqualTo(warehouseId);
-        verify(shipmentRepository).findByWarehouseId(warehouseId);
+        verify(warehouseRepository).findById(warehouseId);
+        verify(shipmentRepository).findByWarehouse(testWarehouse);
     }
 
     @Test
@@ -141,7 +152,7 @@ class ShipmentServiceTest {
                 LocalDate.of(2025, 12, 1),
                 ShipmentStatus.ORDERED
         );
-        when(warehouseRepository.existsById("warehouse-1")).thenReturn(true);
+        when(warehouseRepository.findById("warehouse-1")).thenReturn(Optional.of(testWarehouse));
         when(shipmentRepository.save(any(Shipment.class))).thenReturn(testShipment);
 
         // WHEN
@@ -151,7 +162,7 @@ class ShipmentServiceTest {
         assertThat(actualShipment).isNotNull();
         assertThat(actualShipment.warehouseId()).isEqualTo("warehouse-1");
         assertThat(actualShipment.status()).isEqualTo(ShipmentStatus.ORDERED);
-        verify(warehouseRepository).existsById("warehouse-1");
+        verify(warehouseRepository).findById("warehouse-1");
         verify(shipmentRepository).save(any(Shipment.class));
     }
 
@@ -163,13 +174,13 @@ class ShipmentServiceTest {
                 LocalDate.of(2025, 12, 1),
                 ShipmentStatus.ORDERED
         );
-        when(warehouseRepository.existsById("non-existent-warehouse")).thenReturn(false);
+        when(warehouseRepository.findById("non-existent-warehouse")).thenReturn(Optional.empty());
 
         // WHEN & THEN
         assertThatThrownBy(() -> shipmentService.createShipment(dto))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Warehouse not found with id: non-existent-warehouse");
-        verify(warehouseRepository).existsById("non-existent-warehouse");
+        verify(warehouseRepository).findById("non-existent-warehouse");
     }
 
     @Test
@@ -177,6 +188,7 @@ class ShipmentServiceTest {
         // GIVEN
         String shipmentId = "shipment-123";
         ShipmentUpdateDTO dto = new ShipmentUpdateDTO(
+                null,
                 LocalDate.of(2025, 12, 15),
                 ShipmentStatus.IN_DELIVERY
         );
@@ -250,14 +262,14 @@ class ShipmentServiceTest {
         );
         List<Warehouse> warehouses = List.of(warehouse1, warehouse2);
         
-        Shipment shipment1 = new Shipment("warehouse-1", LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
-        Shipment shipment2 = new Shipment("warehouse-2", LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY);
-        Shipment shipment3 = new Shipment("warehouse-1", LocalDate.of(2025, 12, 10), ShipmentStatus.PROCESSED);
+        Shipment shipment1 = new Shipment(warehouse1, LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
+        Shipment shipment2 = new Shipment(warehouse2, LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY);
+        Shipment shipment3 = new Shipment(warehouse1, LocalDate.of(2025, 12, 10), ShipmentStatus.PROCESSED);
         List<Shipment> shipments = List.of(shipment1, shipment2, shipment3);
 
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(testShop));
         when(warehouseRepository.findByShop(testShop)).thenReturn(warehouses);
-        when(shipmentRepository.findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2")))
+        when(shipmentRepository.findAllByWarehouseIn(warehouses))
                 .thenReturn(shipments);
 
         // WHEN
@@ -270,7 +282,7 @@ class ShipmentServiceTest {
         );
         verify(shopRepository).findById(shopId);
         verify(warehouseRepository).findByShop(testShop);
-        verify(shipmentRepository).findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2"));
+        verify(shipmentRepository).findAllByWarehouseIn(warehouses);
     }
 
     @Test
@@ -292,7 +304,7 @@ class ShipmentServiceTest {
         String shopId = "shop-123";
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(testShop));
         when(warehouseRepository.findByShop(testShop)).thenReturn(List.of());
-        when(shipmentRepository.findAllByWarehouseIdIn(List.of())).thenReturn(List.of());
+        when(shipmentRepository.findAllByWarehouseIn(List.of())).thenReturn(List.of());
 
         // WHEN
         List<ShipmentResponseDTO> result = shipmentService.getAllShipmentsByShopId(shopId);
@@ -302,7 +314,7 @@ class ShipmentServiceTest {
         assertThat(result).isEmpty();
         verify(shopRepository).findById(shopId);
         verify(warehouseRepository).findByShop(testShop);
-        verify(shipmentRepository).findAllByWarehouseIdIn(List.of());
+        verify(shipmentRepository).findAllByWarehouseIn(List.of());
     }
 
     @Test
@@ -321,7 +333,7 @@ class ShipmentServiceTest {
 
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(testShop));
         when(warehouseRepository.findByShop(testShop)).thenReturn(warehouses);
-        when(shipmentRepository.findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2")))
+        when(shipmentRepository.findAllByWarehouseIn(warehouses))
                 .thenReturn(List.of());
 
         // WHEN
@@ -332,7 +344,7 @@ class ShipmentServiceTest {
         assertThat(result).isEmpty();
         verify(shopRepository).findById(shopId);
         verify(warehouseRepository).findByShop(testShop);
-        verify(shipmentRepository).findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2"));
+        verify(shipmentRepository).findAllByWarehouseIn(warehouses);
     }
 
     @Test
@@ -355,7 +367,7 @@ class ShipmentServiceTest {
 
         when(shopRepository.findById(shopId)).thenReturn(Optional.of(testShop));
         when(warehouseRepository.findByShop(testShop)).thenReturn(warehouses);
-        when(shipmentRepository.findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2", "warehouse-3")))
+        when(shipmentRepository.findAllByWarehouseIn(warehouses))
                 .thenReturn(List.of());
 
         // WHEN
@@ -364,7 +376,7 @@ class ShipmentServiceTest {
         // THEN
         verify(shopRepository).findById(shopId);
         verify(warehouseRepository).findByShop(testShop);
-        verify(shipmentRepository).findAllByWarehouseIdIn(List.of("warehouse-1", "warehouse-2", "warehouse-3"));
+        verify(shipmentRepository).findAllByWarehouseIn(warehouses);
     }
 }
 

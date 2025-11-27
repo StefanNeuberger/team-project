@@ -8,6 +8,12 @@ import java.time.LocalDate;
 @Schema(description = "Request to update shipment details")
 public record ShipmentUpdateDTO(
         @Schema(
+                description = "Warehouse ID",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED
+        )
+        String warehouseId,
+
+        @Schema(
                 description = "Expected arrival date",
                 requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )

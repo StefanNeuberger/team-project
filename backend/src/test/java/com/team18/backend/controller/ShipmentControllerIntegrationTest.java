@@ -83,7 +83,7 @@ class ShipmentControllerIntegrationTest {
     @Test
     void updateShipment_shouldReturn200_whenShipmentExists() throws Exception {
         // GIVEN - Create a shipment first
-        Shipment existingShipment = new Shipment(testWarehouse.getId(), LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
+        Shipment existingShipment = new Shipment(testWarehouse, LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
         Shipment saved = shipmentRepository.save(existingShipment);
 
         String updateRequest = """
@@ -105,7 +105,7 @@ class ShipmentControllerIntegrationTest {
     @Test
     void updateShipmentStatus_shouldReturn200_whenShipmentExists() throws Exception {
         // GIVEN - Create a shipment first
-        Shipment existingShipment = new Shipment(testWarehouse.getId(), LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
+        Shipment existingShipment = new Shipment(testWarehouse, LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
         Shipment saved = shipmentRepository.save(existingShipment);
 
         String statusUpdateRequest = """
@@ -125,7 +125,7 @@ class ShipmentControllerIntegrationTest {
     @Test
     void deleteShipment_shouldReturn204_whenShipmentExists() throws Exception {
         // GIVEN - Create a shipment first
-        Shipment existingShipment = new Shipment(testWarehouse.getId(), LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
+        Shipment existingShipment = new Shipment(testWarehouse, LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED);
         Shipment saved = shipmentRepository.save(existingShipment);
 
         // WHEN & THEN
@@ -137,8 +137,8 @@ class ShipmentControllerIntegrationTest {
     void getShipmentsByWarehouseId_shouldReturnShipments_whenWarehouseHasShipments() throws Exception {
         // GIVEN - Create shipments for a warehouse
         String warehouseId = testWarehouse.getId();
-        shipmentRepository.save(new Shipment(warehouseId, LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED));
-        shipmentRepository.save(new Shipment(warehouseId, LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY));
+        shipmentRepository.save(new Shipment(testWarehouse, LocalDate.of(2025, 12, 1), ShipmentStatus.ORDERED));
+        shipmentRepository.save(new Shipment(testWarehouse, LocalDate.of(2025, 12, 5), ShipmentStatus.IN_DELIVERY));
 
         // WHEN & THEN
         mockMvc.perform(get("/api/shipments/warehouse/{warehouseId}", warehouseId)

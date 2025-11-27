@@ -39,7 +39,7 @@ public record ShipmentResponseDTO(
     public static ShipmentResponseDTO fromEntity( Shipment shipment ) {
         return new ShipmentResponseDTO(
                 shipment.getId(),
-                shipment.getWarehouseId(),
+                shipment.getWarehouse() != null ? shipment.getWarehouse().getId() : null,
                 shipment.getExpectedArrivalDate(),
                 shipment.getStatus(),
                 shipment.getCreatedDate(),

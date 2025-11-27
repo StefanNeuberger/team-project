@@ -1,27 +1,27 @@
 package com.team18.backend.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import java.time.LocalDate;
 
 @Document(collection = "shipments")
 @Schema(description = "Shipment entity")
-@CompoundIndex(def = "{'warehouseId': 1, 'status': 1}")
+@CompoundIndex(def = "{'warehouse.$id': 1, 'status': 1}")
 public class Shipment extends BaseModel {
 
-    @NotBlank(message = "Warehouse ID is required")
-    @Indexed
+    @NotNull(message = "Warehouse is required")
+    @DocumentReference
     @Schema(
-            description = "Delivery destination warehouse ID",
+            description = "Related warehouse entity",
             requiredMode = Schema.RequiredMode.REQUIRED,
             nullable = false
     )
-    private String warehouseId;
+    private Warehouse warehouse;
 
     @NotNull(message = "Expected arrival date is required")
     @Schema(
@@ -44,23 +44,23 @@ public class Shipment extends BaseModel {
         super( null );
     }
 
-    public Shipment( String id, String warehouseId, LocalDate expectedArrivalDate, ShipmentStatus status ) {
+    public Shipment( String id, Warehouse warehouse, LocalDate expectedArrivalDate, ShipmentStatus status ) {
         super( id );
-        this.warehouseId = warehouseId;
+        this.warehouse = warehouse;
         this.expectedArrivalDate = expectedArrivalDate;
         this.status = status;
     }
 
-    public Shipment( String warehouseId, LocalDate expectedArrivalDate, ShipmentStatus status ) {
-        this( null, warehouseId, expectedArrivalDate, status );
+    public Shipment( Warehouse warehouse, LocalDate expectedArrivalDate, ShipmentStatus status ) {
+        this( null, warehouse, expectedArrivalDate, status );
     }
 
-    public String getWarehouseId() {
-        return warehouseId;
+    public Warehouse getWarehouse() {
+        return warehouse;
     }
 
-    public void setWarehouseId( String warehouseId ) {
-        this.warehouseId = warehouseId;
+    public void setWarehouse( Warehouse warehouse ) {
+        this.warehouse = warehouse;
     }
 
     public LocalDate getExpectedArrivalDate() {
