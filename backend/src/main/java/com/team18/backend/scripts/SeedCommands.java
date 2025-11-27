@@ -426,8 +426,7 @@ public class SeedCommands {
                 );
                 return "🌱 Seeded new data into MongoDB.";
             } catch ( Exception e ) {
-                System.err.println( "❌ Failed to seed data: " + e.getMessage() );
-                throw new RuntimeException( e );
+                return "❌ Failed to seed data: " + e.getMessage();
             }
         } else {
             return "✅ MongoDB already contains data. Skipping seeding.";

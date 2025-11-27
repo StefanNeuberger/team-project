@@ -34,7 +34,7 @@ class SeedCommandsTest {
     private SeedCommands seedCommands;
 
     @Test
-    void run() throws Exception {
+    void run() {
 
         assertDoesNotThrow( () -> seedCommands.seedAll() );
         //THEN

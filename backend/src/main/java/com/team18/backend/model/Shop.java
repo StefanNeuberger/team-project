@@ -6,9 +6,6 @@ import jakarta.validation.constraints.Size;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.Instant;
-
-
 @Document(collection = "shops")
 @Schema(description = "Shop entity")
 public class Shop extends BaseModel {
