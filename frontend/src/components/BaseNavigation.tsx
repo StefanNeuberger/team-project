@@ -4,24 +4,27 @@ import {
     NavigationMenuLink,
     NavigationMenuList,
 } from "@/components/ui/navigation-menu"
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useParams } from "react-router-dom";
 
 type NavigationLinkType = {
     name: string;
     href: string;
 }
 
-const navigationLinks: NavigationLinkType[] = [
-    { name: 'Home', href: '/' },
-    { name: 'Shop', href: '/shop' },
-    { name: 'Warehouses', href: '/warehouse' },
-    { name: 'Items', href: '/items' },
-];
 
 export default function BaseNavigation( { isMobile, toggleMenu }: Readonly<{
     isMobile?: boolean,
     toggleMenu?: () => void
 }> ) {
+
+    const { shopId } = useParams();
+
+    const navigationLinks: NavigationLinkType[] = [
+        { name: 'Items', href: `/shop/${ shopId }/items` },
+        { name: 'Warehouses', href: `/shop/${ shopId }/warehouses` },
+        { name: 'Inventory', href: `/shop/${ shopId }/inventory` },
+        { name: 'Shipments', href: `/shop/${ shopId }/shipments` },
+    ];
 
     const handleLinkClick = () => {
         if ( isMobile && toggleMenu ) {
