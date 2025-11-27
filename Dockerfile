@@ -14,11 +14,9 @@
     FROM maven:3.9-eclipse-temurin-21 AS backend-builder
     WORKDIR /app
     
-    # Copy Maven wrapper + POM to warm cache
+    # Copy POM to warm cache
     COPY backend/pom.xml .
-    COPY backend/.mvn .mvn
-    COPY backend/mvnw .
-    RUN ./mvnw -q -DskipTests dependency:go-offline
+    RUN mvn -q -DskipTests dependency:go-offline
     
     # Copy backend sources
     COPY backend/ .
@@ -27,7 +25,7 @@
     COPY --from=frontend-builder /app/frontend/dist src/main/resources/static
     
     # Build Spring Boot jar (tests optional)
-    RUN ./mvnw clean package -DskipTests
+    RUN mvn clean package -DskipTests
     
     # --- Stage 3: Runtime image ---
     FROM amazoncorretto:21
