@@ -7,7 +7,7 @@ export default function RootLayout() {
     return (
         <>
             <Header/>
-            <div className={ "flex-1 flex-start flex" }>
+            <div className={ "flex-1 flex" }>
                 <Outlet/>
             </div>
             <Footer/>

@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useState } from "react";
 
 interface UseIsMobileReturn {
@@ -31,7 +29,7 @@ export const useIsMobile = (): UseIsMobileReturn => {
 
             // Combine both checks - prioritize media query but consider user agent
             const isMobileDevice = mediaQuery.matches ||
-                ( isMobileUA && globalThis.innerWidth <= 768 );
+                ( isMobileUA && globalThis.innerWidth <= mobileBreakpoint );
 
             setIsMobile( isMobileDevice );
             setIsLoading( false );

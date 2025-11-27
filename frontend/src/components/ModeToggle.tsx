@@ -17,11 +17,11 @@ export function ModeToggle() {
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
                     <Sun
-                        className={ `absolute h-[1.2rem] w-[1.2rem] scale-0  transition-all ${ theme === 'light' ? 'scale-100 rotate-0' : 'scale-0 ' }` }/>
+                        className={ `absolute h-[1.2rem] w-[1.2rem] scale-0 transition-all ${ theme === 'light' ? 'scale-100 rotate-0' : 'scale-0' }` }/>
                     <Moon
-                        className={ `absolute h-[1.2rem] w-[1.2rem] scale-0  transition-all ${ theme === 'dark' ? 'scale-100 rotate-0' : 'scale-0 ' }` }/>
+                        className={ `absolute h-[1.2rem] w-[1.2rem] scale-0 transition-all ${ theme === 'dark' ? 'scale-100 rotate-0' : 'scale-0' }` }/>
                     <LaptopMinimal
-                        className={ `absolute h-[1.2rem] w-[1.2rem] scale-0  transition-all ${ theme === 'system' ? 'scale-100' : 'scale-0 ' }` }/>
+                        className={ `absolute h-[1.2rem] w-[1.2rem] scale-0 transition-all ${ theme === 'system' ? 'scale-100' : 'scale-0' }` }/>
                     <span className="sr-only">Toggle theme</span>
                 </Button>
             </DropdownMenuTrigger>

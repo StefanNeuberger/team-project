@@ -5,14 +5,13 @@ import {
     NavigationMenuList,
 } from "@/components/ui/navigation-menu"
 import { NavLink, useLocation } from "react-router-dom";
-import { Separator } from "@/components/ui/separator.tsx";
 
-type navigationLinkType = {
+type NavigationLinkType = {
     name: string;
     href: string;
 }
 
-const navigationLinks: navigationLinkType[] = [
+const navigationLinks: NavigationLinkType[] = [
     { name: 'Home', href: '/' },
     { name: 'Shop', href: '/shop' },
     { name: 'Warehouses', href: '/warehouse' },
@@ -43,12 +42,10 @@ export default function BaseNavigation( { isMobile, toggleMenu }: Readonly<{
                     <NavigationMenuItem key={ name }>
                         <NavigationMenuLink data-active={ pathname === href }
                                             className={ "data-[active=true]:text-accent-foreground" } asChild>
-                            <NavLink onClick={ handleLinkClick } to={ href }
-                                     className="">
+                            <NavLink onClick={ handleLinkClick } to={ href }>
                                 { name }
                             </NavLink>
                         </NavigationMenuLink>
-                        <Separator orientation={ "vertical" }/>
                     </NavigationMenuItem>
                 ) ) }
             </NavigationMenuList>
