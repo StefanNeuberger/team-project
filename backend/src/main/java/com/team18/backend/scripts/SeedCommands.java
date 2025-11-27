@@ -411,7 +411,7 @@ public class SeedCommands {
                         warehouses.stream().flatMap( warehouse -> {
                             List<Shipment> shipmentList = new ArrayList<>();
                             for ( int i = 0; i < 10; i++ ) {
-                                long randomDay = startEpoch + Math.abs( random.nextLong() ) % ( endEpoch - startEpoch + 1 );
+                                long randomDay = startEpoch + Math.absExact( random.nextLong() ) % ( endEpoch - startEpoch + 1 );
                                 int status = random.nextInt( 4 );
                                 shipmentList.add(
                                         new Shipment(
