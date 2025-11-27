@@ -1,5 +1,6 @@
 import { useGetAllShops } from "../api/generated/shops/shops";
 import { ShopForm } from "./ShopForm";
+import { NavLink } from "react-router-dom";
 
 export function ShopList() {
     // GET all shops
@@ -20,12 +21,13 @@ export function ShopList() {
     const shops = shopsResponse?.data ?? [];
 
     return (
-        <div className="p-4 flex flex-col items-center justify-center gap-4">
+        <div className="p-4 flex flex-col flex-1 items-center justify-start gap-4">
+            <h1 className={ "text-accent-foreground font-bold my-8 text-2xl" }>Choose a Shop or create one</h1>
             {/* Create Shop Form */ }
             <ShopForm/>
 
             {/* Shop List */ }
-            <div className="space-y-2 w-full">
+            <div className="space-y-2">
                 <h2 className="text-xl font-semibold mb-2">Shops ({ shops.length })</h2>
                 { shops.length === 0 ? (
                     <p className="text-muted-foreground">
@@ -44,6 +46,7 @@ export function ShopList() {
                                     Created: { new Date( shop.createdDate ).toLocaleString() }
                                 </div>
                             ) }
+                            <NavLink to={ `/shop/${ shop.id }` }>Go to Shop</NavLink>
                         </div>
                     ) )
                 ) }

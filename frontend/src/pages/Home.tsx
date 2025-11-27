@@ -7,7 +7,6 @@ export default function Home() {
             <h1 className="text-3xl font-bold mb-8">🛍️ Shop Management</h1>
             <ShopList/>
         </section>
-
     )
 }
 
