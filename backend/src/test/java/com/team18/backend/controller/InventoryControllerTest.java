@@ -138,7 +138,7 @@ class InventoryControllerTest {
                 )
                 .andExpect(
                         MockMvcResultMatchers
-                                .jsonPath( "$[0].warehouse.id" ).value( inventoryResponseDTO.warehouse().getId() )
+                                .jsonPath( "$[0].warehouse.id" ).value( inventoryResponseDTO.warehouse().id() )
                 )
                 .andExpect(
                         MockMvcResultMatchers
@@ -169,7 +169,7 @@ class InventoryControllerTest {
                 )
                 .andExpect(
                         MockMvcResultMatchers
-                                .jsonPath( "$.warehouse.id" ).value( inventoryResponseDTO.warehouse().getId() )
+                                .jsonPath( "$.warehouse.id" ).value( inventoryResponseDTO.warehouse().id() )
                 )
                 .andExpect(
                         MockMvcResultMatchers
@@ -295,7 +295,7 @@ class InventoryControllerTest {
         InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
 
         InventoryUpdateDTO inventoryUpdateDTO = new InventoryUpdateDTO(
-                inventoryResponseDTO.warehouse().getId(),
+                inventoryResponseDTO.warehouse().id(),
                 inventoryResponseDTO.item().getId(),
                 1232138
         );

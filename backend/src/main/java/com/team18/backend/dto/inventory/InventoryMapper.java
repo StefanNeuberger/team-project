@@ -1,5 +1,6 @@
 package com.team18.backend.dto.inventory;
 
+import com.team18.backend.dto.warehouse.WarehouseMapper;
 import com.team18.backend.model.Inventory;
 import com.team18.backend.model.Item;
 import com.team18.backend.model.Warehouse;
@@ -10,10 +11,16 @@ import java.util.List;
 @Component
 public class InventoryMapper {
 
+    private final WarehouseMapper warehouseMapper;
+
+    public InventoryMapper() {
+        this.warehouseMapper = new WarehouseMapper();
+    }
+
     public InventoryResponseDTO toInventoryResponseDTO( Inventory inventory ) {
         return new InventoryResponseDTO(
                 inventory.getId(),
-                inventory.getWarehouse(),
+                warehouseMapper.toWarehouseResponseDTO( inventory.getWarehouse() ),
                 inventory.getItem(),
                 inventory.getQuantity(),
                 inventory.getCreatedDate(),
