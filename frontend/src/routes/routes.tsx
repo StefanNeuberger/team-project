@@ -13,60 +13,63 @@ import WarehouseDetailPage from "@/pages/WarehouseDetailPage.tsx";
 import InventoryDetailPage from "@/pages/InventoryDetailPage.tsx";
 import ShipmentsPage from "@/pages/ShipmentsPage.tsx";
 import ShipmentDetailPage from "@/pages/ShipmentDetailPage.tsx";
+import { ShopsPage } from "@/pages/ShopsPage";
 
-
-export const router = createBrowserRouter( [
-        {
-            path: "/",
-            element: <RootLayout/>,
-            errorElement: <ErrorPage/>,
-        },
-        {
-            path: "/shop",
-            element: <ShopLayout/>,
-            ErrorBoundary: ErrorBoundary,
-            children: [
-                {
-                    path: ":shopId",
-                    element: <ShopPage/>,
-                },
-                {
-                    path: ":shopId/items",
-                    element: <ItemPage/>
-                },
-                {
-                    path: ":shopId/items/:id",
-                    element: <ItemDetailPage/>
-                },
-                {
-                    path: ":shopId/warehouses",
-                    element: <WarehousesPage/>
-                },
-                {
-                    path: ":shopId/warehouses/:id",
-                    element: <WarehouseDetailPage/>
-                },
-                {
-                    path: ":shopId/inventory",
-                    element: <InventoryPage/>
-                },
-                {
-                    path: ":shopId/inventory/:id",
-                    element: <InventoryDetailPage/>
-                },
-                {
-                    path: ":shopId/shipments",
-                    element: <ShipmentsPage/>
-                },
-                {
-                    path: ":shopId/shipments/:id",
-                    element: <ShipmentDetailPage/>
-                }
-            ]
-        },
-        {
-            path: "*",
-            element: <PageNotFound/>
-        }
-    ]
-);
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <RootLayout />,
+    errorElement: <ErrorPage />,
+  },
+  {
+    path: "/shop",
+    element: <ShopLayout />,
+    ErrorBoundary: ErrorBoundary,
+    children: [
+      {
+        path: "",
+        element: <ShopsPage />,
+      },
+      {
+        path: ":shopId",
+        element: <ShopPage />,
+      },
+      {
+        path: ":shopId/items",
+        element: <ItemPage />,
+      },
+      {
+        path: ":shopId/items/:id",
+        element: <ItemDetailPage />,
+      },
+      {
+        path: ":shopId/warehouses",
+        element: <WarehousesPage />,
+      },
+      {
+        path: ":shopId/warehouses/:id",
+        element: <WarehouseDetailPage />,
+      },
+      {
+        path: ":shopId/inventory",
+        element: <InventoryPage />,
+      },
+      {
+        path: ":shopId/inventory/:id",
+        element: <InventoryDetailPage />,
+      },
+      {
+        path: ":shopId/shipments",
+        element: <ShipmentsPage />,
+      },
+      {
+        path: ":shopId/shipments/:id",
+        element: <ShipmentDetailPage />,
+      },
+    ],
+  },
+  {
+    path: "*",
+    element: <PageNotFound />,
+  },
+]);
