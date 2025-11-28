@@ -13,7 +13,7 @@ export default function RootLayout() {
     return (
         <>
             <Header/>
-            <div className={ "flex-1 flex" }>
+            <div className={ "flex-1" }>
                 { isHomePage && <ShopList/> }
                 <Outlet/>
             </div>
