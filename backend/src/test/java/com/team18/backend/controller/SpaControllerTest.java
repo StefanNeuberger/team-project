@@ -16,44 +16,46 @@ class SpaControllerTest {
 
     @Test
     void forward_shouldForwardToIndexHtml_whenRootPath() throws Exception {
+        // Root path is handled by Spring Boot's WelcomePageHandlerMapping
+        // which forwards to index.html (without leading slash)
         mockMvc.perform(get("/"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/index.html"));
+                .andExpect(forwardedUrl("index.html"));
     }
 
     @Test
     void forward_shouldForwardToIndexHtml_whenSingleLevelPath() throws Exception {
         mockMvc.perform(get("/shop"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/index.html"));
+                .andExpect(view().name("forward:/index.html"));
     }
 
     @Test
     void forward_shouldForwardToIndexHtml_whenNestedPath() throws Exception {
         mockMvc.perform(get("/shop/123"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/index.html"));
+                .andExpect(view().name("forward:/index.html"));
     }
 
     @Test
     void forward_shouldForwardToIndexHtml_whenDeeplyNestedPath() throws Exception {
         mockMvc.perform(get("/shop/123/items/456"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/index.html"));
+                .andExpect(view().name("forward:/index.html"));
     }
 
     @Test
     void forward_shouldForwardToIndexHtml_whenPathWithHyphens() throws Exception {
         mockMvc.perform(get("/my-shop/123"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/index.html"));
+                .andExpect(view().name("forward:/index.html"));
     }
 
     @Test
     void forward_shouldForwardToIndexHtml_whenPathWithUnderscores() throws Exception {
         mockMvc.perform(get("/my_shop/123"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/index.html"));
+                .andExpect(view().name("forward:/index.html"));
     }
 }
 
