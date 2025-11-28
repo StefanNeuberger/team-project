@@ -7,6 +7,7 @@ import com.team18.backend.exception.ErrorResponse;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.service.WarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -47,12 +48,12 @@ public class WarehouseController {
             description = "List of Warehouse",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = WarehouseResponseDTO.class)
+                    array = @ArraySchema(schema = @Schema(implementation = WarehouseResponseDTO.class))
             )
     )
     @GetMapping(path = "", consumes = MediaType.ALL_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<WarehouseResponseDTO>> getAll() {
+    public ResponseEntity<List<WarehouseResponseDTO>> getAllWarehouses() {
         return ResponseEntity.ok( service.getAllWarehouses() );
     }
 
@@ -78,7 +79,7 @@ public class WarehouseController {
 
     )
     @GetMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<WarehouseResponseDTO> get( @PathVariable String id ) throws ResourceNotFoundException {
+    public ResponseEntity<WarehouseResponseDTO> getWarehouse( @PathVariable String id ) throws ResourceNotFoundException {
         return ResponseEntity.ok( service.getWarehouseById( id ) );
     }
 
@@ -96,7 +97,7 @@ public class WarehouseController {
     )
     @PostMapping(path = "")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<WarehouseResponseDTO> post( @Valid @RequestBody WarehouseCreateDTO warehouse ) {
+    public ResponseEntity<WarehouseResponseDTO> postWarehouse( @Valid @RequestBody WarehouseCreateDTO warehouse ) {
         return ResponseEntity.status( HttpStatus.CREATED ).body( service.createWarehouse( warehouse ) );
     }
 
@@ -122,7 +123,7 @@ public class WarehouseController {
 
     )
     @PatchMapping("/{id}")
-    public ResponseEntity<WarehouseResponseDTO> patch( @PathVariable String id, @Valid @RequestBody WarehouseUpdateDTO warehouse )
+    public ResponseEntity<WarehouseResponseDTO> patchWarehouse( @PathVariable String id, @Valid @RequestBody WarehouseUpdateDTO warehouse )
             throws ResourceNotFoundException {
         return ResponseEntity.ok( service.updateWarehouse( id, warehouse ) );
     }
@@ -146,7 +147,7 @@ public class WarehouseController {
     )
     @DeleteMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Boolean delete( @PathVariable String id ) throws ResourceNotFoundException {
+    public Boolean deleteWarehouse( @PathVariable String id ) throws ResourceNotFoundException {
         return service.deleteWarehouse( id );
     }
 }
