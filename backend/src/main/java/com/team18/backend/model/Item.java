@@ -3,6 +3,7 @@ package com.team18.backend.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -35,6 +36,7 @@ public class Item extends BaseModel {
     )
     private String name;
 
+    @PersistenceCreator
     public Item( String id, String sku, String name ) {
         super( id );
         this.sku = sku;

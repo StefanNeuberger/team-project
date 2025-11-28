@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-@SpringBootTest
+@SpringBootTest("spring.shell.interactive.enabled=false")
 @AutoConfigureMockMvc
 @Import(TestContainersConfiguration.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -64,7 +64,7 @@ class InventoryControllerTest {
         shopRepository.deleteAll();
         warehouseRepository.deleteAll();
         itemRepo.deleteAll();
-        
+
         Shop shop = shopRepository.save(
                 new Shop(
                         "Test Shop"
