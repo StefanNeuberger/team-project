@@ -4,7 +4,7 @@ import PageNotFound from "@/pages/PageNotFound.tsx";
 import ErrorPage from "@/pages/Error.tsx";
 import ShopPage from "@/pages/ShopPage.tsx";
 import WarehousesPage from "@/pages/WarehousesPage.tsx";
-import ItemPage from "@/pages/ItemsPage.tsx";
+import ItemsPage from "@/pages/ItemsPage.tsx";
 import InventoryPage from "@/pages/InventoryPage.tsx";
 import ItemDetailPage from "@/pages/ItemDetailPage.tsx";
 import WarehouseDetailPage from "@/pages/WarehouseDetailPage.tsx";
@@ -12,7 +12,6 @@ import InventoryDetailPage from "@/pages/InventoryDetailPage.tsx";
 import ShipmentsPage from "@/pages/ShipmentsPage.tsx";
 import ShipmentDetailPage from "@/pages/ShipmentDetailPage.tsx";
 import ShopLayout from "@/layouts/ShopLayout.tsx";
-import Items from "@/pages/Items.tsx";
 
 
 export const router = createBrowserRouter( [
@@ -31,7 +30,7 @@ export const router = createBrowserRouter( [
                         },
                         {
                             path: ":shopId/items",
-                            element: <ItemPage/>
+                            element: <ItemsPage/>
                         },
                         {
                             path: ":shopId/items/:id",
@@ -65,7 +64,7 @@ export const router = createBrowserRouter( [
                 },
                 {
                     path: "items",
-                    element: <Items/>
+                    element: <ItemsPage/>
                 }
             ]
         },
