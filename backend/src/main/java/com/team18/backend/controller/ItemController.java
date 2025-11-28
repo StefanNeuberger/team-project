@@ -4,7 +4,6 @@ import com.team18.backend.dto.item.ItemDTO;
 import com.team18.backend.exception.ErrorResponse;
 import com.team18.backend.exception.FieldValidationErrorResponse;
 import com.team18.backend.model.Item;
-import com.team18.backend.model.Shop;
 import com.team18.backend.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -42,7 +41,7 @@ public class ItemController {
             responseCode = "200",
             description = "List of Items",
             content = @Content(
-                    array = @ArraySchema(schema = @Schema(implementation = Shop.class))
+                    array = @ArraySchema(schema = @Schema(implementation = Item.class))
             )
     )
     @ApiResponse(
