@@ -4,21 +4,17 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 RUN_TESTS=false
-QUIET=false
 
 for arg in "$@"; do
   case "$arg" in
     -t|--test)
       RUN_TESTS=true
       ;;
-    -q|--quiet)
-      QUIET=true
-      ;;
     "")
       ;;
     *)
       echo "Unknown option: $arg"
-      echo "Usage: $0 [-t|--test] [-q|--quiet]"
+      echo "Usage: $0 [-t|--test]"
       exit 1
       ;;
   esac
@@ -32,31 +28,15 @@ else
 fi
 
 echo "🧬 Generating API client & building frontend..."
-if [[ "${QUIET}" == "true" ]]; then
-  (
-    cd "${ROOT_DIR}/frontend" \
-    && NODE_ENV=development npm run generate:client > /dev/null \
-    && NODE_ENV=development npm run build > /dev/null
-  )
-else
-  (
-    cd "${ROOT_DIR}/frontend" \
-    && NODE_ENV=development npm run generate:client \
-    && NODE_ENV=development npm run build
-  )
-fi
+(
+  cd "${ROOT_DIR}/frontend" \
+  && NODE_ENV=development npm run generate:client \
+  && NODE_ENV=development npm run build
+)
 
 echo "🚧 Building Docker image (frontend + backend)..."
-if [[ "${QUIET}" == "true" ]]; then
-  ( cd "${ROOT_DIR}" && docker build -t hanshase/teamproject:latest . ) > /dev/null
-else
-  ( cd "${ROOT_DIR}" && docker build -t hanshase/teamproject:latest . )
-fi
+( cd "${ROOT_DIR}" && docker build -t hanshase/teamproject:latest . )
 
 echo "🐳 Starting MongoDB + app with docker compose..."
-if [[ "${QUIET}" == "true" ]]; then
-  ( cd "${ROOT_DIR}" && docker compose up --build ) > /dev/null
-else
-  ( cd "${ROOT_DIR}" && docker compose up --build )
-fi
+( cd "${ROOT_DIR}" && docker compose up --build )
 

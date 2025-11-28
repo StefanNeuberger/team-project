@@ -46,5 +46,3 @@ Use `./scripts/rebuild-and-run.sh` to run the full workflow:
 
 - `./scripts/rebuild-and-run.sh` – build image + run compose (no tests)
 - `./scripts/rebuild-and-run.sh -t` – run tests (`./mvnw clean verify`) before building
-- `./scripts/rebuild-and-run.sh -q` – quiet mode (suppresses docker output)
-- `./scripts/rebuild-and-run.sh -t -q` – run tests + quiet docker output
