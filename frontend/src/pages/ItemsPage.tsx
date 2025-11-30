@@ -4,6 +4,13 @@ import ItemsView from "@/components/ItemsView.tsx";
 import { useGetAll1 } from "@/api/generated/inventory/inventory.ts";
 import { useEffect, useState } from "react";
 
+export type ItemsWithQuantitiesType = Record<string, ItemQuantityType>;
+
+export type ItemQuantityType = {
+    totalQuantity: number;
+    [ warehouseName: string ]: number;
+};
+
 export default function ItemsPage() {
 
     const { data: itemsData, isLoading, isFetched: itemsFetched } = useGetAllItems();
@@ -12,7 +19,7 @@ export default function ItemsPage() {
 
     const [ quantityLoading, setQuantityLoading ] = useState<boolean>( true );
 
-    const [ itemsWithQuantities, setItemsWithQuantities ] = useState<Record<string, number>>( {} );
+    const [ itemsWithQuantities, setItemsWithQuantities ] = useState<ItemsWithQuantitiesType>( {} );
 
 
     useEffect( () => {
@@ -26,15 +33,22 @@ export default function ItemsPage() {
             return;
         }
 
-        const newItemsWithQuantities: Record<string, number> = {};
+        const newItemsWithQuantities: ItemsWithQuantitiesType = {};
 
         itemsData.data.forEach( item => {
-            newItemsWithQuantities[ item.id ] = inventoryData.data.reduce( ( acc, inventory ) => {
-                if ( inventory.item.id === item.id ) {
-                    return acc + inventory.quantity;
-                }
+            const itemInventory = inventoryData.data.filter( inventory =>
+                inventory.item.id === item.id
+            );
+
+            newItemsWithQuantities[ item.id ] = itemInventory.reduce( ( acc, inventory ) => {
+
+                acc.totalQuantity = ( acc.totalQuantity || 0 ) + inventory.quantity;
+
+                acc[ inventory.warehouse.name ] = inventory.quantity;
+
                 return acc;
-            }, 0 );
+
+            }, { totalQuantity: 0 } as { totalQuantity: number; [ key: string ]: number } );
         } );
 
         setItemsWithQuantities( newItemsWithQuantities );
@@ -42,7 +56,7 @@ export default function ItemsPage() {
     }, [ itemsFetched, inventoriesFetched, itemsData?.data, inventoryData?.data ] );
 
     return (
-        <div className={ "flex flex-1 justify-center flex-col mt-8 items-center" }>
+        <div className={ "flex flex-1 justify-center w-full flex-col mt-8 items-center" }>
             {
                 isLoading &&
                 <div className={ "flex flex-col justify-center items-center gap-4" }>

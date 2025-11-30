@@ -11,7 +11,7 @@ export default function Header() {
 
     return (
         <>
-            <header className={ "p-2 flex justify-between items-center" }>
+            <header className={ "p-2 z-10 flex justify-between items-center" }>
                 { isMobile ?
                     <MobileNavigation/>
                     :

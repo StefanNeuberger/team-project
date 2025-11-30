@@ -13,7 +13,7 @@ export default function ItemsSearchBar( { onInputChange, inputValue }: Readonly<
 
     return (
         <div className={ "w-full flex justify-center items-center flex-col p-4" }>
-            <Field className={ "w-1/2 max-w-[500px]" }>
+            <Field className={ "w-full md:w-1/2 max-w-[500px]" }>
                 <FieldLabel>
                     Search Items:
                 </FieldLabel>

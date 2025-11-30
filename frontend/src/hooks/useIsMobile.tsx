@@ -5,7 +5,7 @@ interface UseIsMobileReturn {
     isLoading: boolean;
 }
 
-const mobileBreakpoint = 768; // pixels
+const mobileBreakpoint = 767; // pixels
 
 export const useIsMobile = (): UseIsMobileReturn => {
     const [ isMobile, setIsMobile ] = useState( false );
