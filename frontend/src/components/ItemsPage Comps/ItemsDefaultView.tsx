@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/table.tsx";
 import { motion } from "framer-motion";
 import { Spinner } from "@/components/ui/spinner.tsx";
-import type { ItemsViewProps, ItemViewItem } from "@/components/ItemsView.tsx";
-import ItemDialogDetailsView from "@/components/ItemDialogDetailsView.tsx";
+import type { ItemsViewProps, ItemViewItem } from "@/components/ItemsPage Comps/ItemsView.tsx";
+import ItemDialogDetailsView from "@/components/ItemsPage Comps/ItemDialogDetailsView.tsx";
 
 
 export default function ItemsDefaultView( {

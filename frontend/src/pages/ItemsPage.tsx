@@ -1,6 +1,6 @@
 import { useGetAllItems } from "@/api/generated/items/items.ts";
 import Loading from "@/components/custom-ui/Loading.tsx";
-import ItemsView from "@/components/ItemsView.tsx";
+import ItemsView from "@/components/ItemsPage Comps/ItemsView.tsx";
 import { useGetAll1 } from "@/api/generated/inventory/inventory.ts";
 import { useEffect, useState } from "react";
 
@@ -22,6 +22,7 @@ export default function ItemsPage() {
     const [ itemsWithQuantities, setItemsWithQuantities ] = useState<ItemsWithQuantitiesType>( {} );
 
 
+    // Squash items and inventory to get quantities per item
     useEffect( () => {
         if ( !itemsFetched || !inventoriesFetched ) {
             return;
@@ -33,13 +34,16 @@ export default function ItemsPage() {
             return;
         }
 
+        // Collector for items with their quantities
         const newItemsWithQuantities: ItemsWithQuantitiesType = {};
 
         itemsData.data.forEach( item => {
+            // Find inventory for item
             const itemInventory = inventoryData.data.filter( inventory =>
                 inventory.item.id === item.id
             );
 
+            // reduce inventory to get total quantity and quantities per warehouse
             newItemsWithQuantities[ item.id ] = itemInventory.reduce( ( acc, inventory ) => {
 
                 acc.totalQuantity = ( acc.totalQuantity || 0 ) + inventory.quantity;
@@ -51,8 +55,10 @@ export default function ItemsPage() {
             }, { totalQuantity: 0 } as { totalQuantity: number; [ key: string ]: number } );
         } );
 
+        // set the state with squashed data
         setItemsWithQuantities( newItemsWithQuantities );
         setQuantityLoading( false );
+        
     }, [ itemsFetched, inventoriesFetched, itemsData?.data, inventoryData?.data ] );
 
     return (

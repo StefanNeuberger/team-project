@@ -1,8 +1,8 @@
-import { type Item } from '../api/generated/openAPIDefinition.schemas';
-import ItemsSearchBar from "@/components/ItemsSearchBar.tsx";
+import { type Item } from '../../api/generated/openAPIDefinition.schemas.ts';
+import ItemsSearchBar from "@/components/ItemsPage Comps/ItemsSearchBar.tsx";
 import { useState } from "react";
-import ItemsDefaultView from "@/components/ItemsDefaultView.tsx";
-import ItemsMobileView from "@/components/ItemsMobileView.tsx";
+import ItemsDefaultView from "@/components/ItemsPage Comps/ItemsDefaultView.tsx";
+import ItemsMobileView from "@/components/ItemsPage Comps/ItemsMobileView.tsx";
 import type { ItemsWithQuantitiesType } from "@/pages/ItemsPage.tsx";
 
 export type ItemsViewProps = {
