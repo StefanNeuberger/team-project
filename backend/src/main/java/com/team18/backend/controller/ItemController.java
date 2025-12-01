@@ -1,15 +1,18 @@
 package com.team18.backend.controller;
 
 import com.team18.backend.dto.item.ItemDTO;
+import com.team18.backend.exception.ErrorResponse;
+import com.team18.backend.exception.FieldValidationErrorResponse;
 import com.team18.backend.model.Item;
 import com.team18.backend.service.ItemService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -32,19 +35,24 @@ public class ItemController {
     @GetMapping
     @Operation(
             summary = "Get all Items",
-            description = "Returns every Item currently stored in the system."
+            description = "Returns an array of all Items currently stored in the system or an empty array if no items are stored."
     )
-    @ApiResponses(
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "List of Items",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Item.class)
-                    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "List of Items",
+            content = @Content(
+                    array = @ArraySchema(schema = @Schema(implementation = Item.class))
             )
     )
-    public ResponseEntity<List<Item>> findAllItems() {
+    @ApiResponse(
+            responseCode = "500",
+            description = "Unexpected server error",
+            content = @Content(
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
+    )
+
+    public ResponseEntity<List<Item>> getAllItems() {
         return ResponseEntity.ok( itemService.findAllItems() );
     }
 
@@ -53,22 +61,23 @@ public class ItemController {
             summary = "Get Item by ID",
             description = "Returns a single Item by its unique identifier."
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Item found",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Item.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Item not found",
-                    content = @Content
+
+    @ApiResponse(
+            responseCode = "200",
+            description = "Item found",
+            content = @Content(
+                    schema = @Schema(implementation = Item.class)
             )
-    })
-    public ResponseEntity<Item> findItemById( @PathVariable String id ) {
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Item not found",
+            content = @Content(
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
+    )
+
+    public ResponseEntity<Item> getItemById( @PathVariable String id ) {
         return ResponseEntity.ok( itemService.findItemById( id ) );
     }
 
@@ -77,21 +86,20 @@ public class ItemController {
             summary = "Create a Item",
             description = "Creates a new Item with the provided name."
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Item created",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Item.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid input",
-                    content = @Content
+    @ApiResponse(
+            responseCode = "201",
+            description = "Item created",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = Item.class)
             )
-    })
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input",
+            content = @Content(schema = @Schema(implementation = FieldValidationErrorResponse.class))
+    )
+
     public ResponseEntity<Item> createItem( @RequestBody @Valid ItemDTO item ) {
         Item createdItem = itemService.createItem( item );
         return ResponseEntity.status( 201 ).body( createdItem );
@@ -102,26 +110,28 @@ public class ItemController {
             summary = "Update an Item",
             description = "Updates the Item with the given ID using the provided data."
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Item updated",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Item.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Invalid input",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Item not found",
-                    content = @Content
+    @ApiResponse(
+            responseCode = "200",
+            description = "Item updated",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = Item.class)
             )
-    })
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Invalid input",
+            content = @Content(schema = @Schema(implementation = FieldValidationErrorResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Item not found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
+    )
+
     public ResponseEntity<Item> updateItemById( @PathVariable String id, @Valid @RequestBody ItemDTO itemDTO ) {
         return ResponseEntity.ok( itemService.updateItemById( id, itemDTO ) );
     }
@@ -131,17 +141,18 @@ public class ItemController {
             summary = "Delete an Item",
             description = "Deletes the Item with the given ID from the system."
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "204",
-                    description = "Item deleted"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Item not found",
-                    content = @Content
+    @ApiResponse(
+            responseCode = "204",
+            description = "Item deleted"
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Item not found",
+            content = @Content(
+                    schema = @Schema(implementation = ErrorResponse.class)
             )
-    })
+    )
+
     public ResponseEntity<Void> deleteItemById( @PathVariable String id ) {
         itemService.deleteItemById( id );
         return ResponseEntity.noContent().build();
@@ -152,12 +163,10 @@ public class ItemController {
             summary = "Delete all Items",
             description = "Deletes all Items from the system."
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "204",
-                    description = "All Items deleted"
-            )
-    })
+    @ApiResponse(
+            responseCode = "204",
+            description = "All Items deleted"
+    )
     public ResponseEntity<Void> deleteAllItems() {
         itemService.deleteAllItems();
         return ResponseEntity.noContent().build();

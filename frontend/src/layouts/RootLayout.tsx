@@ -1,22 +1,24 @@
-import { useGetAllShops } from "@/api/generated/shops/shops.ts";
-import Loading from "@/components/custom-ui/Loading.tsx";
+import Footer from "@/components/Footer.tsx";
+import { Outlet, useLocation } from "react-router-dom";
+import Header from "@/components/Header.tsx";
 import { ShopList } from "@/components/ShopList.tsx";
-import { Navigate } from "react-router-dom";
+import { Toaster } from "sonner";
 
 export default function RootLayout() {
-  const { data: shopResponse, isLoading, error } = useGetAllShops();
 
-  if (error) {
-    throw error;
-  }
+    const location = useLocation();
+    const isHomePage = location.pathname === '/';
 
-  if (isLoading || !shopResponse) {
-    return <Loading />;
-  }
 
-  if (shopResponse.data.length == 0) {
-    return <ShopList></ShopList>;
-  }
-
-  return <Navigate to={`/shop`} />;
+    return (
+        <>
+            <Header/>
+            <div className={ "flex-1 flex" }>
+                { isHomePage && <ShopList/> }
+                <Outlet/>
+            </div>
+            <Toaster/>
+            <Footer/>
+        </>
+    )
 }

@@ -7,6 +7,7 @@ import com.team18.backend.exception.ErrorResponse;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.service.InventoryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -47,7 +48,7 @@ public class InventoryController {
             description = "List of inventory",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = InventoryResponseDTO.class)
+                    array = @ArraySchema(schema = @Schema(implementation = InventoryResponseDTO.class))
             )
     )
     @GetMapping(path = "", consumes = MediaType.ALL_VALUE)

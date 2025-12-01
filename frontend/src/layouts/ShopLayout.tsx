@@ -1,17 +1,23 @@
-import Footer from "@/components/Footer.tsx";
-import { Outlet } from "react-router-dom";
-import Header from "@/components/Header.tsx";
-import { Toaster } from "sonner";
+import { Navigate, Outlet, useParams } from "react-router-dom";
+import { useGetShopById } from "@/api/generated/shops/shops.ts";
+
 
 export default function ShopLayout() {
-  return (
-    <>
-      <Header />
-      <div className="flex flex-col flex-1 items-center justify-center py-8">
-        <Outlet />
-      </div>
-      <Toaster />
-      <Footer />
-    </>
-  );
+
+    const { shopId } = useParams();
+
+    const { data: shopData, isLoading } = useGetShopById( shopId || "", {
+        query: {
+            enabled: !!shopId,
+        }
+    } );
+
+    if ( isLoading ) return <p>Loading</p>
+
+    if ( !shopData ) return <Navigate to={ "/" }/>;
+
+
+    return (
+        <Outlet/>
+    )
 }
