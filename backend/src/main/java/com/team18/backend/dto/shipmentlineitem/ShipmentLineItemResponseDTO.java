@@ -27,12 +27,12 @@ public record ShipmentLineItemResponseDTO(
         )
         Item item,
         @Schema(
-                description = "Related item entity",
+                description = "Expected item quantity",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
         Integer expectedQuantity,
         @Schema(
-                description = "Related item entity",
+                description = "Received item quantity",
                 accessMode = Schema.AccessMode.READ_ONLY
         )
         Integer receivedQuantity,

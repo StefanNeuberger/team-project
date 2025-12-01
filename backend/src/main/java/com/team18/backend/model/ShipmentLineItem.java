@@ -91,4 +91,21 @@ public class ShipmentLineItem extends BaseModel {
     public Integer getReceivedQuantity() {
         return receivedQuantity;
     }
+
+    public void setShipment( Shipment shipment ) {
+        this.shipment = shipment;
+    }
+
+    public void setItem( Item item ) {
+        this.item = item;
+    }
+
+    public void setExpectedQuantity( Integer expectedQuantity ) {
+        this.expectedQuantity = expectedQuantity;
+    }
+
+    public void setReceivedQuantity( Integer receivedQuantity ) {
+        this.receivedQuantity = receivedQuantity;
+    }
+
 }

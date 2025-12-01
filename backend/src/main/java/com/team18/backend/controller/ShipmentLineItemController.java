@@ -1,6 +1,10 @@
 package com.team18.backend.controller;
 
+import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemCreateDTO;
 import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemResponseDTO;
+import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemUpdateDTO;
+import com.team18.backend.exception.ErrorResponse;
+import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.service.ShipmentLineItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -8,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -46,9 +51,86 @@ public class ShipmentLineItemController {
                     array = @ArraySchema(schema = @Schema(implementation = ShipmentLineItemResponseDTO.class))
             )
     )
-    @GetMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
+    @GetMapping(path = "/byShipmentId/{id}", consumes = MediaType.ALL_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<ShipmentLineItemResponseDTO>> getAllInventory( @PathVariable String id ) {
         return ResponseEntity.ok( service.getShipmentLineItemsByShipmentId( id ) );
+    }
+
+    @Operation(
+            summary = "Create ShipmentLineItem",
+            description = "Creates a new ShipmentLineItem and returns a ShipmentLineItemResponseDTO"
+    )
+    @ApiResponse(
+            responseCode = "201",
+            description = "ShipmentLineItem created",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ShipmentLineItemResponseDTO.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Shipment or Item not found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
+    )
+    @PostMapping("")
+    public ResponseEntity<ShipmentLineItemResponseDTO> patch(
+            @Valid @RequestBody ShipmentLineItemCreateDTO shipmentLineItemCreateDTO
+    ) throws ResourceNotFoundException {
+        return ResponseEntity.status( HttpStatus.CREATED ).body( service.createShipmentLineItem( shipmentLineItemCreateDTO ) );
+    }
+
+    @Operation(
+            summary = "Update ShipmentLineItem",
+            description = "Updates a ShipmentLineItem and returns a ShipmentLineItemResponseDTO"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "ShipmentLineItem updated",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ShipmentLineItemResponseDTO.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "ShipmentLineItem, Shipment or Item not found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
+    )
+    @PatchMapping("/{id}")
+    public ResponseEntity<ShipmentLineItemResponseDTO> patch(
+            @PathVariable String id,
+            @Valid @RequestBody ShipmentLineItemUpdateDTO shipmentLineItemUpdateDTO
+    ) throws ResourceNotFoundException {
+        return ResponseEntity.ok().body( service.updateShipmentLineItem( id, shipmentLineItemUpdateDTO ) );
+    }
+
+    @Operation(
+            summary = "Delete ShipmentLineItem",
+            description = "Deletes a ShipmentLineItem by its id and returns true"
+    )
+    @ApiResponse(
+            responseCode = "204",
+            description = "ShipmentLineItem deleted"
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "ShipmentLineItem not found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
+
+    )
+    @DeleteMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<Boolean> delete( @PathVariable String id ) throws ResourceNotFoundException {
+        return ResponseEntity.status( HttpStatus.NO_CONTENT ).body( service.deleteShipmentLineItem( id ) );
     }
 }
