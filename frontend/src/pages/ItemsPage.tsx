@@ -1,7 +1,7 @@
 import { useGetAllItems } from "@/api/generated/items/items.ts";
 import Loading from "@/components/custom-ui/Loading.tsx";
 import ItemsView from "@/components/ItemsPage Comps/ItemsView.tsx";
-import { useGetAll1 } from "@/api/generated/inventory/inventory.ts";
+import { useGetAllInventory } from "@/api/generated/inventory/inventory.ts";
 import { useEffect, useState } from "react";
 
 export type ItemsWithQuantitiesType = Record<string, ItemQuantityType>;
@@ -15,7 +15,7 @@ export default function ItemsPage() {
 
     const { data: itemsData, isLoading, isFetched: itemsFetched } = useGetAllItems();
 
-    const { data: inventoryData, isFetched: inventoriesFetched } = useGetAll1();
+    const { data: inventoryData, isFetched: inventoriesFetched } = useGetAllInventory();
 
     const [ quantityLoading, setQuantityLoading ] = useState<boolean>( true );
 
@@ -58,7 +58,7 @@ export default function ItemsPage() {
         // set the state with squashed data
         setItemsWithQuantities( newItemsWithQuantities );
         setQuantityLoading( false );
-        
+
     }, [ itemsFetched, inventoriesFetched, itemsData?.data, inventoryData?.data ] );
 
     return (
@@ -66,7 +66,7 @@ export default function ItemsPage() {
             {
                 isLoading &&
                 <div className={ "flex flex-col justify-center items-center gap-4" }>
-                    <Loading text={ "Items loading..." }/>
+                    <Loading title={ "Items loading..." }/>
                 </div>
             }
             {

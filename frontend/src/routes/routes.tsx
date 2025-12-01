@@ -12,6 +12,9 @@ import InventoryDetailPage from "@/pages/InventoryDetailPage.tsx";
 import ShipmentsPage from "@/pages/ShipmentsPage.tsx";
 import ShipmentDetailPage from "@/pages/ShipmentDetailPage.tsx";
 import ShopLayout from "@/layouts/ShopLayout.tsx";
+import WarehouseEditPage from "@/pages/WarehouseEditPage.tsx";
+import WarehouseDeletePage from "@/pages/WarehouseDeletePage.tsx";
+import WarehouseCreatePage from "@/pages/WarehouseCreatePage.tsx";
 
 
 export const router = createBrowserRouter( [
@@ -41,8 +44,20 @@ export const router = createBrowserRouter( [
                             element: <WarehousesPage/>
                         },
                         {
+                            path: ":shopId/warehouses/create",
+                            element: <WarehouseCreatePage/>
+                        },
+                        {
                             path: ":shopId/warehouses/:id",
                             element: <WarehouseDetailPage/>
+                        },
+                        {
+                            path: ":shopId/warehouses/:id/edit",
+                            element: <WarehouseEditPage/>
+                        },
+                        {
+                            path: ":shopId/warehouses/:id/delete",
+                            element: <WarehouseDeletePage/>
                         },
                         {
                             path: ":shopId/inventory",

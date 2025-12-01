@@ -82,7 +82,7 @@ public class WarehouseService {
                 );
 
         List<Inventory> relatedInventories = inventoryRepository
-                .findAllByWarehouse_Id( toDelete.getId() );
+                .findAllByWarehouse_Id( toDelete.getId() ).orElse( List.of() );
 
         inventoryRepository.deleteAll( relatedInventories );
 

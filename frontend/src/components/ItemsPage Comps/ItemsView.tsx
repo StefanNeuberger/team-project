@@ -1,4 +1,4 @@
-import { type Item } from '../../api/generated/openAPIDefinition.schemas.ts';
+import { type Item } from '@/api/generated/openAPIDefinition.schemas.ts';
 import ItemsSearchBar from "@/components/ItemsPage Comps/ItemsSearchBar.tsx";
 import { useState } from "react";
 import ItemsDefaultView from "@/components/ItemsPage Comps/ItemsDefaultView.tsx";

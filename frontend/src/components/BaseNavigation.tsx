@@ -21,7 +21,7 @@ export default function BaseNavigation( { isMobile, toggleMenu }: Readonly<{
 
     const navigationLinks: NavigationLinkType[] = [
         { name: 'Home', href: `/` },
-        { name: 'Items', href: `/items` },
+        { name: 'Items', href: `/shop/${ shopId }/items` },
         { name: 'Warehouses', href: `/shop/${ shopId }/warehouses` },
         { name: 'Inventory', href: `/shop/${ shopId }/inventory` },
         { name: 'Shipments', href: `/shop/${ shopId }/shipments` },

@@ -4,6 +4,7 @@ import { useGetAllWarehouses } from "@/api/generated/warehouses/warehouses.ts";
 import Loading from "@/components/custom-ui/Loading.tsx";
 import WarehouseMap from "@/components/warehouse/WarehouseMap.tsx";
 import { Button } from "@/components/ui/button.tsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
 
 export default function WarehousesPage() {
     const { shopId } = useParams();
@@ -17,11 +18,23 @@ export default function WarehousesPage() {
         throw error;
     }
 
-    return <div className="p-8 flex flex-col justify-start items-center gap-10">
-        <WarehouseMap shopId={ shopId! } warehouses={ warehouseData.data }/>
-        <Link to={ `/shop/${ shopId }/warehouses/create` } className="self-end">
-            <Button type="button" variant="default">Create new warehouse</Button>
-        </Link>
-        <WarehouseTable shopId={ shopId! } data={ warehouseData.data }/>
+    return <div className="p-8 w-full">
+        <Tabs defaultValue="map">
+            <div className="flex flex-row justify-between items-center">
+                <TabsList className="h-9">
+                    <TabsTrigger className="min-w-20" value="map">Map</TabsTrigger>
+                    <TabsTrigger className="min-w-20" value="table">Table</TabsTrigger>
+                </TabsList>
+                <Link to={ `/shop/${ shopId }/warehouses/create` } className="self-end">
+                    <Button type="button" variant="default">New</Button>
+                </Link>
+            </div>
+            <TabsContent value="map">
+                <WarehouseMap shopId={ shopId! } warehouses={ warehouseData.data }/>
+            </TabsContent>
+            <TabsContent value="table">
+                <WarehouseTable shopId={ shopId! } data={ warehouseData.data }/>
+            </TabsContent>
+        </Tabs>
     </div>
 }

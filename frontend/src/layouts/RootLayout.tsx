@@ -5,7 +5,6 @@ import { ShopList } from "@/components/ShopList.tsx";
 import { Toaster } from "sonner";
 
 export default function RootLayout() {
-
     const location = useLocation();
     const isHomePage = location.pathname === '/';
 

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WarehouseMap from "@/components/warehouse/WarehouseMap.tsx";
-import { useGetAll } from "@/api/generated/inventory/inventory.ts";
+import { useGetInventoryByWarehouseId } from "@/api/generated/inventory/inventory.ts";
 import Loading from "@/components/custom-ui/Loading.tsx";
 import InventoryTable from "@/components/inventory/InventoryTable.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -22,7 +22,7 @@ type WarehouseDetailProps = {
 }
 
 export default function WarehouseDetail( { shopId, warehouse }: WarehouseDetailProps ) {
-    const { data: inventoryData, isError, isLoading } = useGetAll();
+    const { data: inventoryData, isError, isLoading } = useGetInventoryByWarehouseId( warehouse.id );
 
     return <Card className="w-full">
         <CardHeader>
@@ -65,7 +65,7 @@ export default function WarehouseDetail( { shopId, warehouse }: WarehouseDetailP
                     { isLoading || isError || !inventoryData ?
                         <Loading classNames="flex flex-col items-center justify-center" title="Loading inventory"/> :
                         <InventoryTable shopId={ shopId }
-                                        data={ inventoryData.data.filter( data => data.warehouse.id === warehouse.id ) }/> }
+                                        data={ inventoryData.data }/> }
                 </TabsContent>
             </Tabs>
         </CardContent>
