@@ -49,7 +49,7 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
             {
                 onSuccess: () => {
                     toast.success( "Item deleted successfully." );
-                    
+
                     queryClient.invalidateQueries(
                         { queryKey: getGetAllItemsQueryKey() }
                     );
@@ -72,6 +72,7 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
         setShowConfirmDelete( !showConfirmDelete );
     }
 
+    const itemArray = Object.entries( itemQuantity || {} );
 
     return (
         <Dialog open={ dialogOpen } onOpenChange={ setDialogOpen }>
@@ -107,7 +108,8 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
                 <Separator/>
                 <div className={ "grid grid-cols-2 gap-4" }>
                     {
-                        Object.entries( itemQuantity || {} ).map( ( [ warehouseName, quantity ] ) => {
+                        itemArray.map( ( [ warehouseName, quantity ] ) => {
+
                             if ( warehouseName === "totalQuantity" ) {
                                 return null;
                             }
@@ -121,6 +123,10 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
                                 </div>
                             );
                         } )
+                    }
+                    { itemArray.length === 1 &&
+                        <p className={ "text-center col-span-full text-muted-foreground my-4" }>--in no warehouses
+                            available--</p>
                     }
                 </div>
                 <Separator className={ "my-4" }/>
