@@ -19,19 +19,22 @@ public class SeedCommands {
     private final ShipmentRepository shipmentRepository;
     private final ItemRepo itemRepo;
     private final InventoryRepository inventoryRepository;
+    private final ShipmentLineItemRepository shipmentLineItemRepository;
 
     public SeedCommands(
             ShopRepository shopRepository,
             WarehouseRepository warehouseRepository,
             ShipmentRepository shipmentRepository,
             ItemRepo itemRepo,
-            InventoryRepository inventoryRepository
+            InventoryRepository inventoryRepository,
+            ShipmentLineItemRepository shipmentLineItemRepository
     ) {
         this.shopRepository = shopRepository;
         this.warehouseRepository = warehouseRepository;
         this.shipmentRepository = shipmentRepository;
         this.itemRepo = itemRepo;
         this.inventoryRepository = inventoryRepository;
+        this.shipmentLineItemRepository = shipmentLineItemRepository;
     }
 
     @ShellMethod("Seeds the database with test data. It requires the database to be emtpy")
@@ -41,8 +44,9 @@ public class SeedCommands {
         long itemCount = itemRepo.count();
         long inventoryCount = inventoryRepository.count();
         long shipmentCount = shipmentRepository.count();
+        long lineItemCount = shipmentLineItemRepository.count();
 
-        if ( shopCount == 0 && warehouseCount == 0 && itemCount == 0 && inventoryCount == 0 && shipmentCount == 0 ) {
+        if ( shopCount == 0 && warehouseCount == 0 && itemCount == 0 && inventoryCount == 0 && shipmentCount == 0 && lineItemCount == 0 ) {
             SecureRandom random = new SecureRandom();
 
             // Seed shop
@@ -406,7 +410,7 @@ public class SeedCommands {
                     3, ShipmentStatus.COMPLETED
             );
 
-            shipmentRepository.saveAll(
+            List<Shipment> shipments = shipmentRepository.saveAll(
                     warehouses.stream().flatMap( warehouse -> {
                         List<Shipment> shipmentList = new ArrayList<>();
                         for ( int i = 0; i < 10; i++ ) {
@@ -423,6 +427,29 @@ public class SeedCommands {
                         return shipmentList.stream();
                     } ).toList()
             );
+
+            int bound = items.size() - 1;
+
+            shipmentLineItemRepository.saveAll(
+                    shipments.stream().flatMap( shipment -> {
+                        List<ShipmentLineItem> lineItemList = new ArrayList<>();
+                        for ( int i = 0; i < 10; i++ ) {
+                            int randomItem = random.nextInt( bound );
+                            int quantity = random.nextInt( 500 );
+                            Item item = items.get( randomItem );
+                            lineItemList.add(
+                                    new ShipmentLineItem(
+                                            shipment,
+                                            item,
+                                            quantity,
+                                            quantity
+                                    )
+                            );
+                        }
+                        return lineItemList.stream();
+                    } ).toList()
+            );
+
             return "🌱 MongoDB has been seeded with new data.";
         } else {
             return "✅ MongoDB already contains data. Skipping seeding.";
@@ -445,6 +472,9 @@ public class SeedCommands {
         }
         if ( this.shopRepository.count() != 0 ) {
             this.shopRepository.deleteAll();
+        }
+        if ( this.shipmentLineItemRepository.count() != 0 ) {
+            this.shipmentLineItemRepository.deleteAll();
         }
 
         return "✅ MongoDB has been reset.";
