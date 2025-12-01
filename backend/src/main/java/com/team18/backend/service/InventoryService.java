@@ -14,7 +14,9 @@ import com.team18.backend.repository.WarehouseRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class InventoryService {
@@ -41,6 +43,26 @@ public class InventoryService {
                 () -> new ResourceNotFoundException( "Could not find inventory with id: " + id )
         );
         return mapper.toInventoryResponseDTO( inventory );
+    }
+
+    public List<InventoryResponseDTO> getInventoryByItemId( String itemId ) {
+        Optional<List<Inventory>> inventory = repository.findAllByItem_Id( itemId );
+
+        if ( inventory.isEmpty() || inventory.get().isEmpty() ) {
+            throw new ResourceNotFoundException( "Could not find inventory with itemId: " + itemId );
+        }
+
+        return mapper.toInventoryResponseDTOList( inventory.get() );
+    }
+
+    public List<InventoryResponseDTO> getInventoryByWarehouseId( String warehouseId ) {
+        Optional<List<Inventory>> inventory = repository.findAllByWarehouse_Id( warehouseId );
+
+        if ( inventory.isEmpty() || inventory.get().isEmpty() ) {
+            throw new ResourceNotFoundException( "Could not find inventory with warehouseId: " + warehouseId );
+        }
+
+        return mapper.toInventoryResponseDTOList( inventory.get() );
     }
 
     public InventoryResponseDTO createInventory( InventoryCreateDTO inventoryCreateDTO ) throws ResourceNotFoundException {

@@ -210,6 +210,114 @@ class InventoryControllerTest {
     }
 
     @Test
+    void getByWarehouseId_ShouldReturnInventoryList_WhenCalled() throws Exception {
+        InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .get( "/api/inventory/byWarehouseId/" + inventoryResponseDTO.warehouse().id() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .status().isOk()
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .content()
+                                .contentType( MediaType.APPLICATION_JSON )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$[0].warehouse.id" ).value( inventoryResponseDTO.warehouse().id() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$[0].item.id" ).value( inventoryResponseDTO.item().getId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$[0].quantity" ).value( inventoryResponseDTO.quantity() )
+                );
+    }
+
+    @Test
+    void getByWarehouseId_ShouldReturnError_WhenCalled() throws Exception {
+        inventoryService.createInventory( newInventory );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .get( "/api/inventory/byWarehouseId/fakeid" )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .status().isNotFound()
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .content()
+                                .contentType( MediaType.APPLICATION_JSON )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.message" ).isNotEmpty()
+                );
+    }
+
+    @Test
+    void getByItemId_ShouldReturnInventoryList_WhenCalled() throws Exception {
+        InventoryResponseDTO inventoryResponseDTO = inventoryService.createInventory( newInventory );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .get( "/api/inventory/byItemId/" + inventoryResponseDTO.item().getId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .status().isOk()
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .content()
+                                .contentType( MediaType.APPLICATION_JSON )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$[0].warehouse.id" ).value( inventoryResponseDTO.warehouse().id() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$[0].item.id" ).value( inventoryResponseDTO.item().getId() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$[0].quantity" ).value( inventoryResponseDTO.quantity() )
+                );
+    }
+
+    @Test
+    void getByItemId_ShouldReturnError_WhenCalled() throws Exception {
+        inventoryService.createInventory( newInventory );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .get( "/api/inventory/byItemId/fakeid" )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .status().isNotFound()
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .content()
+                                .contentType( MediaType.APPLICATION_JSON )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.message" ).isNotEmpty()
+                );
+    }
+
+    @Test
     void post_ShouldReturnCreatedItem_WhenCalled() throws Exception {
         String jsonContent = mapper.writeValueAsString( newInventory );
 

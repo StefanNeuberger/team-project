@@ -53,7 +53,7 @@ public class InventoryController {
     )
     @GetMapping(path = "", consumes = MediaType.ALL_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<InventoryResponseDTO>> getAll() {
+    public ResponseEntity<List<InventoryResponseDTO>> getAllInventory() {
         return ResponseEntity.ok( service.getAllInventory() );
     }
 
@@ -79,9 +79,62 @@ public class InventoryController {
 
     )
     @GetMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<InventoryResponseDTO> get( @PathVariable String id ) throws ResourceNotFoundException {
+    public ResponseEntity<InventoryResponseDTO> getInventory( @PathVariable String id ) throws ResourceNotFoundException {
         return ResponseEntity.ok( service.getInventoryById( id ) );
     }
+
+    @Operation(
+            summary = "Get inventory by warehouse id",
+            description = "Returns inventory related to a warehouse id"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Inventory found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = InventoryResponseDTO.class))
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Inventory not found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
+
+    )
+    @GetMapping(path = "/byWarehouseId/{id}", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<List<InventoryResponseDTO>> getInventoryByWarehouseId( @PathVariable String id ) throws ResourceNotFoundException {
+        return ResponseEntity.ok( service.getInventoryByWarehouseId( id ) );
+    }
+
+    @Operation(
+            summary = "Get inventory by item id",
+            description = "Returns inventory related to a item id"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Inventory found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    array = @ArraySchema(schema = @Schema(implementation = InventoryResponseDTO.class))
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Inventory not found",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
+
+    )
+    @GetMapping(path = "/byItemId/{id}", consumes = MediaType.ALL_VALUE)
+    public ResponseEntity<List<InventoryResponseDTO>> getInventoryByItemId( @PathVariable String id ) {
+        return ResponseEntity.ok( service.getInventoryByItemId( id ) );
+    }
+
 
     @Operation(
             summary = "Create Inventory",
