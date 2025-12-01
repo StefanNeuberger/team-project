@@ -2,6 +2,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -22,6 +24,7 @@ const shopFormSchema = z.object({
 type ShopFormData = z.infer<typeof shopFormSchema>;
 
 export function ShopForm() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const {
     register,
@@ -40,10 +43,12 @@ export function ShopForm() {
     createShop.mutate(
       { data: { name: data.name } },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           // Reset form and invalidate query
           reset();
           queryClient.invalidateQueries({ queryKey: getGetAllShopsQueryKey() });
+          toast.success("Shop created successfully");
+          navigate(`/shop/${data.data.id}`);
         },
         onError: (error: any) => {
           if (error?.response?.status === 409) {
