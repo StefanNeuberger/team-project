@@ -1,26 +1,27 @@
 import { createBrowserRouter } from "react-router-dom";
-import { ErrorBoundary } from "@/ErrorBoundary.tsx";
 import RootLayout from "@/layouts/RootLayout.tsx";
 import PageNotFound from "@/pages/PageNotFound.tsx";
 import ErrorPage from "@/pages/Error.tsx";
-import ShopLayout from "@/layouts/ShopLayout.tsx";
+import ShopPage from "@/pages/ShopPage.tsx";
 import WarehousesPage from "@/pages/WarehousesPage.tsx";
-import ItemsPage from "@/pages/ItemsPage.tsx";
+import ItemPage from "@/pages/ItemsPage.tsx";
 import InventoryPage from "@/pages/InventoryPage.tsx";
 import ItemDetailPage from "@/pages/ItemDetailPage.tsx";
 import WarehouseDetailPage from "@/pages/WarehouseDetailPage.tsx";
 import InventoryDetailPage from "@/pages/InventoryDetailPage.tsx";
 import ShipmentsPage from "@/pages/ShipmentsPage.tsx";
 import ShipmentDetailPage from "@/pages/ShipmentDetailPage.tsx";
+import ShopLayout from "@/layouts/ShopLayout.tsx";
+import WarehouseEditPage from "@/pages/WarehouseEditPage.tsx";
+import WarehouseDeletePage from "@/pages/WarehouseDeletePage.tsx";
+import WarehouseCreatePage from "@/pages/WarehouseCreatePage.tsx";
 
-import { ShopsPage } from "@/pages/ShopsPage";
 
 export const router = createBrowserRouter( [
         {
             path: "/",
             element: <RootLayout/>,
             errorElement: <ErrorPage/>,
-            ErrorBoundary: ErrorBoundary,
             children: [
                 {
                     path: "shop",
@@ -28,11 +29,11 @@ export const router = createBrowserRouter( [
                     children: [
                         {
                             path: ":shopId",
-                            element: <ShopsPage/>,
+                            element: <ShopPage/>,
                         },
                         {
                             path: ":shopId/items",
-                            element: <ItemsPage/>
+                            element: <ItemPage/>
                         },
                         {
                             path: ":shopId/items/:id",
@@ -43,8 +44,20 @@ export const router = createBrowserRouter( [
                             element: <WarehousesPage/>
                         },
                         {
+                            path: ":shopId/warehouses/create",
+                            element: <WarehouseCreatePage/>
+                        },
+                        {
                             path: ":shopId/warehouses/:id",
                             element: <WarehouseDetailPage/>
+                        },
+                        {
+                            path: ":shopId/warehouses/:id/edit",
+                            element: <WarehouseEditPage/>
+                        },
+                        {
+                            path: ":shopId/warehouses/:id/delete",
+                            element: <WarehouseDeletePage/>
                         },
                         {
                             path: ":shopId/inventory",
@@ -63,10 +76,6 @@ export const router = createBrowserRouter( [
                             element: <ShipmentDetailPage/>
                         }
                     ]
-                },
-                {
-                    path: "items",
-                    element: <ItemsPage/>
                 }
             ]
         },

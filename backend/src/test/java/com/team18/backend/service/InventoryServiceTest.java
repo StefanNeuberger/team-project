@@ -176,6 +176,94 @@ class InventoryServiceTest {
     }
 
     @Test
+    void getInventoryByWarehouseId_ShouldReturnInventoryList_WhenCalled() {
+        //GIVEN
+        List<InventoryResponseDTO> inventoryResponseDTO = mapper.toInventoryResponseDTOList( List.of( inventoryWithId ) );
+
+
+        Mockito.when( inventoryRepository.save( inventoryWithId ) ).thenReturn( inventoryWithId );
+        Mockito.when( inventoryRepository.findAllByWarehouse_Id( fixedTestId ) ).thenReturn( Optional.of( List.of( inventoryWithId ) ) );
+
+        //WHEN
+        inventoryRepository.save( inventoryWithId );
+
+        List<InventoryResponseDTO> actual = assertDoesNotThrow( () -> inventoryService.getInventoryByWarehouseId( fixedTestId ) );
+
+        //THEN
+        assertThat( actual )
+                .isNotNull()
+                .isEqualTo( inventoryResponseDTO );
+
+        Mockito.verify( inventoryRepository, Mockito.times( 1 ) ).save( inventoryWithId );
+        Mockito.verify( inventoryRepository, Mockito.times( 1 ) ).findAllByWarehouse_Id( fixedTestId );
+    }
+
+    @Test
+    void getInventoryByWarehouseId_ShouldThrow_WhenCalled() {
+        //GIVEN
+        String fakeId = "fake-id";
+
+        Mockito.when( inventoryRepository.save( inventoryWithId ) ).thenReturn( inventoryWithId );
+        Mockito.when( inventoryRepository.findAllByWarehouse_Id( fakeId ) ).thenReturn( Optional.empty() );
+
+        //WHEN
+        inventoryRepository.save( inventoryWithId );
+
+        ResourceNotFoundException ex = assertThrows( ResourceNotFoundException.class, () -> inventoryService.getInventoryByWarehouseId( fakeId ) );
+
+        assertThat( ex )
+                .isNotNull()
+                .isInstanceOf( ResourceNotFoundException.class );
+
+        Mockito.verify( inventoryRepository, Mockito.times( 1 ) ).save( inventoryWithId );
+        Mockito.verify( inventoryRepository, Mockito.times( 1 ) ).findAllByWarehouse_Id( fakeId );
+    }
+
+    @Test
+    void getInventoryByItemId_ShouldReturnInventoryList_WhenCalled() {
+        //GIVEN
+        List<InventoryResponseDTO> inventoryResponseDTO = mapper.toInventoryResponseDTOList( List.of( inventoryWithId ) );
+
+
+        Mockito.when( inventoryRepository.save( inventoryWithId ) ).thenReturn( inventoryWithId );
+        Mockito.when( inventoryRepository.findAllByItem_Id( fixedTestId ) ).thenReturn( Optional.of( List.of( inventoryWithId ) ) );
+
+        //WHEN
+        inventoryRepository.save( inventoryWithId );
+
+        List<InventoryResponseDTO> actual = assertDoesNotThrow( () -> inventoryService.getInventoryByItemId( fixedTestId ) );
+
+        //THEN
+        assertThat( actual )
+                .isNotNull()
+                .isEqualTo( inventoryResponseDTO );
+
+        Mockito.verify( inventoryRepository, Mockito.times( 1 ) ).save( inventoryWithId );
+        Mockito.verify( inventoryRepository, Mockito.times( 1 ) ).findAllByItem_Id( fixedTestId );
+    }
+
+    @Test
+    void getInventoryByItemId_ShouldThrow_WhenCalled() {
+        //GIVEN
+        String fakeId = "fake-id";
+
+        Mockito.when( inventoryRepository.save( inventoryWithId ) ).thenReturn( inventoryWithId );
+        Mockito.when( inventoryRepository.findAllByItem_Id( fakeId ) ).thenReturn( Optional.empty() );
+
+        //WHEN
+        inventoryRepository.save( inventoryWithId );
+
+        ResourceNotFoundException ex = assertThrows( ResourceNotFoundException.class, () -> inventoryService.getInventoryByItemId( fakeId ) );
+
+        assertThat( ex )
+                .isNotNull()
+                .isInstanceOf( ResourceNotFoundException.class );
+
+        Mockito.verify( inventoryRepository, Mockito.times( 1 ) ).save( inventoryWithId );
+        Mockito.verify( inventoryRepository, Mockito.times( 1 ) ).findAllByItem_Id( fakeId );
+    }
+
+    @Test
     void createInventory_ShouldReturnInventory_WhenCalled() {
         //GIVEN
         InventoryCreateDTO inventoryCreateDTO = new InventoryCreateDTO(

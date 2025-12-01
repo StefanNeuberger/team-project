@@ -69,8 +69,8 @@ public class SeedCommands {
             Warehouse warehouseEast = new Warehouse(
                     "Warehouse EU East",
                     shop,
-                    14.5028771,
-                    53.6696729,
+                    14.5049545,
+                    52.3415954,
                     "Nuhnenstraße",
                     "19",
                     "Frankfurt (Oder)",

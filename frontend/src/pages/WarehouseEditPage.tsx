@@ -1,10 +1,10 @@
+import WarehouseEditForm from "@/components/warehouse/WarehouseEditForm.tsx";
 import { useParams } from "react-router-dom";
 import { useGetWarehouse } from "@/api/generated/warehouses/warehouses.ts";
 import Loading from "@/components/custom-ui/Loading.tsx";
-import WarehouseDetail from "@/components/warehouse/WarehouseDetail.tsx";
 
-export default function WarehouseDetailPage() {
-    const { shopId, id } = useParams();
+export default function WarehouseEditPage() {
+    const { id } = useParams();
     const { data: warehouseData, isError, error, isLoading } = useGetWarehouse( id! );
 
     if ( isLoading ) {
@@ -16,6 +16,6 @@ export default function WarehouseDetailPage() {
     }
 
     return <div className="p-8 flex flex-col justify-start items-center">
-        <WarehouseDetail shopId={ shopId! } warehouse={ warehouseData.data }/>
+        <WarehouseEditForm warehouse={ warehouseData.data }/>
     </div>
 }
