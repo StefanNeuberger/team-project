@@ -346,7 +346,7 @@ class ShipmentServiceTest {
         // WHEN
         ResourceNotFoundException e = assertThrows(
                 ResourceNotFoundException.class,
-                () -> shipmentService.updateShipment( given.getId(), dto )
+                () -> shipmentService.updateShipment( shipmentId, dto )
         );
 
         // THEN
