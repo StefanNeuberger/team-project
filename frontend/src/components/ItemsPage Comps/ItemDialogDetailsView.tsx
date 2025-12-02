@@ -8,11 +8,11 @@ import { Separator } from "@/components/ui/separator.tsx";
 import { getGetAllItemsQueryKey, useDeleteItemById } from "@/api/generated/items/items.ts";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert.tsx";
-import { Trash2 } from "lucide-react"
-import { motion } from "framer-motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetAllInventoryQueryKey } from "@/api/generated/inventory/inventory.ts";
+import DeleteItemAlert from "@/components/ItemsPage Comps/DeleteItemAlert.tsx";
+import EditItem from "@/components/ItemsPage Comps/EditItem.tsx";
+import { AnimatePresence } from "framer-motion";
 
 
 export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<{
@@ -23,6 +23,8 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
     const [ dialogOpen, setDialogOpen ] = useState( false );
 
     const [ showConfirmDelete, setShowConfirmDelete ] = useState( false );
+
+    const [ showEditItem, setShowEditItem ] = useState( false );
 
     const { shopId } = useParams();
 
@@ -74,20 +76,30 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
 
     const itemArray = Object.entries( itemQuantity || {} );
 
+    const handleOpenChange = ( open: boolean ) => {
+        setShowConfirmDelete( false );
+        setShowEditItem( false )
+        setDialogOpen( open );
+    }
+
+    const toggleShowEditItem = () => {
+        setShowEditItem( !showEditItem );
+    }
+
     return (
-        <Dialog open={ dialogOpen } onOpenChange={ setDialogOpen }>
+        <Dialog open={ dialogOpen } onOpenChange={ handleOpenChange }>
             <DialogTrigger asChild>
                 <Button variant={ "link" }>
                     Details
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className={ "max-h-[90vh] overflow-y-auto" }>
                 <DialogHeader>
                     <DialogTitle className={ "text-lg text-accent-foreground font-medium" }>
                         { item.name }
                     </DialogTitle>
                     <DialogDescription className={ "text-muted-foreground" }>
-                        Detail view of Item
+                        SKU: { item.sku || "-- no SKU --" }
                     </DialogDescription>
                 </DialogHeader>
                 <p className={ "text-muted-foreground text-center" }>-- no image available --</p>
@@ -134,38 +146,20 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
                     <Button asChild>
                         <NavLink to={ `/shop/${ shopId }/warehouses` }>See Warehouses</NavLink>
                     </Button>
-                    <Button variant={ "destructive" } onClick={ toggleShowConfirmDelete }>
+                    <Button onClick={ toggleShowEditItem } disabled={ showConfirmDelete }>Edit Item</Button>
+                    <Button disabled={ showEditItem } variant={ "destructive" } onClick={ toggleShowConfirmDelete }>
                         Delete Item
                     </Button>
                 </div>
-                { showConfirmDelete &&
-                    <motion.div
-                        initial={ { opacity: 0, scale: 0.9 } }
-                        animate={ { opacity: 1, scale: 1 } }
-                        transition={ { duration: 0.2 } }
-                        className={ "mt-4" }
-                    >
-                        <Alert variant={ "destructive" }>
-                            <Trash2/>
-                            <AlertTitle>
-                                Are you sure you want to delete this item?
-                            </AlertTitle>
-                            <AlertDescription>
-                                <p>This actions cannot be undone</p>
-                                <div className={ "flex justify-between mt-4 w-full items-center" }>
-                                    <Button variant={ "destructive" } disabled={ isPending }
-                                            onClick={ handleDeleteItem }>
-                                        Delete Item
-                                    </Button>
-                                    <Button variant={ "outline" } onClick={ toggleShowConfirmDelete }>
-                                        Cancel
-                                    </Button>
-                                </div>
-                            </AlertDescription>
-                        </Alert>
-                    </motion.div>
-                }
-
+                <AnimatePresence>
+                    { showConfirmDelete &&
+                        <DeleteItemAlert isPending={ isPending } onDeleteItem={ handleDeleteItem }
+                                         toggleShowConfirmDelete={ toggleShowConfirmDelete }/>
+                    }
+                    { showEditItem &&
+                        <EditItem item={ item } closeEdit={ toggleShowEditItem }/>
+                    }
+                </AnimatePresence>
             </DialogContent>
         </Dialog>
     )
