@@ -4,10 +4,12 @@ import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemCreateDTO;
 import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemMapper;
 import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemResponseDTO;
 import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemUpdateDTO;
+import com.team18.backend.exception.RecordIsLockedException;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.Item;
 import com.team18.backend.model.Shipment;
 import com.team18.backend.model.ShipmentLineItem;
+import com.team18.backend.model.ShipmentStatus;
 import com.team18.backend.repository.ItemRepo;
 import com.team18.backend.repository.ShipmentLineItemRepository;
 import com.team18.backend.repository.ShipmentRepository;
@@ -70,6 +72,9 @@ public class ShipmentLineItemService {
                 () -> new ResourceNotFoundException( "Could not find shipment with id: " + id )
         );
 
+        if ( current.getShipment().getStatus() == ShipmentStatus.COMPLETED ) {
+            throw new RecordIsLockedException( "Cannot modify line items with shipment status completed" );
+        }
 
         String shipmentId = updateDTO.shipmentId();
         String itemId = updateDTO.itemId();
@@ -95,6 +100,10 @@ public class ShipmentLineItemService {
         ShipmentLineItem current = shipmentLineItemRepository.findById( id ).orElseThrow(
                 () -> new ResourceNotFoundException( "Could not find shipment with id: " + id )
         );
+
+        if ( current.getShipment().getStatus() == ShipmentStatus.COMPLETED ) {
+            throw new RecordIsLockedException( "Cannot modify line items with shipment status completed" );
+        }
 
         this.shipmentLineItemRepository.delete( current );
 

@@ -4,19 +4,18 @@ import com.team18.backend.dto.ShipmentCreateDTO;
 import com.team18.backend.dto.ShipmentResponseDTO;
 import com.team18.backend.dto.ShipmentStatusUpdateDTO;
 import com.team18.backend.dto.ShipmentUpdateDTO;
+import com.team18.backend.dto.inventory.InventoryUpdateDTO;
 import com.team18.backend.dto.warehouse.WarehouseMapper;
+import com.team18.backend.exception.RecordIsLockedException;
 import com.team18.backend.exception.ResourceNotFoundException;
-import com.team18.backend.model.Shipment;
-import com.team18.backend.model.ShipmentLineItem;
-import com.team18.backend.model.Shop;
-import com.team18.backend.model.Warehouse;
-import com.team18.backend.repository.ShipmentLineItemRepository;
-import com.team18.backend.repository.ShipmentRepository;
-import com.team18.backend.repository.ShopRepository;
-import com.team18.backend.repository.WarehouseRepository;
+import com.team18.backend.model.*;
+import com.team18.backend.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,19 +27,22 @@ public class ShipmentService {
     private final ShopRepository shopRepository;
     private final WarehouseMapper warehouseMapper;
     private final ShipmentLineItemRepository shipmentLineItemRepository;
+    private final InventoryRepository inventoryRepository;
 
     public ShipmentService(
             ShipmentRepository repository,
             WarehouseRepository warehouseRepository,
             ShopRepository shopRepository,
             WarehouseMapper warehouseMapper,
-            ShipmentLineItemRepository shipmentLineItemRepository
+            ShipmentLineItemRepository shipmentLineItemRepository,
+            InventoryRepository inventoryRepository
     ) {
         this.repository = repository;
         this.warehouseRepository = warehouseRepository;
         this.shopRepository = shopRepository;
         this.warehouseMapper = warehouseMapper;
         this.shipmentLineItemRepository = shipmentLineItemRepository;
+        this.inventoryRepository = inventoryRepository;
     }
 
     private ShipmentResponseDTO toDTO( Shipment shipment ) {
@@ -106,6 +108,10 @@ public class ShipmentService {
         Shipment shipment = repository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Shipment not found with id: " + id ) );
 
+        if ( shipment.getStatus() == ShipmentStatus.COMPLETED ) {
+            throw new RecordIsLockedException( "Cannot modify shipments with status COMPLETED" );
+        }
+
         // Update warehouse if provided
         if ( dto.warehouseId() != null ) {
             Warehouse warehouse = warehouseRepository.findById( dto.warehouseId() )
@@ -124,20 +130,72 @@ public class ShipmentService {
         return toDTO( updated );
     }
 
+    @Transactional
     public ShipmentResponseDTO updateShipmentStatus( String id, ShipmentStatusUpdateDTO dto ) {
         Shipment shipment = repository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Shipment not found with id: " + id ) );
+
+        if ( shipment.getStatus() == ShipmentStatus.COMPLETED ) {
+            throw new RecordIsLockedException( "Cannot modify shipments with status completed" );
+        }
+
+        if ( dto.status() == ShipmentStatus.COMPLETED ) {
+            processShipmentCompletion( shipment );
+        }
+
 
         shipment.setStatus( dto.status() );
         Shipment updated = repository.save( shipment );
         return toDTO( updated );
     }
 
-    public void deleteShipment( String id ) {
-        if ( !repository.existsById( id ) ) {
-            throw new ResourceNotFoundException( "Shipment not found with id: " + id );
+    @Transactional
+    public void processShipmentCompletion( Shipment shipment ) {
+        Warehouse warehouse = shipment.getWarehouse();
+        List<ShipmentLineItem> lineItems = shipmentLineItemRepository.findAllByShipment_Id( shipment.getId() )
+                .orElseThrow(
+                        () -> new ResourceNotFoundException( "Shipment has no line items" )
+                );
+
+        List<Inventory> inventoryList = inventoryRepository.findAllByWarehouse_Id( warehouse.getId() )
+                .orElse( List.of() );
+
+        Map<String, Inventory> inventoryMap = inventoryList.stream().collect(
+                Collectors.toMap( inventory -> inventory.getItem().getId(), inventory -> inventory )
+        );
+
+        List<Inventory> upsertInventoryList = new ArrayList<>();
+
+
+        for ( ShipmentLineItem lineItem : lineItems ) {
+            Inventory inventory = inventoryMap.get( lineItem.getItem().getId() );
+
+            if ( inventory != null ) {
+                int newQuantity = inventory.getQuantity() + lineItem.getReceivedQuantity();
+                inventory.setQuantity( newQuantity );
+                upsertInventoryList.add( inventory );
+            } else {
+                upsertInventoryList.add(
+                        new Inventory(
+                                warehouse,
+                                lineItem.getItem(),
+                                lineItem.getReceivedQuantity()
+                        )
+                );
+            }
         }
-        
+
+        this.inventoryRepository.saveAll( upsertInventoryList );
+    }
+
+    public void deleteShipment( String id ) {
+        Shipment shipment = repository.findById( id )
+                .orElseThrow( () -> new ResourceNotFoundException( "Shipment not found with id: " + id ) );
+
+        if ( shipment.getStatus() == ShipmentStatus.COMPLETED ) {
+            throw new RecordIsLockedException( "Cannot modify shipments with status completed" );
+        }
+
         shipmentLineItemRepository
                 .findAllByShipment_Id( id )
                 .ifPresent( this.shipmentLineItemRepository::deleteAll );
