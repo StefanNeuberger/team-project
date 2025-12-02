@@ -87,6 +87,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handle RecordIsLockedException - returns 400 Bad Request
+     */
+    @ExceptionHandler(RecordIsLockedException.class)
+    public ResponseEntity<ErrorResponse> handleRecordIsLockedException( RecordIsLockedException ex ) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                Instant.now()
+        );
+        return new ResponseEntity<>( errorResponse, HttpStatus.BAD_REQUEST );
+    }
+
+    /**
      * Handle generic runtime exceptions.
      * Returns a generic error response without exposing internal details.
      */

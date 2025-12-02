@@ -174,6 +174,16 @@ public class ShipmentController {
                     responseCode = "404",
                     description = "Shipment not found",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Shipment line items not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Record is locked",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
     public ResponseEntity<ShipmentResponseDTO> updateShipment(
@@ -204,6 +214,16 @@ public class ShipmentController {
                     responseCode = "404",
                     description = "Shipment not found",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Shipment line items not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Record is locked",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
     public ResponseEntity<ShipmentResponseDTO> updateShipmentStatus(
@@ -227,6 +247,11 @@ public class ShipmentController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Shipment not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Record is locked",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))
             )
     })
