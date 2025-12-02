@@ -90,7 +90,6 @@ public class ShipmentLineItemService {
         ShipmentLineItem updatedLineItem = shipmentLineItemRepository.save(
                 mapper.toShipmentLineItem( current, updateDTO, shipment, item )
         );
-        System.out.println( updatedLineItem );
 
         return mapper.toResponseDTO( updatedLineItem );
     }

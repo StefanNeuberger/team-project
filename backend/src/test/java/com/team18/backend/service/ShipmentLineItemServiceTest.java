@@ -109,8 +109,7 @@ class ShipmentLineItemServiceTest {
         List<ShipmentLineItemResponseDTO> actualItems = service.getShipmentLineItemsByShipmentId( fixedTestId );
 
         // THEN
-        assertThat( actualItems ).hasSize( 1 );
-        assertThat( actualItems ).containsAll( expected );
+        assertThat( actualItems ).hasSize( 1 ).containsAll( expected );
         verify( shipmentLineItemRepository, Mockito.times( 1 ) ).findAllByShipment_Id( fixedTestId );
     }
 

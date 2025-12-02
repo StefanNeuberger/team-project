@@ -27,6 +27,7 @@ public class ShipmentService {
     private final ShipmentLineItemRepository shipmentLineItemRepository;
     private final InventoryRepository inventoryRepository;
 
+
     public ShipmentService(
             ShipmentRepository repository,
             WarehouseRepository warehouseRepository,
@@ -126,7 +127,7 @@ public class ShipmentService {
         }
 
         if ( dto.status() == ShipmentStatus.COMPLETED ) {
-            processShipmentCompletion( shipment );
+            this.processShipmentCompletion( shipment );
         }
 
         Shipment updated = repository.save( shipment );
@@ -143,7 +144,7 @@ public class ShipmentService {
         }
 
         if ( dto.status() == ShipmentStatus.COMPLETED ) {
-            processShipmentCompletion( shipment );
+            this.processShipmentCompletion( shipment );
         }
 
         shipment.setStatus( dto.status() );
@@ -151,7 +152,6 @@ public class ShipmentService {
         return toDTO( updated );
     }
 
-    @Transactional
     public void processShipmentCompletion( Shipment shipment ) {
         Warehouse warehouse = shipment.getWarehouse();
         List<ShipmentLineItem> lineItems = shipmentLineItemRepository.findAllByShipment_Id( shipment.getId() )

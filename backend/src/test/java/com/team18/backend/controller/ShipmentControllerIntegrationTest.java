@@ -146,7 +146,7 @@ class ShipmentControllerIntegrationTest {
         Shipment saved = shipmentRepository.save( existingShipment );
         Item item = itemRepo.save( new Item( "test-id", "test-sku", "test-title" ) );
         ShipmentLineItem existingLineItem = shipmentLineItemRepository.save( new ShipmentLineItem( saved, item, 10, 10 ) );
-        Inventory inventory = inventoryRepository.save( new Inventory( saved.getWarehouse(), existingLineItem.getItem(), 10 ) );
+        inventoryRepository.save( new Inventory( saved.getWarehouse(), existingLineItem.getItem(), 10 ) );
 
         String updateRequest = """
                 {
@@ -267,7 +267,7 @@ class ShipmentControllerIntegrationTest {
         Shipment saved = shipmentRepository.save( existingShipment );
         Item item = itemRepo.save( new Item( "test-id", "test-sku", "test-title" ) );
         ShipmentLineItem existingLineItem = shipmentLineItemRepository.save( new ShipmentLineItem( saved, item, 10, 10 ) );
-        Inventory inventory = inventoryRepository.save( new Inventory( saved.getWarehouse(), existingLineItem.getItem(), 10 ) );
+        inventoryRepository.save( new Inventory( saved.getWarehouse(), existingLineItem.getItem(), 10 ) );
 
         String updateRequest = """
                 {

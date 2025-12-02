@@ -397,7 +397,7 @@ class ShipmentServiceTest {
         when( shipmentRepository.save( Mockito.any( Shipment.class ) ) ).thenReturn( given );
 
         // WHEN
-        ShipmentResponseDTO actual = assertDoesNotThrow( () -> shipmentService.updateShipment( given.getId(), dto ) );
+        ShipmentResponseDTO actual = assertDoesNotThrow( () -> shipmentService.updateShipment( shipmentId, dto ) );
 
         // THEN
         assertThat( actual ).isNotNull().isEqualTo( expected );
