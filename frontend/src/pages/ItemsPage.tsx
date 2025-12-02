@@ -40,7 +40,7 @@ export default function ItemsPage() {
         itemsData.data.forEach( item => {
             // Find inventory for item
             const itemInventory = inventoryData.data.filter( inventory =>
-                inventory.item.id === item.id
+                inventory.item?.id === item?.id
             );
 
             // reduce inventory to get total quantity and quantities per warehouse
