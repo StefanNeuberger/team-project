@@ -5,11 +5,7 @@ import type { ItemQuantityType } from "@/pages/ItemsPage.tsx";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { NavLink, useParams } from "react-router-dom";
 import { Separator } from "@/components/ui/separator.tsx";
-import { getGetAllItemsQueryKey, useDeleteItemById } from "@/api/generated/items/items.ts";
-import { toast } from "sonner";
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { getGetAllInventoryQueryKey } from "@/api/generated/inventory/inventory.ts";
 import DeleteItemAlert from "@/components/ItemsPage Comps/DeleteItemAlert.tsx";
 import EditItem from "@/components/ItemsPage Comps/EditItem.tsx";
 import { AnimatePresence } from "framer-motion";
@@ -22,15 +18,11 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
 
     const [ dialogOpen, setDialogOpen ] = useState( false );
 
-    const [ showConfirmDelete, setShowConfirmDelete ] = useState( false );
+    const [ showDeleteItem, setShowDeleteItem ] = useState( false );
 
     const [ showEditItem, setShowEditItem ] = useState( false );
 
     const { shopId } = useParams();
-
-    const { mutate: deleteItem, isPending } = useDeleteItemById();
-
-    const queryClient = useQueryClient();
 
     const formatDate = ( isoDate: string ) => {
         return new Intl.DateTimeFormat( 'de-DE', {
@@ -42,42 +34,17 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
         } ).format( new Date( isoDate ) );
     };
 
-    const handleDeleteItem = () => {
-        if ( !item.id ) {
-            return;
-        }
-        deleteItem(
-            { id: item.id },
-            {
-                onSuccess: () => {
-                    toast.success( "Item deleted successfully." );
-
-                    queryClient.invalidateQueries(
-                        { queryKey: getGetAllItemsQueryKey() }
-                    );
-
-                    queryClient.invalidateQueries(
-                        { queryKey: getGetAllInventoryQueryKey() }
-                    );
-
-                    setDialogOpen( false )
-                },
-                onError: ( error ) => {
-                    toast.error( error.response?.data.message || error.message || "Failed to delete item." );
-                    console.error( "Failed to delete item:", error );
-                }
-            }
-        );
-    }
-
     const toggleShowConfirmDelete = () => {
-        setShowConfirmDelete( !showConfirmDelete );
+        setShowDeleteItem( !showDeleteItem );
     }
 
-    const itemArray = Object.entries( itemQuantity || {} );
+
+    const handleCloseDialog = () => {
+        setDialogOpen( false );
+    }
 
     const handleOpenChange = ( open: boolean ) => {
-        setShowConfirmDelete( false );
+        setShowDeleteItem( false );
         setShowEditItem( false )
         setDialogOpen( open );
     }
@@ -85,6 +52,8 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
     const toggleShowEditItem = () => {
         setShowEditItem( !showEditItem );
     }
+
+    const itemArray = Object.entries( itemQuantity || {} );
 
     return (
         <Dialog open={ dialogOpen } onOpenChange={ handleOpenChange }>
@@ -115,7 +84,6 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
                             <p>{ formatDate( item.lastModifiedDate ) }</p>
                         </>
                     }
-
                 </div>
                 <Separator/>
                 <div className={ "grid grid-cols-2 gap-4" }>
@@ -146,14 +114,15 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
                     <Button asChild>
                         <NavLink to={ `/shop/${ shopId }/warehouses` }>See Warehouses</NavLink>
                     </Button>
-                    <Button onClick={ toggleShowEditItem } disabled={ showConfirmDelete }>Edit Item</Button>
+                    <Button onClick={ toggleShowEditItem } disabled={ showDeleteItem }>Edit Item</Button>
                     <Button disabled={ showEditItem } variant={ "destructive" } onClick={ toggleShowConfirmDelete }>
                         Delete Item
                     </Button>
                 </div>
                 <AnimatePresence>
-                    { showConfirmDelete &&
-                        <DeleteItemAlert isPending={ isPending } onDeleteItem={ handleDeleteItem }
+                    { showDeleteItem &&
+                        <DeleteItemAlert item={ item }
+                                         closeDialog={ handleCloseDialog }
                                          toggleShowConfirmDelete={ toggleShowConfirmDelete }/>
                     }
                     { showEditItem &&
