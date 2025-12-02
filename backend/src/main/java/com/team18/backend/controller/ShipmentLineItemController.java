@@ -53,7 +53,7 @@ public class ShipmentLineItemController {
     )
     @GetMapping(path = "/byShipmentId/{id}", consumes = MediaType.ALL_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<ShipmentLineItemResponseDTO>> getAllInventory( @PathVariable String id ) {
+    public ResponseEntity<List<ShipmentLineItemResponseDTO>> getAllShipmentLineItemsByShipmentId( @PathVariable String id ) {
         return ResponseEntity.ok( service.getShipmentLineItemsByShipmentId( id ) );
     }
 
@@ -78,7 +78,7 @@ public class ShipmentLineItemController {
             )
     )
     @PostMapping("")
-    public ResponseEntity<ShipmentLineItemResponseDTO> patch(
+    public ResponseEntity<ShipmentLineItemResponseDTO> createShipmentLineItem(
             @Valid @RequestBody ShipmentLineItemCreateDTO shipmentLineItemCreateDTO
     ) throws ResourceNotFoundException {
         return ResponseEntity.status( HttpStatus.CREATED ).body( service.createShipmentLineItem( shipmentLineItemCreateDTO ) );
@@ -105,7 +105,7 @@ public class ShipmentLineItemController {
             )
     )
     @PatchMapping("/{id}")
-    public ResponseEntity<ShipmentLineItemResponseDTO> patch(
+    public ResponseEntity<ShipmentLineItemResponseDTO> updateShipmentLineItem(
             @PathVariable String id,
             @Valid @RequestBody ShipmentLineItemUpdateDTO shipmentLineItemUpdateDTO
     ) throws ResourceNotFoundException {
@@ -130,7 +130,7 @@ public class ShipmentLineItemController {
 
     )
     @DeleteMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<Boolean> delete( @PathVariable String id ) throws ResourceNotFoundException {
+    public ResponseEntity<Boolean> deleteShipmentLineItem( @PathVariable String id ) throws ResourceNotFoundException {
         return ResponseEntity.status( HttpStatus.NO_CONTENT ).body( service.deleteShipmentLineItem( id ) );
     }
 }

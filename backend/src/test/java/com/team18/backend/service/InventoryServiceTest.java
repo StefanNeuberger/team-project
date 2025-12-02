@@ -29,7 +29,7 @@ class InventoryServiceTest {
     private static final WarehouseRepository warehouseRepository = Mockito.mock( WarehouseRepository.class );
     private static final ItemRepo itemRepo = Mockito.mock( ItemRepo.class );
     private static final InventoryRepository inventoryRepository = Mockito.mock( InventoryRepository.class );
-    private static InventoryMapper mapper = new InventoryMapper();
+    private static final InventoryMapper mapper = new InventoryMapper();
     private static final InventoryService inventoryService = new InventoryService(
             inventoryRepository,
             mapper,
