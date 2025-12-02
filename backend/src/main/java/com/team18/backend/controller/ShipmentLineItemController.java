@@ -51,6 +51,11 @@ public class ShipmentLineItemController {
                     array = @ArraySchema(schema = @Schema(implementation = ShipmentLineItemResponseDTO.class))
             )
     )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Shipment line items not found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    )
     @GetMapping(path = "/byShipmentId/{id}", consumes = MediaType.ALL_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<ShipmentLineItemResponseDTO>> getAllShipmentLineItemsByShipmentId( @PathVariable String id ) {
@@ -71,7 +76,7 @@ public class ShipmentLineItemController {
     )
     @ApiResponse(
             responseCode = "404",
-            description = "Shipment or Item not found",
+            description = "Shipment ot Item not found",
             content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ErrorResponse.class)
@@ -104,6 +109,14 @@ public class ShipmentLineItemController {
                     schema = @Schema(implementation = ErrorResponse.class)
             )
     )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Record is locked",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
+    )
     @PatchMapping("/{id}")
     public ResponseEntity<ShipmentLineItemResponseDTO> updateShipmentLineItem(
             @PathVariable String id,
@@ -127,7 +140,14 @@ public class ShipmentLineItemController {
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
                     schema = @Schema(implementation = ErrorResponse.class)
             )
-
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Record is locked",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponse.class)
+            )
     )
     @DeleteMapping(path = "/{id}", consumes = MediaType.ALL_VALUE)
     public ResponseEntity<Boolean> deleteShipmentLineItem( @PathVariable String id ) throws ResourceNotFoundException {

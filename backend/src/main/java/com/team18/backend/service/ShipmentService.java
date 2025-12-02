@@ -4,7 +4,6 @@ import com.team18.backend.dto.ShipmentCreateDTO;
 import com.team18.backend.dto.ShipmentResponseDTO;
 import com.team18.backend.dto.ShipmentStatusUpdateDTO;
 import com.team18.backend.dto.ShipmentUpdateDTO;
-import com.team18.backend.dto.inventory.InventoryUpdateDTO;
 import com.team18.backend.dto.warehouse.WarehouseMapper;
 import com.team18.backend.exception.RecordIsLockedException;
 import com.team18.backend.exception.ResourceNotFoundException;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -104,6 +102,7 @@ public class ShipmentService {
         return toDTO( saved );
     }
 
+    @Transactional
     public ShipmentResponseDTO updateShipment( String id, ShipmentUpdateDTO dto ) {
         Shipment shipment = repository.findById( id )
                 .orElseThrow( () -> new ResourceNotFoundException( "Shipment not found with id: " + id ) );
@@ -126,6 +125,10 @@ public class ShipmentService {
             shipment.setStatus( dto.status() );
         }
 
+        if ( dto.status() == ShipmentStatus.COMPLETED ) {
+            processShipmentCompletion( shipment );
+        }
+
         Shipment updated = repository.save( shipment );
         return toDTO( updated );
     }
@@ -142,7 +145,6 @@ public class ShipmentService {
         if ( dto.status() == ShipmentStatus.COMPLETED ) {
             processShipmentCompletion( shipment );
         }
-
 
         shipment.setStatus( dto.status() );
         Shipment updated = repository.save( shipment );

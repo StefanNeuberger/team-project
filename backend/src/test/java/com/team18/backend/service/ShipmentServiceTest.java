@@ -6,26 +6,23 @@ import com.team18.backend.dto.ShipmentStatusUpdateDTO;
 import com.team18.backend.dto.ShipmentUpdateDTO;
 import com.team18.backend.dto.warehouse.WarehouseMapper;
 import com.team18.backend.dto.warehouse.WarehouseResponseDTO;
+import com.team18.backend.exception.RecordIsLockedException;
 import com.team18.backend.exception.ResourceNotFoundException;
-import com.team18.backend.model.Shipment;
-import com.team18.backend.model.ShipmentStatus;
-import com.team18.backend.model.Shop;
-import com.team18.backend.model.Warehouse;
-import com.team18.backend.repository.ShipmentLineItemRepository;
-import com.team18.backend.repository.ShipmentRepository;
-import com.team18.backend.repository.ShopRepository;
-import com.team18.backend.repository.WarehouseRepository;
+import com.team18.backend.model.*;
+import com.team18.backend.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,6 +45,9 @@ class ShipmentServiceTest {
     private WarehouseMapper warehouseMapper;
 
     @Mock
+    private InventoryRepository inventoryRepository;
+
+    @Mock
     private ShipmentLineItemRepository shipmentLineItemRepository;
 
     @InjectMocks
@@ -56,6 +56,8 @@ class ShipmentServiceTest {
     private Shipment testShipment;
     private Shop testShop;
     private Warehouse testWarehouse;
+    private Inventory testInventory;
+    private ShipmentLineItem testShipmentLineItem;
 
     @BeforeEach
     void setUp() {
@@ -69,6 +71,18 @@ class ShipmentServiceTest {
                 testWarehouse,
                 LocalDate.of( 2025, 12, 1 ),
                 ShipmentStatus.ORDERED
+        );
+        Item item = new Item( "item-id", "test-sku", "test-item" );
+        testInventory = new Inventory(
+                testWarehouse,
+                item,
+                10
+        );
+        testShipmentLineItem = new ShipmentLineItem(
+                testShipment,
+                item,
+                10,
+                10
         );
     }
 
@@ -219,6 +233,247 @@ class ShipmentServiceTest {
     }
 
     @Test
+    void updateShipment_shouldThrow_whenShipmentIsCompleted() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        ShipmentUpdateDTO dto = new ShipmentUpdateDTO(
+                null,
+                LocalDate.of( 2025, 12, 15 ),
+                ShipmentStatus.COMPLETED
+        );
+
+        testShipment.setStatus( ShipmentStatus.COMPLETED );
+
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+
+        // WHEN
+        RecordIsLockedException e = assertThrows( RecordIsLockedException.class, () -> shipmentService.updateShipment( shipmentId, dto ) );
+
+        // THEN
+        assertThat( e ).isNotNull().isInstanceOf( RecordIsLockedException.class );
+
+        verify( shipmentRepository ).findById( shipmentId );
+    }
+
+    @Test
+    void updateShipment_shouldThrow_whenWarehouseNotExists() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        ShipmentUpdateDTO dto = new ShipmentUpdateDTO(
+                testWarehouse.getId(),
+                LocalDate.of( 2025, 12, 15 ),
+                ShipmentStatus.IN_DELIVERY
+        );
+
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+        when( warehouseRepository.findById( dto.warehouseId() ) ).thenReturn( Optional.empty() );
+
+        // WHEN
+        ResourceNotFoundException e = assertThrows( ResourceNotFoundException.class, () -> shipmentService.updateShipment( shipmentId, dto ) );
+
+        // THEN
+        assertThat( e ).isNotNull().isInstanceOf( ResourceNotFoundException.class );
+        verify( shipmentRepository ).findById( shipmentId );
+        verify( warehouseRepository ).findById( dto.warehouseId() );
+    }
+
+    @Test
+    void updateShipment_shouldReturnShipment_whenWarehouseExists() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        ShipmentUpdateDTO dto = new ShipmentUpdateDTO(
+                testWarehouse.getId(),
+                LocalDate.of( 2025, 12, 15 ),
+                ShipmentStatus.IN_DELIVERY
+        );
+
+        Shipment given = new Shipment(
+                testShipment.getId(),
+                testShipment.getWarehouse(),
+                testShipment.getExpectedArrivalDate(),
+                testShipment.getStatus()
+        );
+
+        given.setCreatedDate( testShipment.getCreatedDate() );
+        given.setLastModifiedDate( testShipment.getLastModifiedDate() );
+
+        ShipmentResponseDTO expected = new ShipmentResponseDTO(
+                testShipment.getId(),
+                warehouseMapper.toWarehouseResponseDTO( testShipment.getWarehouse() ),
+                testShipment.getExpectedArrivalDate(),
+                testShipment.getStatus(),
+                testShipment.getCreatedDate(),
+                testShipment.getLastModifiedDate()
+        );
+
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+        when( warehouseRepository.findById( dto.warehouseId() ) ).thenReturn( Optional.of( testWarehouse ) );
+        when( shipmentRepository.save( any( Shipment.class ) ) ).thenReturn( given );
+
+        // WHEN
+        ShipmentResponseDTO actual = assertDoesNotThrow( () -> shipmentService.updateShipment( shipmentId, dto ) );
+
+        // THEN
+        assertThat( actual ).isNotNull().isEqualTo( expected );
+        verify( shipmentRepository ).findById( shipmentId );
+        verify( warehouseRepository ).findById( dto.warehouseId() );
+        verify( shipmentRepository ).save( Mockito.any( Shipment.class ) );
+    }
+
+    @Test
+    void updateShipment_shouldThrowOnShipmentCompletion_whenLineItemsNotFound() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        ShipmentUpdateDTO dto = new ShipmentUpdateDTO(
+                testWarehouse.getId(),
+                LocalDate.of( 2025, 12, 15 ),
+                ShipmentStatus.COMPLETED
+        );
+
+        Shipment given = new Shipment(
+                testShipment.getId(),
+                testShipment.getWarehouse(),
+                dto.expectedArrivalDate(),
+                dto.status()
+        );
+        given.setCreatedDate( testShipment.getCreatedDate() );
+        given.setLastModifiedDate( testShipment.getLastModifiedDate() );
+
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+        when( warehouseRepository.findById( dto.warehouseId() ) ).thenReturn( Optional.of( testWarehouse ) );
+        when( shipmentLineItemRepository.findAllByShipment_Id( given.getId() ) ).thenReturn( Optional.empty() );
+
+        // WHEN
+        ResourceNotFoundException e = assertThrows(
+                ResourceNotFoundException.class,
+                () -> shipmentService.updateShipment( given.getId(), dto )
+        );
+
+        // THEN
+        assertThat( e ).isNotNull().isInstanceOf( ResourceNotFoundException.class );
+        verify( shipmentRepository ).findById( shipmentId );
+        verify( warehouseRepository ).findById( dto.warehouseId() );
+        verify( shipmentLineItemRepository ).findAllByShipment_Id( given.getId() );
+    }
+
+    @Test
+    void updateShipment_shouldProcessShipmentCompletionWithNewInventory_whenCalled() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        ShipmentUpdateDTO dto = new ShipmentUpdateDTO(
+                testWarehouse.getId(),
+                LocalDate.of( 2025, 12, 15 ),
+                ShipmentStatus.COMPLETED
+        );
+
+        Shipment given = new Shipment(
+                testShipment.getId(),
+                testShipment.getWarehouse(),
+                dto.expectedArrivalDate(),
+                dto.status()
+        );
+        given.setCreatedDate( testShipment.getCreatedDate() );
+        given.setLastModifiedDate( testShipment.getLastModifiedDate() );
+
+        ShipmentResponseDTO expected = new ShipmentResponseDTO(
+                given.getId(),
+                warehouseMapper.toWarehouseResponseDTO( given.getWarehouse() ),
+                given.getExpectedArrivalDate(),
+                given.getStatus(),
+                given.getCreatedDate(),
+                given.getLastModifiedDate()
+        );
+
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+        when( warehouseRepository.findById( dto.warehouseId() ) ).thenReturn( Optional.of( testWarehouse ) );
+        when( shipmentLineItemRepository.findAllByShipment_Id( given.getId() ) )
+                .thenReturn( Optional.of( List.of( testShipmentLineItem ) ) );
+
+        when( inventoryRepository.findAllByWarehouse_Id( given.getWarehouse().getId() ) )
+                .thenReturn( Optional.of( List.of() ) );
+
+        when( inventoryRepository.saveAll( Mockito.anyList() ) ).thenReturn( List.of( testInventory ) );
+
+        when( shipmentRepository.save( Mockito.any( Shipment.class ) ) ).thenReturn( given );
+
+        // WHEN
+        ShipmentResponseDTO actual = assertDoesNotThrow( () -> shipmentService.updateShipment( given.getId(), dto ) );
+
+        // THEN
+        assertThat( actual ).isNotNull().isEqualTo( expected );
+
+        verify( shipmentRepository ).findById( shipmentId );
+        verify( warehouseRepository ).findById( dto.warehouseId() );
+        verify( shipmentLineItemRepository ).findAllByShipment_Id( given.getId() );
+        verify( inventoryRepository, Mockito.times( 1 ) )
+                .findAllByWarehouse_Id( given.getWarehouse().getId() );
+        verify( inventoryRepository, Mockito.times( 1 ) )
+                .saveAll( Mockito.anyList() );
+    }
+
+    @Test
+    void updateShipment_shouldProcessShipmentCompletionOnExistingInventory_whenCalled() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        ShipmentUpdateDTO dto = new ShipmentUpdateDTO(
+                testWarehouse.getId(),
+                LocalDate.of( 2025, 12, 15 ),
+                ShipmentStatus.COMPLETED
+        );
+
+        Shipment given = new Shipment(
+                testShipment.getId(),
+                testShipment.getWarehouse(),
+                dto.expectedArrivalDate(),
+                dto.status()
+        );
+        given.setCreatedDate( testShipment.getCreatedDate() );
+        given.setLastModifiedDate( testShipment.getLastModifiedDate() );
+
+        ShipmentResponseDTO expected = new ShipmentResponseDTO(
+                given.getId(),
+                warehouseMapper.toWarehouseResponseDTO( given.getWarehouse() ),
+                given.getExpectedArrivalDate(),
+                given.getStatus(),
+                given.getCreatedDate(),
+                given.getLastModifiedDate()
+        );
+
+        Inventory updatedInventory = new Inventory(
+                testInventory.getId(),
+                testInventory.getWarehouse(),
+                testInventory.getItem(),
+                testInventory.getQuantity() + testShipmentLineItem.getReceivedQuantity()
+        );
+
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+        when( warehouseRepository.findById( dto.warehouseId() ) ).thenReturn( Optional.of( testWarehouse ) );
+        when( shipmentLineItemRepository.findAllByShipment_Id( given.getId() ) )
+                .thenReturn( Optional.of( List.of( testShipmentLineItem ) ) );
+
+        when( inventoryRepository.findAllByWarehouse_Id( given.getWarehouse().getId() ) )
+                .thenReturn( Optional.of( List.of( testInventory ) ) );
+
+        when( inventoryRepository.saveAll( Mockito.anyList() ) ).thenReturn( List.of( updatedInventory ) );
+
+        when( shipmentRepository.save( Mockito.any( Shipment.class ) ) ).thenReturn( given );
+
+        // WHEN
+        ShipmentResponseDTO actual = assertDoesNotThrow( () -> shipmentService.updateShipment( given.getId(), dto ) );
+
+        // THEN
+        assertThat( actual ).isNotNull().isEqualTo( expected );
+
+        verify( shipmentRepository ).findById( shipmentId );
+        verify( warehouseRepository ).findById( dto.warehouseId() );
+        verify( shipmentLineItemRepository ).findAllByShipment_Id( given.getId() );
+        verify( inventoryRepository, Mockito.times( 1 ) )
+                .findAllByWarehouse_Id( given.getWarehouse().getId() );
+        verify( inventoryRepository, Mockito.times( 1 ) )
+                .saveAll( Mockito.anyList() );
+    }
+
+    @Test
     void updateShipmentStatus_shouldUpdateStatusAndReturnShipment_whenShipmentExists() {
         // GIVEN
         stubWarehouseMapper();
@@ -237,16 +492,157 @@ class ShipmentServiceTest {
     }
 
     @Test
+    void updateShipmentStatus_shouldThrow_whenShipmentIsCompleted() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        ShipmentStatusUpdateDTO dto = new ShipmentStatusUpdateDTO( ShipmentStatus.PROCESSED );
+        testShipment.setStatus( ShipmentStatus.COMPLETED );
+
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+
+        // WHEN
+        RecordIsLockedException e = assertThrows( RecordIsLockedException.class, () -> shipmentService.updateShipmentStatus( shipmentId, dto ) );
+
+        // THEN
+        assertThat( e ).isNotNull().isInstanceOf( RecordIsLockedException.class );
+
+        verify( shipmentRepository ).findById( shipmentId );
+    }
+
+    @Test
+    void updateShipmentStatus_shouldProcessShipmentCompletionWithNewInventory_whenCalled() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        ShipmentStatusUpdateDTO dto = new ShipmentStatusUpdateDTO( ShipmentStatus.COMPLETED );
+
+        Shipment given = new Shipment(
+                shipmentId,
+                testShipment.getWarehouse(),
+                testShipment.getExpectedArrivalDate(),
+                dto.status()
+        );
+        given.setCreatedDate( testShipment.getCreatedDate() );
+        given.setLastModifiedDate( testShipment.getLastModifiedDate() );
+
+        ShipmentResponseDTO expected = new ShipmentResponseDTO(
+                given.getId(),
+                warehouseMapper.toWarehouseResponseDTO( given.getWarehouse() ),
+                given.getExpectedArrivalDate(),
+                given.getStatus(),
+                given.getCreatedDate(),
+                given.getLastModifiedDate()
+        );
+
+
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+        when( shipmentLineItemRepository.findAllByShipment_Id( given.getId() ) )
+                .thenReturn( Optional.of( List.of( testShipmentLineItem ) ) );
+
+        when( inventoryRepository.findAllByWarehouse_Id( given.getWarehouse().getId() ) )
+                .thenReturn( Optional.of( List.of() ) );
+
+        when( inventoryRepository.saveAll( Mockito.anyList() ) ).thenReturn( List.of( testInventory ) );
+
+        when( shipmentRepository.save( Mockito.any( Shipment.class ) ) ).thenReturn( given );
+
+        // WHEN
+        ShipmentResponseDTO actual = assertDoesNotThrow( () -> shipmentService.updateShipmentStatus( given.getId(), dto ) );
+
+        // THEN
+        assertThat( actual ).isNotNull().isEqualTo( expected );
+
+        verify( shipmentRepository ).findById( shipmentId );
+        verify( shipmentLineItemRepository ).findAllByShipment_Id( given.getId() );
+        verify( inventoryRepository, Mockito.times( 1 ) )
+                .findAllByWarehouse_Id( given.getWarehouse().getId() );
+        verify( inventoryRepository, Mockito.times( 1 ) )
+                .saveAll( Mockito.anyList() );
+    }
+
+    @Test
+    void updateShipmentStatus_shouldProcessShipmentCompletionOnExistingInventory_whenCalled() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        ShipmentStatusUpdateDTO dto = new ShipmentStatusUpdateDTO( ShipmentStatus.COMPLETED );
+
+        Shipment given = new Shipment(
+                testShipment.getId(),
+                testShipment.getWarehouse(),
+                testShipment.getExpectedArrivalDate(),
+                dto.status()
+        );
+        given.setCreatedDate( testShipment.getCreatedDate() );
+        given.setLastModifiedDate( testShipment.getLastModifiedDate() );
+
+        ShipmentResponseDTO expected = new ShipmentResponseDTO(
+                given.getId(),
+                warehouseMapper.toWarehouseResponseDTO( given.getWarehouse() ),
+                given.getExpectedArrivalDate(),
+                given.getStatus(),
+                given.getCreatedDate(),
+                given.getLastModifiedDate()
+        );
+
+        Inventory updatedInventory = new Inventory(
+                testInventory.getId(),
+                testInventory.getWarehouse(),
+                testInventory.getItem(),
+                testInventory.getQuantity() + testShipmentLineItem.getReceivedQuantity()
+        );
+
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+        when( shipmentLineItemRepository.findAllByShipment_Id( given.getId() ) )
+                .thenReturn( Optional.of( List.of( testShipmentLineItem ) ) );
+
+        when( inventoryRepository.findAllByWarehouse_Id( given.getWarehouse().getId() ) )
+                .thenReturn( Optional.of( List.of( testInventory ) ) );
+
+        when( inventoryRepository.saveAll( Mockito.anyList() ) ).thenReturn( List.of( updatedInventory ) );
+
+        when( shipmentRepository.save( Mockito.any( Shipment.class ) ) ).thenReturn( given );
+
+        // WHEN
+        ShipmentResponseDTO actual = assertDoesNotThrow( () -> shipmentService.updateShipmentStatus( given.getId(), dto ) );
+
+        // THEN
+        assertThat( actual ).isNotNull().isEqualTo( expected );
+
+        verify( shipmentRepository ).findById( shipmentId );
+        verify( shipmentLineItemRepository ).findAllByShipment_Id( given.getId() );
+        verify( inventoryRepository, Mockito.times( 1 ) )
+                .findAllByWarehouse_Id( given.getWarehouse().getId() );
+        verify( inventoryRepository, Mockito.times( 1 ) )
+                .saveAll( Mockito.anyList() );
+    }
+
+    @Test
     void deleteShipment_shouldDeleteShipment_whenShipmentExists() {
         // GIVEN
         String shipmentId = "shipment-123";
-        when( shipmentRepository.existsById( shipmentId ) ).thenReturn( true );
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+        when( shipmentLineItemRepository.findAllByShipment_Id( shipmentId ) ).thenReturn( Optional.of( List.of() ) );
 
         // WHEN
         shipmentService.deleteShipment( shipmentId );
 
         // THEN
-        verify( shipmentRepository ).existsById( shipmentId );
+        verify( shipmentRepository ).findById( shipmentId );
+        verify( shipmentRepository ).deleteById( shipmentId );
+    }
+
+    @Test
+    void deleteShipment_shouldDeleteShipmentAndShipmentLineItems_whenShipmentExists() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        List<ShipmentLineItem> lineItemList = List.of( testShipmentLineItem );
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+        when( shipmentLineItemRepository.findAllByShipment_Id( shipmentId ) ).thenReturn( Optional.of( lineItemList ) );
+        // WHEN
+        shipmentService.deleteShipment( shipmentId );
+
+        // THEN
+        verify( shipmentRepository ).findById( shipmentId );
+        verify( shipmentLineItemRepository ).deleteAll( lineItemList );
         verify( shipmentRepository ).deleteById( shipmentId );
     }
 
@@ -254,13 +650,29 @@ class ShipmentServiceTest {
     void deleteShipment_shouldThrowResourceNotFoundException_whenShipmentDoesNotExist() {
         // GIVEN
         String shipmentId = "non-existent-id";
-        when( shipmentRepository.existsById( shipmentId ) ).thenReturn( false );
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.empty() );
 
         // WHEN & THEN
         assertThatThrownBy( () -> shipmentService.deleteShipment( shipmentId ) )
                 .isInstanceOf( ResourceNotFoundException.class )
                 .hasMessage( "Shipment not found with id: " + shipmentId );
-        verify( shipmentRepository ).existsById( shipmentId );
+        verify( shipmentRepository ).findById( shipmentId );
+    }
+
+    @Test
+    void deleteShipment_shouldThrow_whenShipmentIsLocked() {
+        // GIVEN
+        String shipmentId = "shipment-123";
+        testShipment.setStatus( ShipmentStatus.COMPLETED );
+        when( shipmentRepository.findById( shipmentId ) ).thenReturn( Optional.of( testShipment ) );
+
+        // WHEN
+        RecordIsLockedException e = assertThrows( RecordIsLockedException.class, () -> shipmentService.deleteShipment( shipmentId ) );
+
+        assertThat( e ).isNotNull().isInstanceOf( RecordIsLockedException.class );
+
+        // THEN
+        verify( shipmentRepository ).findById( shipmentId );
     }
 
     @Test

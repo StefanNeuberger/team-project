@@ -1,13 +1,9 @@
 package com.team18.backend.controller;
 
 import com.team18.backend.TestContainersConfiguration;
-import com.team18.backend.model.Shipment;
-import com.team18.backend.model.ShipmentStatus;
-import com.team18.backend.model.Shop;
-import com.team18.backend.model.Warehouse;
-import com.team18.backend.repository.ShipmentRepository;
-import com.team18.backend.repository.ShopRepository;
-import com.team18.backend.repository.WarehouseRepository;
+import com.team18.backend.model.*;
+import com.team18.backend.repository.*;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +14,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest("spring.shell.interactive.enabled=false")
 @AutoConfigureMockMvc
@@ -39,6 +37,15 @@ class ShipmentControllerIntegrationTest {
 
     @Autowired
     private ShopRepository shopRepository;
+
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
+    @Autowired
+    private ShipmentLineItemRepository shipmentLineItemRepository;
+
+    @Autowired
+    private ItemRepo itemRepo;
 
     private Warehouse testWarehouse;
 
@@ -103,6 +110,88 @@ class ShipmentControllerIntegrationTest {
     }
 
     @Test
+    void updateShipment_shouldReturn200AndCreateInventory_whenStatusIsCompleted() throws Exception {
+        // GIVEN - Create a shipment first
+        Shipment existingShipment = new Shipment( testWarehouse, LocalDate.of( 2025, 12, 1 ), ShipmentStatus.IN_DELIVERY );
+        Shipment saved = shipmentRepository.save( existingShipment );
+        Item item = itemRepo.save( new Item( "test-id", "test-sku", "test-title" ) );
+        ShipmentLineItem existingLineItem = shipmentLineItemRepository.save( new ShipmentLineItem( saved, item, 10, 10 ) );
+
+        String updateRequest = """
+                {
+                    "expectedArrivalDate": "2025-12-15",
+                    "status": "COMPLETED"
+                }
+                """;
+
+        // WHEN & THEN
+        mockMvc.perform( patch( "/api/shipments/{id}", saved.getId() )
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( updateRequest ) )
+                .andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.id" ).value( saved.getId() ) );
+
+        List<Inventory> inventories = inventoryRepository.findAllByWarehouse_Id( saved.getWarehouse().getId() ).orElse( List.of() );
+
+        assertThat( inventories ).isNotNull().isNotEmpty()
+                .extracting( "item.id" )
+                .contains( existingLineItem.getItem().getId() );
+
+    }
+
+    @Test
+    void updateShipment_shouldReturn200AndUpdateInventory_whenStatusIsCompleted() throws Exception {
+        // GIVEN - Create a shipment first
+        Shipment existingShipment = new Shipment( testWarehouse, LocalDate.of( 2025, 12, 1 ), ShipmentStatus.IN_DELIVERY );
+        Shipment saved = shipmentRepository.save( existingShipment );
+        Item item = itemRepo.save( new Item( "test-id", "test-sku", "test-title" ) );
+        ShipmentLineItem existingLineItem = shipmentLineItemRepository.save( new ShipmentLineItem( saved, item, 10, 10 ) );
+        Inventory inventory = inventoryRepository.save( new Inventory( saved.getWarehouse(), existingLineItem.getItem(), 10 ) );
+
+        String updateRequest = """
+                {
+                    "expectedArrivalDate": "2025-12-15",
+                    "status": "COMPLETED"
+                }
+                """;
+
+        // WHEN & THEN
+        mockMvc.perform( patch( "/api/shipments/{id}", saved.getId() )
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( updateRequest ) )
+                .andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.id" ).value( saved.getId() ) );
+
+        List<Inventory> inventories = inventoryRepository.findAllByWarehouse_Id( saved.getWarehouse().getId() ).orElse( List.of() );
+
+        assertThat( inventories ).isNotNull().isNotEmpty()
+                .extracting( "item.id", "quantity" )
+                .contains( Tuple.tuple( existingLineItem.getItem().getId(), 20 ) );
+
+    }
+
+    @Test
+    void updateShipment_shouldReturn400_whenShipmentIsLocked() throws Exception {
+        // GIVEN - Create a shipment first
+        Shipment existingShipment = new Shipment( testWarehouse, LocalDate.of( 2025, 12, 1 ), ShipmentStatus.COMPLETED );
+        Shipment saved = shipmentRepository.save( existingShipment );
+
+        String updateRequest = """
+                {
+                    "expectedArrivalDate": "2025-12-15",
+                    "status": "IN_DELIVERY"
+                }
+                """;
+
+        // WHEN & THEN
+        mockMvc.perform( patch( "/api/shipments/{id}", saved.getId() )
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( updateRequest ) )
+                .andExpect( status().isBadRequest() )
+                .andExpect( jsonPath( "$.message" ).isNotEmpty() );
+    }
+
+    @Test
     void updateShipmentStatus_shouldReturn200_whenShipmentExists() throws Exception {
         // GIVEN - Create a shipment first
         Shipment existingShipment = new Shipment( testWarehouse, LocalDate.of( 2025, 12, 1 ), ShipmentStatus.ORDERED );
@@ -120,6 +209,85 @@ class ShipmentControllerIntegrationTest {
                         .content( statusUpdateRequest ) )
                 .andExpect( status().isOk() )
                 .andExpect( jsonPath( "$.status" ).value( "PROCESSED" ) );
+    }
+
+    @Test
+    void updateShipmentStatus_shouldReturn400_whenShipmentIsLocked() throws Exception {
+        // GIVEN - Create a shipment first
+        Shipment existingShipment = new Shipment( testWarehouse, LocalDate.of( 2025, 12, 1 ), ShipmentStatus.COMPLETED );
+        Shipment saved = shipmentRepository.save( existingShipment );
+
+        String updateRequest = """
+                {
+                    "status": "IN_DELIVERY"
+                }
+                """;
+
+        // WHEN & THEN
+        mockMvc.perform( patch( "/api/shipments/{id}/status", saved.getId() )
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( updateRequest ) )
+                .andExpect( status().isBadRequest() )
+                .andExpect( jsonPath( "$.message" ).isNotEmpty() );
+    }
+
+    @Test
+    void updateShipmentStatus_shouldReturn200AndCreateInventory_whenStatusIsCompleted() throws Exception {
+        // GIVEN - Create a shipment first
+        Shipment existingShipment = new Shipment( testWarehouse, LocalDate.of( 2025, 12, 1 ), ShipmentStatus.IN_DELIVERY );
+        Shipment saved = shipmentRepository.save( existingShipment );
+        Item item = itemRepo.save( new Item( "test-id", "test-sku", "test-title" ) );
+        ShipmentLineItem existingLineItem = shipmentLineItemRepository.save( new ShipmentLineItem( saved, item, 10, 10 ) );
+
+        String updateRequest = """
+                {
+                    "status": "COMPLETED"
+                }
+                """;
+
+        // WHEN & THEN
+        mockMvc.perform( patch( "/api/shipments/{id}/status", saved.getId() )
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( updateRequest ) )
+                .andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.id" ).value( saved.getId() ) );
+
+        List<Inventory> inventories = inventoryRepository.findAllByWarehouse_Id( saved.getWarehouse().getId() ).orElse( List.of() );
+
+        assertThat( inventories ).isNotNull().isNotEmpty()
+                .extracting( "item.id" )
+                .contains( existingLineItem.getItem().getId() );
+
+    }
+
+    @Test
+    void updateShipmentStatus_shouldReturn200AndUpdateInventory_whenStatusIsCompleted() throws Exception {
+        // GIVEN - Create a shipment first
+        Shipment existingShipment = new Shipment( testWarehouse, LocalDate.of( 2025, 12, 1 ), ShipmentStatus.IN_DELIVERY );
+        Shipment saved = shipmentRepository.save( existingShipment );
+        Item item = itemRepo.save( new Item( "test-id", "test-sku", "test-title" ) );
+        ShipmentLineItem existingLineItem = shipmentLineItemRepository.save( new ShipmentLineItem( saved, item, 10, 10 ) );
+        Inventory inventory = inventoryRepository.save( new Inventory( saved.getWarehouse(), existingLineItem.getItem(), 10 ) );
+
+        String updateRequest = """
+                {
+                    "status": "COMPLETED"
+                }
+                """;
+
+        // WHEN & THEN
+        mockMvc.perform( patch( "/api/shipments/{id}/status", saved.getId() )
+                        .contentType( MediaType.APPLICATION_JSON )
+                        .content( updateRequest ) )
+                .andExpect( status().isOk() )
+                .andExpect( jsonPath( "$.id" ).value( saved.getId() ) );
+
+        List<Inventory> inventories = inventoryRepository.findAllByWarehouse_Id( saved.getWarehouse().getId() ).orElse( List.of() );
+
+        assertThat( inventories ).isNotNull().isNotEmpty()
+                .extracting( "item.id", "quantity" )
+                .contains( Tuple.tuple( existingLineItem.getItem().getId(), 20 ) );
+
     }
 
     @Test

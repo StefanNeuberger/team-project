@@ -4,6 +4,7 @@ import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemCreateDTO;
 import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemMapper;
 import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemResponseDTO;
 import com.team18.backend.dto.shipmentlineitem.ShipmentLineItemUpdateDTO;
+import com.team18.backend.exception.RecordIsLockedException;
 import com.team18.backend.exception.ResourceNotFoundException;
 import com.team18.backend.model.*;
 import com.team18.backend.repository.*;
@@ -93,6 +94,7 @@ class ShipmentLineItemServiceTest {
     @BeforeEach
     void resetMocks() {
         Mockito.reset( itemRepo, shipmentRepository, shipmentLineItemRepository );
+        shipment.setStatus( ShipmentStatus.ORDERED );
     }
 
     @Test
@@ -223,6 +225,29 @@ class ShipmentLineItemServiceTest {
     }
 
     @Test
+    void updateShipmentLineItem_shouldThrow_whenShipmentIsLocked() {
+        // GIVEN
+        ShipmentLineItemUpdateDTO updatedLineItem = new ShipmentLineItemUpdateDTO(
+                null,
+                null,
+                null,
+                null
+        );
+        shipment.setStatus( ShipmentStatus.COMPLETED );
+
+        when( shipmentLineItemRepository.findById( fixedTestId ) ).thenReturn( Optional.of( shipmentLineItem ) );
+
+        // WHEN
+        RecordIsLockedException e = assertThrows( RecordIsLockedException.class, () -> service
+                .updateShipmentLineItem( fixedTestId, updatedLineItem )
+        );
+
+        // THEN
+        assertThat( e ).isNotNull().isInstanceOf( RecordIsLockedException.class );
+        verify( shipmentLineItemRepository, Mockito.times( 1 ) ).findById( fixedTestId );
+    }
+
+    @Test
     void updateShipmentLineItem_shouldThrow_whenShipmentNotFound() {
         // GIVEN
         ShipmentLineItemUpdateDTO updatedLineItem = new ShipmentLineItemUpdateDTO(
@@ -231,6 +256,7 @@ class ShipmentLineItemServiceTest {
                 null,
                 null
         );
+
         when( shipmentLineItemRepository.findById( fixedTestId ) ).thenReturn( Optional.of( shipmentLineItem ) );
         when( shipmentRepository.findById( updatedLineItem.shipmentId() ) ).thenReturn( Optional.empty() );
 
@@ -338,6 +364,22 @@ class ShipmentLineItemServiceTest {
         // THEN
         assertThat( e ).isNotNull().isInstanceOf( ResourceNotFoundException.class );
         verify( shipmentLineItemRepository, Mockito.times( 1 ) ).findById( "wrong-id" );
+    }
+
+    @Test
+    void deleteShipmentLineItem_shouldThrow_WhenShipmentIsLocked() {
+        // GIVEN
+        shipment.setStatus( ShipmentStatus.COMPLETED );
+
+        when( shipmentLineItemRepository.findById( fixedTestId ) ).thenReturn( Optional.of( shipmentLineItem ) );
+
+        // WHEN
+        RecordIsLockedException e = assertThrows( RecordIsLockedException.class, () -> service.deleteShipmentLineItem( fixedTestId ) );
+
+        // THEN
+        assertThat( e ).isNotNull().isInstanceOf( RecordIsLockedException.class );
+
+        verify( shipmentLineItemRepository, Mockito.times( 1 ) ).findById( fixedTestId );
     }
 
     @Test

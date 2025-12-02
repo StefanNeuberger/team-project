@@ -404,6 +404,43 @@ class ShipmentLineItemControllerTest {
     }
 
     @Test
+    void updateShipmentLineItem_ShouldThrow_WhenShipmentIsLocked() throws Exception {
+        ShipmentLineItemResponseDTO data = this.shipmentLineItemService.createShipmentLineItem( shipmentLineItemCreateDTO );
+        Shipment shipment = shipmentRepository.findById( shipmentLineItemCreateDTO.shipmentId() ).orElseThrow();
+        shipment.setStatus( ShipmentStatus.COMPLETED );
+        this.shipmentRepository.save( shipment );
+
+        ShipmentLineItemUpdateDTO updateDTO = new ShipmentLineItemUpdateDTO(
+                null,
+                null,
+                null,
+                null
+        );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .patch( "/api/shipmentlineitems/" + data.id() )
+                                .accept( MediaType.APPLICATION_JSON_VALUE )
+                                .contentType( MediaType.APPLICATION_JSON_VALUE )
+                                .content( mapper.writeValueAsString( updateDTO ) )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .status()
+                                .isBadRequest()
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .content()
+                                .contentType( MediaType.APPLICATION_JSON )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.message" ).isNotEmpty()
+                );
+    }
+
+    @Test
     void updateShipmentLineItem_ShouldReturnShipmentLineItemResponseDTO_WhenReferencesAreNull() throws Exception {
         ShipmentLineItemResponseDTO data = this.shipmentLineItemService
                 .createShipmentLineItem( shipmentLineItemCreateDTO );
@@ -515,6 +552,33 @@ class ShipmentLineItemControllerTest {
                         MockMvcResultMatchers
                                 .status()
                                 .isNotFound()
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .content()
+                                .contentType( MediaType.APPLICATION_JSON )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .jsonPath( "$.message" ).isNotEmpty()
+                );
+    }
+
+    @Test
+    void deleteShipmentLineItem_ShouldThrow_WhenShipmentIsLocked() throws Exception {
+        ShipmentLineItemResponseDTO data = this.shipmentLineItemService.createShipmentLineItem( shipmentLineItemCreateDTO );
+        Shipment shipment = shipmentRepository.findById( shipmentLineItemCreateDTO.shipmentId() ).orElseThrow();
+        shipment.setStatus( ShipmentStatus.COMPLETED );
+        this.shipmentRepository.save( shipment );
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .delete( "/api/shipmentlineitems/" + data.id() )
+                )
+                .andExpect(
+                        MockMvcResultMatchers
+                                .status()
+                                .isBadRequest()
                 )
                 .andExpect(
                         MockMvcResultMatchers
