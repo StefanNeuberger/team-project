@@ -12,9 +12,10 @@ import { useState } from "react";
 
 type LineItemCreateDialogProps = {
     shipmentId: string;
+    status: string
 }
 
-export default function LineItemCreateDialog( { shipmentId }: Readonly<LineItemCreateDialogProps> ) {
+export default function LineItemCreateDialog( { shipmentId, status }: Readonly<LineItemCreateDialogProps> ) {
 
     const [ open, setOpen ] = useState( false );
 
@@ -38,7 +39,11 @@ export default function LineItemCreateDialog( { shipmentId }: Readonly<LineItemC
                         Add a new line item to this shipment.
                     </DialogDescription>
                 </DialogHeader>
-                <LineItemCreateForm closeDialog={ toggleDialog } shipmentId={ shipmentId }/>
+                { status === "COMPLETED" ?
+                    <p>Items cannot be added to a completed shipment</p>
+                    :
+                    <LineItemCreateForm closeDialog={ toggleDialog } shipmentId={ shipmentId }/>
+                }
             </DialogContent>
 
         </Dialog>

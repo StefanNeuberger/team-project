@@ -55,8 +55,10 @@ export default function ShipmentCreateForm( { closeDialog }: Readonly<ShipmentCr
     } );
 
     const handleCreateShipment = ( data: ShipmentFormData ) => {
-        // Implement shipment creation logic here
-        console.log( "Created shipment" );
+        if ( data.status === "COMPLETED" ) {
+            toast.info( "Shipment cant be completed now" );
+            return;
+        }
         createShipment.mutate(
             {
                 data: {
@@ -67,7 +69,7 @@ export default function ShipmentCreateForm( { closeDialog }: Readonly<ShipmentCr
             },
             {
                 onSuccess: () => {
-                    // Invalidate and refetch shipments list
+                    console.log( "Shipment created successfully" );
                     queryClient.invalidateQueries( { queryKey: getGetAllShipmentsByShopIdQueryKey( shopId || "" ) } );
                     toast.success( "Shipment created successfully." );
                     closeDialog();
