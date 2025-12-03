@@ -15,7 +15,7 @@ export default function ShipmentCreateDialog() {
     return (
         <Dialog open={ open } onOpenChange={ setOpen }>
             <DialogTrigger asChild>
-                <Button variant={ "link" } className={ "max-w-min ml-auto" } size={ "sm" }>
+                <Button className={ "max-w-min ml-auto" } size={ "sm" }>
                     Add Shipment
                 </Button>
             </DialogTrigger>

@@ -24,8 +24,7 @@ export default function ShipmentForm( { form }: Readonly<ShipmentFormProps> ) {
     const orderStatuses = [
         { label: "Ordered", value: "ORDERED" },
         { label: "Processed", value: "PROCESSED" },
-        { label: "In Delivery", value: "IN_DELIVERY" },
-        { label: "Completed", value: "COMPLETED" }
+        { label: "In Delivery", value: "IN_DELIVERY" }
     ] as { label: string; value: ShipmentCreateDTOStatus }[];
 
     if ( warehousesLoading ) {

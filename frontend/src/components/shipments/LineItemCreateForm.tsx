@@ -43,8 +43,6 @@ export default function LineItemCreateForm( { closeDialog, shipmentId }: Readonl
     } );
 
     const handleCreateLineItem = ( data: LineItemFormData ) => {
-        // Implement line item creation logic here
-        console.log( "Created line item", { ...data, shipmentId } );
         createLineItem.mutate(
             {
                 data: {
@@ -54,6 +52,7 @@ export default function LineItemCreateForm( { closeDialog, shipmentId }: Readonl
             },
             {
                 onSuccess: () => {
+                    console.log( "Line item created successfully" );
                     queryClient.invalidateQueries( { queryKey: getGetAllShipmentLineItemsByShipmentIdQueryKey( shipmentId || "" ) } );
                     toast.success( "Line item created successfully" );
                     closeDialog();

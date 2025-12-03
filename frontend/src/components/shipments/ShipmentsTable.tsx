@@ -12,6 +12,7 @@ import {
 import { motion } from "framer-motion";
 import ShipmentDetails from "@/components/shipments/ShipmentDetails.tsx";
 import LineItemCreateDialog from "@/components/shipments/LineItemCreateDialog.tsx";
+import ShipmentUpdateOrderForm from "@/components/shipments/ShipmentUpdateOrderForm.tsx";
 
 type ShipmentsTableProps = {
     shipments: ShipmentResponseDTO[] | undefined;
@@ -54,8 +55,11 @@ export default function ShipmentsTable( { shipments }: Readonly<ShipmentsTablePr
                                     <TableCell
                                         className={ " flex justify-between items-center " }>
                                         { shipment.id }
-                                        <LineItemCreateDialog shipmentId={ shipment.id || "" }/>
-                                        <ShipmentDetails shipment={ shipment }/>
+                                        <div>
+                                            <LineItemCreateDialog shipmentId={ shipment.id || "" }
+                                                                  status={ shipment.status }/>
+                                            <ShipmentDetails shipment={ shipment }/>
+                                        </div>
                                     </TableCell>
                                     <TableCell
                                         className={ "font-medium text-muted-foreground" }>
@@ -67,7 +71,9 @@ export default function ShipmentsTable( { shipments }: Readonly<ShipmentsTablePr
                                     </TableCell>
                                     <TableCell
                                         className={ "font-medium text-muted-foreground" }>
-                                        { shipment.status.toLowerCase() }
+                                        <ShipmentUpdateOrderForm status={ shipment.status }
+                                                                 shipmentId={ shipment.id || "" }
+                                        />
                                     </TableCell>
                                 </motion.tr>
                             ) ) }
