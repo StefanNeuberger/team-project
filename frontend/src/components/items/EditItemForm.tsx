@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { Form } from "@/components/ui/form.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type ItemFormData, itemFormSchema } from "@/types/items.ts";
-import ItemForm from "@/components/ItemsPage Comps/ItemForm.tsx";
+import ItemForm from "@/components/items/ItemForm.tsx";
 import type { Item } from "@/api/generated/openAPIDefinition.schemas.ts";
 import { getGetAllItemsQueryKey, useUpdateItemById } from "@/api/generated/items/items.ts";
 import { toast } from "sonner";

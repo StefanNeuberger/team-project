@@ -6,9 +6,10 @@ import { DialogDescription } from "@radix-ui/react-dialog";
 import { NavLink, useParams } from "react-router-dom";
 import { Separator } from "@/components/ui/separator.tsx";
 import { useState } from "react";
-import DeleteItemAlert from "@/components/ItemsPage Comps/DeleteItemAlert.tsx";
-import EditItem from "@/components/ItemsPage Comps/EditItem.tsx";
+import DeleteItemAlert from "@/components/items/DeleteItemAlert.tsx";
+import EditItem from "@/components/items/EditItem.tsx";
 import { AnimatePresence } from "framer-motion";
+import { formatDate } from "@/utils/utilFunctions.ts";
 
 
 export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<{
@@ -23,16 +24,6 @@ export default function ItemDialogDetailsView( { item, itemQuantity }: Readonly<
     const [ showEditItem, setShowEditItem ] = useState( false );
 
     const { shopId } = useParams();
-
-    const formatDate = ( isoDate: string ) => {
-        return new Intl.DateTimeFormat( 'de-DE', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        } ).format( new Date( isoDate ) );
-    };
 
     const toggleShowConfirmDelete = () => {
         setShowDeleteItem( !showDeleteItem );

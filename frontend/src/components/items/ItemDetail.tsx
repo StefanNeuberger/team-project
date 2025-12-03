@@ -1,16 +1,9 @@
 import type { Item } from "@/api/generated/openAPIDefinition.schemas.ts";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle
-} from "@/components/ui/card.tsx";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { useGetInventoryByItemId } from "@/api/generated/inventory/inventory.ts";
 import Loading from "@/components/custom-ui/Loading.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs.tsx";
-import ItemTable from "@/components/ItemsPage Comps/ItemTable.tsx";
+import ItemTable from "@/components/items/ItemTable.tsx";
 
 type ItemDetailProps = {
     shopId: string;
