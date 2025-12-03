@@ -8,7 +8,7 @@ export default function ItemDetailPage() {
     const { data: itemData, isError, error, isLoading } = useGetItemById( id! );
 
     if ( isLoading ) {
-        return <Loading classNames="flex flex-col justify-center items-center w-full"/>;
+        return <Loading title="Inventory Detail is loading"/>;
     }
 
     if ( isError || !itemData ) {

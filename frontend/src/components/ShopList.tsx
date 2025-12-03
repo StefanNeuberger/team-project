@@ -2,6 +2,7 @@ import { useGetAllShops } from "../api/generated/shops/shops";
 import { ShopForm } from "./ShopForm";
 import { NavLink } from "react-router-dom";
 import Loading from "@/components/custom-ui/Loading.tsx";
+import { StoreIcon } from "lucide-react";
 
 export function ShopList() {
     // GET all shops
@@ -10,7 +11,7 @@ export function ShopList() {
     if ( error ) {
         throw error;
     }
-    
+
     const shops = shopsResponse?.data ?? [];
 
     return (
@@ -26,7 +27,7 @@ export function ShopList() {
                     <ShopForm/>
 
                     {/* Shop List */ }
-                    <div className="space-y-2">
+                    <div className="space-y-2 w-full">
                         <h2 className="text-xl font-semibold mb-2">Shops ({ shops.length })</h2>
                         { shops.length === 0 ? (
                             <p className="text-muted-foreground">
@@ -34,19 +35,22 @@ export function ShopList() {
                             </p>
                         ) : (
                             shops.map( ( shop ) => (
-                                <div
+                                <NavLink
                                     key={ shop.id }
-                                    className="p-2 border border-border hover:bg-accent"
+                                    to={ `/shop/${ shop.id }` }
+                                    className="py-4 border border-border hover:bg-accent w-full flex flex-row justify-start items-center gap-10 px-10 rounded-sm hover:scale-[1.01] duration-150 transition-all ease-in-out"
                                 >
-                                    <div className="font-medium">{ shop.name }</div>
-                                    <div className="text-xs text-muted-foreground">ID: { shop.id }</div>
-                                    { shop.createdDate && (
-                                        <div className="text-xs text-muted-foreground">
-                                            Created: { new Date( shop.createdDate ).toLocaleString() }
-                                        </div>
-                                    ) }
-                                    <NavLink to={ `/shop/${ shop.id }` }>Go to Shop</NavLink>
-                                </div>
+                                    <StoreIcon className="size-8 text-stone-700"/>
+                                    <div>
+                                        <div className="font-medium text-xl">{ shop.name }</div>
+                                        <div className="text-xs text-muted-foreground">ID: { shop.id }</div>
+                                        { shop.createdDate && (
+                                            <div className="text-xs text-muted-foreground">
+                                                Created: { new Date( shop.createdDate ).toLocaleString() }
+                                            </div>
+                                        ) }
+                                    </div>
+                                </NavLink>
                             ) )
                         ) }
                     </div>

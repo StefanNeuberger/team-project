@@ -10,7 +10,6 @@ import ItemDetailPage from "@/pages/ItemDetailPage.tsx";
 import WarehouseDetailPage from "@/pages/WarehouseDetailPage.tsx";
 import InventoryDetailPage from "@/pages/InventoryDetailPage.tsx";
 import ShipmentsPage from "@/pages/ShipmentsPage.tsx";
-import ShipmentDetailPage from "@/pages/ShipmentDetailPage.tsx";
 import ShopLayout from "@/layouts/ShopLayout.tsx";
 import WarehouseEditPage from "@/pages/WarehouseEditPage.tsx";
 import WarehouseDeletePage from "@/pages/WarehouseDeletePage.tsx";
@@ -70,10 +69,6 @@ export const router = createBrowserRouter( [
                         {
                             path: ":shopId/shipments",
                             element: <ShipmentsPage/>
-                        },
-                        {
-                            path: ":shopId/shipments/:id",
-                            element: <ShipmentDetailPage/>
                         }
                     ]
                 }
