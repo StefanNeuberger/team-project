@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
-import EditItemForm from "@/components/ItemsPage Comps/EditItemForm.tsx";
+import EditItemForm from "@/components/items/EditItemForm.tsx";
 import type { Item } from "@/api/generated/openAPIDefinition.schemas.ts";
 
 
