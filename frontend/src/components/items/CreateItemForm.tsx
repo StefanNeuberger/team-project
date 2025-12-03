@@ -4,7 +4,7 @@ import { Form } from "@/components/ui/form.tsx";
 import { getGetAllItemsQueryKey, useCreateItem } from "@/api/generated/items/items.ts";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import ItemForm from "@/components/ItemsPage Comps/ItemForm.tsx";
+import ItemForm from "@/components/items/ItemForm.tsx";
 import { type ItemFormData, itemFormSchema } from "@/types/items.ts";
 
 

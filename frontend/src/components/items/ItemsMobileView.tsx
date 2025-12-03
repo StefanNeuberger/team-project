@@ -1,8 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card.tsx";
-import type { ItemsViewProps } from "@/components/ItemsPage Comps/ItemsView.tsx";
+import type { ItemsViewProps } from "@/components/items/ItemsView.tsx";
 import { motion } from "framer-motion";
 import { Spinner } from "@/components/ui/spinner.tsx";
-import ItemDialogDetailsView from "@/components/ItemsPage Comps/ItemDialogDetailsView.tsx";
+import ItemDialogDetailsView from "@/components/items/ItemDialogDetailsView.tsx";
 import { Separator } from "@/components/ui/separator.tsx";
 
 export default function ItemsMobileView( {

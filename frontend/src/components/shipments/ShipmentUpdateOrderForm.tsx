@@ -1,0 +1,173 @@
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog.tsx";
+import { Button } from "@/components/ui/button.tsx";
+import { ShipmentCreateDTOStatus, type ShipmentUpdateDTOStatus } from "@/api/generated/openAPIDefinition.schemas.ts";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form.tsx";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { getGetAllShipmentsByShopIdQueryKey, useUpdateShipmentStatus } from "@/api/generated/shipments/shipments.ts";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { getGetAllInventoryQueryKey } from "@/api/generated/inventory/inventory.ts";
+import { Spinner } from "@/components/ui/spinner.tsx";
+
+type ShipmentUpdateOrderFormProps = {
+    status: ShipmentUpdateDTOStatus;
+    shipmentId: string;
+}
+
+const UpdateShipmentSchema = z.object( {
+    status: z.enum( [
+        ShipmentCreateDTOStatus.ORDERED,
+        ShipmentCreateDTOStatus.PROCESSED,
+        ShipmentCreateDTOStatus.IN_DELIVERY,
+        ShipmentCreateDTOStatus.COMPLETED
+    ], {
+        message: 'Status is required and must be a valid value'
+    } )
+} )
+
+type ShipmentUpdateOrderFormData = {
+    status: ShipmentUpdateDTOStatus;
+}
+
+export default function ShipmentUpdateOrderForm( { status, shipmentId }: Readonly<ShipmentUpdateOrderFormProps> ) {
+
+
+    const [ dialogOpen, setDialogOpen ] = useState( false );
+
+    const [ currentValue, setCurrentValue ] = useState<ShipmentUpdateDTOStatus>( status );
+
+    const { shopId } = useParams();
+
+    const updateShipmentStatus = useUpdateShipmentStatus();
+    const queryClient = useQueryClient();
+
+    const form = useForm<ShipmentUpdateOrderFormData>( {
+        resolver: zodResolver( UpdateShipmentSchema ),
+        defaultValues: {}
+    } );
+
+    const orderStatuses = [
+        { label: "Ordered", value: "ORDERED" },
+        { label: "Processed", value: "PROCESSED" },
+        { label: "In Delivery", value: "IN_DELIVERY" },
+        { label: "Completed", value: "COMPLETED" }
+    ] as { label: string; value: ShipmentCreateDTOStatus }[];
+
+    const handleUpdateStatus = ( data: ShipmentUpdateOrderFormData ) => {
+        updateShipmentStatus.mutate(
+            {
+                id: shipmentId,
+                data: {
+                    status: data.status
+                }
+            },
+            {
+                onSuccess: () => {
+                    console.log( "Shipment status updated successfully" );
+                    queryClient.invalidateQueries( { queryKey: getGetAllShipmentsByShopIdQueryKey( shopId ) } );
+                    queryClient.invalidateQueries( { queryKey: getGetAllInventoryQueryKey() } );
+                    toast.success( "Shipment updated successfully" );
+                    setDialogOpen( false );
+                },
+                onError: ( error ) => {
+                    console.error( "Error updating shipment status:", error );
+                    toast.error( error.response?.data.message || error.message || "Failed to update shipment." );
+                }
+            } );
+    };
+
+    const updateIsPending = updateShipmentStatus.isPending
+
+    const disableButton = form.formState.isSubmitting || updateIsPending
+
+    return (
+        <Dialog open={ dialogOpen } onOpenChange={ setDialogOpen }>
+            <DialogTrigger asChild>
+                <Button variant={ "outline" } size={ "sm" }>
+                    { orderStatuses.find( ( { value } ) => value === status )?.label }
+                </Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>
+                        Update Order Status
+                    </DialogTitle>
+                    <DialogDescription>
+                        Change the status of this shipment order.
+                    </DialogDescription>
+                </DialogHeader>
+                { status === "COMPLETED" ? (
+                    <p className={ "italic text-center" }>
+                        This order is already completed. Updating the status is not possible.
+                    </p>
+                ) : (
+                    <Form { ...form }>
+                        <form onSubmit={ form.handleSubmit( handleUpdateStatus ) } className={ "mt-4 space-y-4" }>
+                            <FormField
+                                control={ form.control }
+                                name="status"
+                                render={ ( { field } ) => (
+                                    <FormItem className={ "gap-4" }>
+                                        <FormLabel>Order Status</FormLabel>
+                                        <FormControl>
+                                            <RadioGroup
+                                                onValueChange={ ( value ) => {
+                                                    field.onChange( value );
+                                                    setCurrentValue( value as ShipmentUpdateDTOStatus );
+                                                } }
+                                                defaultValue={ field.value }
+                                            >
+                                                { orderStatuses
+                                                    .filter( ( orderStatus ) => orderStatus.value !== status )
+                                                    .map( ( status ) => (
+                                                        <div key={ status.value }
+                                                             className="flex items-center space-x-2">
+                                                            <RadioGroupItem
+                                                                value={ status.value }
+                                                                id={ `status-${ status.value }` }
+                                                            />
+                                                            <label htmlFor={ `status-${ status.value }` }>
+                                                                { status.label }
+                                                            </label>
+                                                        </div>
+                                                    ) ) }
+                                            </RadioGroup>
+                                        </FormControl>
+                                        <FormMessage/>
+                                    </FormItem>
+                                ) }
+                            />
+                            { currentValue === "COMPLETED" &&
+                                <>
+                                    <p className={ "text-muted-foreground" }>Note:</p>
+                                    <p className={ "text-destructive italic text-sm" }>A once COMPLETED shipment
+                                        cannot be changed/updated afterwards</p>
+                                </>
+                            }
+                            <Button disabled={ disableButton }
+                                    className={ "flex justify-center items-center" } size={ "sm" }
+                                    type={ "submit" }>
+                                <p className={ `${ updateIsPending ? "invisible" : "" }` }>
+                                    Update Status
+                                </p>
+                                { updateIsPending && <Spinner className={ "absolute" }/> }
+                            </Button>
+                        </form>
+                    </Form>
+                ) }
+            </DialogContent>
+        </Dialog>
+    )
+}

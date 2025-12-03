@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTrigger } from "@/components/ui/dialog.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import CreateItemForm from "@/components/ItemsPage Comps/CreateItemForm.tsx";
+import CreateItemForm from "@/components/items/CreateItemForm.tsx";
 import { useState } from "react";
 
 export default function CreateItemDialog() {
