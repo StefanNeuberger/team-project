@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useGetItemById } from "@/api/generated/items/items.ts";
 import Loading from "@/components/custom-ui/Loading.tsx";
-import ItemDetail from "@/components/ItemsPage Comps/ItemDetail.tsx";
+import ItemDetail from "@/components/items/ItemDetail.tsx";
 
 export default function ItemDetailPage() {
     const { shopId, id } = useParams();
