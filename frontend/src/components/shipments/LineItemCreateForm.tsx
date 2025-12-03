@@ -65,11 +65,13 @@ export default function LineItemCreateForm( { closeDialog, shipmentId }: Readonl
         );
     }
 
+    const createLineItemPending = createLineItem.isPending;
+
     return (
         <Form { ...form }>
             <form
                 onSubmit={ form.handleSubmit( handleCreateLineItem ) }>
-                <LineItemForm form={ form }/>
+                <LineItemForm form={ form } isPending={ createLineItemPending }/>
             </form>
 
         </Form>

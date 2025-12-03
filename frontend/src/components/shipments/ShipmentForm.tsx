@@ -16,9 +16,10 @@ type ShipmentFormData = {
 
 type ShipmentFormProps = {
     form: UseFormReturn<ShipmentFormData>;
+    isPending: boolean;
 }
 
-export default function ShipmentForm( { form }: Readonly<ShipmentFormProps> ) {
+export default function ShipmentForm( { form, isPending }: Readonly<ShipmentFormProps> ) {
     const { data: warehousesData, isLoading: warehousesLoading } = useGetAllWarehouses();
 
     const orderStatuses = [
@@ -30,6 +31,8 @@ export default function ShipmentForm( { form }: Readonly<ShipmentFormProps> ) {
     if ( warehousesLoading ) {
         return <div><Spinner/></div>;
     }
+
+    const disableForm = isPending || form.formState.isSubmitting;
 
     return (
         <div className="space-y-8 my-4">
@@ -105,7 +108,14 @@ export default function ShipmentForm( { form }: Readonly<ShipmentFormProps> ) {
                 ) }
             />
 
-            <Button type="submit">Submit</Button>
+            <Button disabled={ disableForm }
+                    className={ "flex justify-center items-center" } size={ "sm" }
+                    type={ "submit" }>
+                <p className={ `${ isPending ? "invisible" : "" }` }>
+                    Submit
+                </p>
+                { isPending && <Spinner className={ "absolute" }/> }
+            </Button>
         </div>
     );
 }

@@ -82,10 +82,12 @@ export default function ShipmentCreateForm( { closeDialog }: Readonly<ShipmentCr
         )
     }
 
+    const createShipmentPending = createShipment.isPending;
+
     return (
         <Form { ...form }>
             <form onSubmit={ form.handleSubmit( handleCreateShipment ) }>
-                <ShipmentForm form={ form }/>
+                <ShipmentForm form={ form } isPending={ createShipmentPending }/>
             </form>
         </Form>
     )
