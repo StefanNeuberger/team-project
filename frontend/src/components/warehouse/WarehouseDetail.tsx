@@ -26,12 +26,16 @@ export default function WarehouseDetail( { shopId, warehouse }: WarehouseDetailP
 
     return <Card className="w-full">
         <CardHeader>
+            <small className="text-xs uppercase leading-0">Warehouse</small>
             <CardTitle className="text-2xl">{ warehouse.name }</CardTitle>
             <CardDescription>
                 <div className="flex flex-row gap-10 **:[&_span]:text-xs **:[&_p]:font-semibold **:[&_p]:text-sm">
                     <div>
                         <span>Shop</span>
-                        <p>{ warehouse.shop.name }</p>
+                        <p>
+                            <Link to={ `/shop/${ warehouse.shop.id }/warehouses/` }
+                                  className="hover:underline">{ warehouse.shop.name }</Link>
+                        </p>
                     </div>
                     <div>
                         <span>Address</span>
