@@ -15,6 +15,7 @@ export default function ItemDetail( { shopId, item }: ItemDetailProps ) {
 
     return <Card className="w-full">
         <CardHeader>
+            <small className="text-xs uppercase leading-0">Item</small>
             <CardTitle className="text-2xl">{ item.name }</CardTitle>
             <CardDescription>
                 <div className="flex flex-row gap-10 **:[&_span]:text-xs **:[&_p]:font-semibold **:[&_p]:text-sm">
