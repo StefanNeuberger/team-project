@@ -382,7 +382,6 @@ public class SeedCommands {
                     )
             );
 
-            // Seed inventory
 //            inventoryRepository.saveAll(
 //                    items.stream().flatMap( item -> warehouses.stream().map( warehouse -> {
 //                                int quantity = 20 + random.nextInt( 2000 - 20 + 1 );
@@ -409,7 +408,7 @@ public class SeedCommands {
 //                    2, ShipmentStatus.IN_DELIVERY,
 //                    3, ShipmentStatus.COMPLETED
 //            );
-
+//
 //            List<Shipment> shipments = shipmentRepository.saveAll(
 //                    warehouses.stream().flatMap( warehouse -> {
 //                        List<Shipment> shipmentList = new ArrayList<>();

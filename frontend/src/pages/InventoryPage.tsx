@@ -9,7 +9,7 @@ export default function InventoryPage() {
     const { data: inventoryData, isError, isLoading, error } = useGetAllInventory();
 
     if ( isLoading ) {
-        return <Loading classNames="flex flex-col justify-center items-center w-full"/>;
+        return <Loading title="Inventory is loading"/>;
     }
 
     if ( isError || !inventoryData ) {
