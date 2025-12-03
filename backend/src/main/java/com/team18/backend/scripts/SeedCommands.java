@@ -382,72 +382,72 @@ public class SeedCommands {
                     )
             );
 
-            inventoryRepository.saveAll(
-                    items.stream().flatMap( item -> warehouses.stream().map( warehouse -> {
-                                int quantity = 20 + random.nextInt( 2000 - 20 + 1 );
-                                return new Inventory(
-                                        warehouse,
-                                        item,
-                                        quantity
-                                );
-                            } )
-                    ).toList()
-            );
-
-            // Seed Shipments
-            LocalDate now = LocalDate.now();
-            LocalDate start = now.minusMonths( 1 );
-            LocalDate end = now.plusMonths( 3 );
-
-            long startEpoch = start.toEpochDay();
-            long endEpoch = end.toEpochDay();
-
-            Map<Integer, ShipmentStatus> statusMap = Map.of(
-                    0, ShipmentStatus.ORDERED,
-                    1, ShipmentStatus.PROCESSED,
-                    2, ShipmentStatus.IN_DELIVERY,
-                    3, ShipmentStatus.COMPLETED
-            );
-
-            List<Shipment> shipments = shipmentRepository.saveAll(
-                    warehouses.stream().flatMap( warehouse -> {
-                        List<Shipment> shipmentList = new ArrayList<>();
-                        for ( int i = 0; i < 10; i++ ) {
-                            long randomDay = startEpoch + Math.absExact( random.nextLong() ) % ( endEpoch - startEpoch + 1 );
-                            int status = random.nextInt( 4 );
-                            shipmentList.add(
-                                    new Shipment(
-                                            warehouse,
-                                            LocalDate.ofEpochDay( randomDay ),
-                                            statusMap.get( status )
-                                    )
-                            );
-                        }
-                        return shipmentList.stream();
-                    } ).toList()
-            );
-
-            int bound = items.size() - 1;
-
-            shipmentLineItemRepository.saveAll(
-                    shipments.stream().flatMap( shipment -> {
-                        List<ShipmentLineItem> lineItemList = new ArrayList<>();
-                        for ( int i = 0; i < 10; i++ ) {
-                            int randomItem = random.nextInt( bound );
-                            int quantity = random.nextInt( 500 );
-                            Item item = items.get( randomItem );
-                            lineItemList.add(
-                                    new ShipmentLineItem(
-                                            shipment,
-                                            item,
-                                            quantity,
-                                            quantity
-                                    )
-                            );
-                        }
-                        return lineItemList.stream();
-                    } ).toList()
-            );
+//            inventoryRepository.saveAll(
+//                    items.stream().flatMap( item -> warehouses.stream().map( warehouse -> {
+//                                int quantity = 20 + random.nextInt( 2000 - 20 + 1 );
+//                                return new Inventory(
+//                                        warehouse,
+//                                        item,
+//                                        quantity
+//                                );
+//                            } )
+//                    ).toList()
+//            );
+//
+//            // Seed Shipments
+//            LocalDate now = LocalDate.now();
+//            LocalDate start = now.minusMonths( 1 );
+//            LocalDate end = now.plusMonths( 3 );
+//
+//            long startEpoch = start.toEpochDay();
+//            long endEpoch = end.toEpochDay();
+//
+//            Map<Integer, ShipmentStatus> statusMap = Map.of(
+//                    0, ShipmentStatus.ORDERED,
+//                    1, ShipmentStatus.PROCESSED,
+//                    2, ShipmentStatus.IN_DELIVERY,
+//                    3, ShipmentStatus.COMPLETED
+//            );
+//
+//            List<Shipment> shipments = shipmentRepository.saveAll(
+//                    warehouses.stream().flatMap( warehouse -> {
+//                        List<Shipment> shipmentList = new ArrayList<>();
+//                        for ( int i = 0; i < 10; i++ ) {
+//                            long randomDay = startEpoch + Math.absExact( random.nextLong() ) % ( endEpoch - startEpoch + 1 );
+//                            int status = random.nextInt( 4 );
+//                            shipmentList.add(
+//                                    new Shipment(
+//                                            warehouse,
+//                                            LocalDate.ofEpochDay( randomDay ),
+//                                            statusMap.get( status )
+//                                    )
+//                            );
+//                        }
+//                        return shipmentList.stream();
+//                    } ).toList()
+//            );
+//
+//            int bound = items.size() - 1;
+//
+//            shipmentLineItemRepository.saveAll(
+//                    shipments.stream().flatMap( shipment -> {
+//                        List<ShipmentLineItem> lineItemList = new ArrayList<>();
+//                        for ( int i = 0; i < 10; i++ ) {
+//                            int randomItem = random.nextInt( bound );
+//                            int quantity = random.nextInt( 500 );
+//                            Item item = items.get( randomItem );
+//                            lineItemList.add(
+//                                    new ShipmentLineItem(
+//                                            shipment,
+//                                            item,
+//                                            quantity,
+//                                            quantity
+//                                    )
+//                            );
+//                        }
+//                        return lineItemList.stream();
+//                    } ).toList()
+//            );
 
             return "🌱 MongoDB has been seeded with new data.";
         } else {
