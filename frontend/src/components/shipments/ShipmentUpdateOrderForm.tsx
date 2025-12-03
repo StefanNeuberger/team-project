@@ -87,7 +87,7 @@ export default function ShipmentUpdateOrderForm( { status, shipmentId }: Readonl
         <Dialog open={ dialogOpen } onOpenChange={ setDialogOpen }>
             <DialogTrigger asChild>
                 <Button variant={ "outline" } size={ "sm" }>
-                    { status.toLowerCase() }
+                    { orderStatuses.find( ( { value } ) => value === status )?.label }
                 </Button>
             </DialogTrigger>
             <DialogContent>
@@ -137,7 +137,7 @@ export default function ShipmentUpdateOrderForm( { status, shipmentId }: Readonl
                                     </FormItem>
                                 ) }
                             />
-                            <Button type={ "submit" }>Submit</Button>
+                            <Button size={ "sm" } type={ "submit" }>Submit</Button>
                         </form>
                     </Form>
                 ) }

@@ -27,7 +27,7 @@ export default function ShipmentsTable( { shipments }: Readonly<ShipmentsTablePr
                     <p>-- No Shipments yet -- </p>
                 </div>
                 :
-                <div className={ "m-auto px-4 max-w-[1000px]" }>
+                <div className={ "m-auto px-4" }>
                     <small>Total Shipments: { shipments?.length ?? "N/A" }</small>
                     <Table className={ "my-4 hidden md:block" }>
                         { ( !shipments || shipments?.length > 0 ) && <TableCaption>All Shipments</TableCaption> }

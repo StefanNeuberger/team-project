@@ -116,7 +116,10 @@ export default function LineItemUpdateForm( {
                         </FormItem>
                     ) }
                 />
-                <Button size={ "sm" }>Submit</Button>
+                <div className={ "flex items-center justify-between" }>
+                    <Button size={ "sm" }>Submit</Button>
+                    <Button variant={ "outline" } size={ "sm" } onClick={ closeEditMode }>Cancel</Button>
+                </div>
             </form>
 
         </Form>
