@@ -29,7 +29,7 @@ export default function ShipmentsTable( { shipments }: Readonly<ShipmentsTablePr
                 :
                 <div className={ "m-auto px-4" }>
                     <small>Total Shipments: { shipments?.length ?? "N/A" }</small>
-                    <Table className={ "my-4 hidden md:block" }>
+                    <Table className={ "my-4" }>
                         { ( !shipments || shipments?.length > 0 ) && <TableCaption>All Shipments</TableCaption> }
                         <TableHeader>
                             <TableRow className={ "border-muted-foreground" }>

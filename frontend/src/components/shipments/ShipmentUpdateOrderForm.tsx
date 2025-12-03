@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
+import { getGetAllInventoryQueryKey } from "@/api/generated/inventory/inventory.ts";
+import { Spinner } from "@/components/ui/spinner.tsx";
 
 type ShipmentUpdateOrderFormProps = {
     status: ShipmentUpdateDTOStatus;
@@ -43,6 +45,8 @@ export default function ShipmentUpdateOrderForm( { status, shipmentId }: Readonl
 
 
     const [ dialogOpen, setDialogOpen ] = useState( false );
+
+    const [ currentValue, setCurrentValue ] = useState<ShipmentUpdateDTOStatus>( status );
 
     const { shopId } = useParams();
 
@@ -72,7 +76,8 @@ export default function ShipmentUpdateOrderForm( { status, shipmentId }: Readonl
             {
                 onSuccess: () => {
                     console.log( "Shipment status updated successfully" );
-                    queryClient.invalidateQueries( { queryKey: getGetAllShipmentsByShopIdQueryKey( shopId || "" ) } );
+                    queryClient.invalidateQueries( { queryKey: getGetAllShipmentsByShopIdQueryKey( shopId ) } );
+                    queryClient.invalidateQueries( { queryKey: getGetAllInventoryQueryKey() } );
                     toast.success( "Shipment updated successfully" );
                     setDialogOpen( false );
                 },
@@ -82,6 +87,10 @@ export default function ShipmentUpdateOrderForm( { status, shipmentId }: Readonl
                 }
             } );
     };
+
+    const updateIsPending = updateShipmentStatus.isPending
+
+    const disableButton = form.formState.isSubmitting || updateIsPending
 
     return (
         <Dialog open={ dialogOpen } onOpenChange={ setDialogOpen }>
@@ -114,7 +123,10 @@ export default function ShipmentUpdateOrderForm( { status, shipmentId }: Readonl
                                         <FormLabel>Order Status</FormLabel>
                                         <FormControl>
                                             <RadioGroup
-                                                onValueChange={ field.onChange }
+                                                onValueChange={ ( value ) => {
+                                                    field.onChange( value );
+                                                    setCurrentValue( value as ShipmentUpdateDTOStatus );
+                                                } }
                                                 defaultValue={ field.value }
                                             >
                                                 { orderStatuses
@@ -137,7 +149,21 @@ export default function ShipmentUpdateOrderForm( { status, shipmentId }: Readonl
                                     </FormItem>
                                 ) }
                             />
-                            <Button size={ "sm" } type={ "submit" }>Submit</Button>
+                            { currentValue === "COMPLETED" &&
+                                <>
+                                    <p className={ "text-muted-foreground" }>Note:</p>
+                                    <p className={ "text-destructive italic text-sm" }>A once COMPLETED shipment
+                                        cannot be changed/updated afterwards</p>
+                                </>
+                            }
+                            <Button disabled={ disableButton }
+                                    className={ "flex justify-center items-center" } size={ "sm" }
+                                    type={ "submit" }>
+                                <p className={ `${ updateIsPending ? "invisible" : "" }` }>
+                                    Update Status
+                                </p>
+                                { updateIsPending && <Spinner className={ "absolute" }/> }
+                            </Button>
                         </form>
                     </Form>
                 ) }

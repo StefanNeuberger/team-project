@@ -11,6 +11,7 @@ import {
 } from "@/api/generated/shipment-line-items/shipment-line-items.ts";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { Spinner } from "@/components/ui/spinner.tsx";
 
 type LineItemUpdateFormProps = {
     lineItem: ShipmentLineItemResponseDTO
@@ -73,6 +74,10 @@ export default function LineItemUpdateForm( {
         );
     }
 
+    const updateLineItemPending = updateLineItem.isPending;
+
+    const disableSubmitButton = updateLineItemPending || !form.formState.isDirty || !form.formState.isValid;
+
 
     return (
 
@@ -117,7 +122,15 @@ export default function LineItemUpdateForm( {
                     ) }
                 />
                 <div className={ "flex items-center justify-between" }>
-                    <Button size={ "sm" }>Submit</Button>
+                    <Button disabled={ disableSubmitButton }
+                            className={ "flex justify-center items-center" }
+                            size={ "sm" }
+                            type={ "submit" }>
+                        <p className={ `${ updateLineItemPending ? "invisible" : "" }` }>
+                            Submit
+                        </p>
+                        { updateLineItemPending && <Spinner className={ "absolute" }/> }
+                    </Button>
                     <Button variant={ "outline" } size={ "sm" } onClick={ closeEditMode }>Cancel</Button>
                 </div>
             </form>

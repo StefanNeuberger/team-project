@@ -14,19 +14,22 @@ import {
 } from "@/components/ui/command.tsx";
 import { useGetAllItems } from "@/api/generated/items/items.ts";
 import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner.tsx";
 
 type LineItemFormProps<F extends FieldValues> = {
     form: F,
+    isPending: boolean
 }
 
-export default function LineItemForm<F extends FieldValues>( { form }: Readonly<LineItemFormProps<F>> ) {
+export default function LineItemForm<F extends FieldValues>( { form, isPending }: Readonly<LineItemFormProps<F>> ) {
 
     const [ showItems, setShowItems ] = useState( false );
     const [ selectedItem, setSelectedItem ] = useState<string | null>( null );
 
     const { data: allItemsData } = useGetAllItems();
 
-    const disableSubmitButton = form.formState.isSubmitting || !form.formState.isDirty;
+    const disableSubmitButton = form.formState.isSubmitting || !form.formState.isDirty || isPending;
+
     return (
         <div className={ "space-y-6 my-4" }>
             <FormField
@@ -131,7 +134,15 @@ export default function LineItemForm<F extends FieldValues>( { form }: Readonly<
                         </FormItem>
                     )
                 }/>
-            <Button disabled={ disableSubmitButton } type={ "submit" }>Submit</Button>
+            <Button disabled={ disableSubmitButton }
+                    className={ "flex justify-center items-center" }
+                    size={ "sm" }
+                    type={ "submit" }>
+                <p className={ `${ isPending ? "invisible" : "" }` }>
+                    Submit
+                </p>
+                { isPending && <Spinner className={ "absolute" }/> }
+            </Button>
         </div>
     )
 }
