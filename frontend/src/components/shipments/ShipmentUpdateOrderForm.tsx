@@ -100,7 +100,7 @@ export default function ShipmentUpdateOrderForm( { status, shipmentId }: Readonl
                     </DialogDescription>
                 </DialogHeader>
                 { status === "COMPLETED" ? (
-                    <p className={ "" }>
+                    <p className={ "italic text-center" }>
                         This order is already completed. Updating the status is not possible.
                     </p>
                 ) : (
