@@ -7,9 +7,9 @@ type ItemFormProps<F extends FieldValues> = {
     form: F,
 }
 
-export default function ItemForm<F extends FieldValues>( { form }: ItemFormProps<F> ) {
+export default function ItemForm<F extends FieldValues>( { form }: Readonly<ItemFormProps<F>> ) {
 
-    const disableSubmitButton = form.formState.isSubmitting || !form.formState.isDirty || !form.formState.isValid;
+    const disableSubmitButton = form.formState.isSubmitting || !form.formState.isDirty
 
     return (
         <div className={ "space-y-6 my-4" }>
@@ -20,8 +20,10 @@ export default function ItemForm<F extends FieldValues>( { form }: ItemFormProps
                     ( { field } ) => (
                         <FormItem className={ "gap-4" }>
                             <div className={ "flex items-center justify-between" }>
-                                <FormLabel>Item Name</FormLabel>
-                                <FormMessage className={ "text-xs" }/>
+                                <div className={ "flex items-center justify-between" }>
+                                    <FormLabel>Item Name</FormLabel>
+                                    <FormMessage className={ "text-xs" }/>
+                                </div>
                             </div>
                             <FormControl>
                                 <Input placeholder={ "Type in name..." } { ...field } />

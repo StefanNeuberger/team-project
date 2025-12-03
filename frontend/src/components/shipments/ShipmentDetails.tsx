@@ -2,6 +2,7 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
     DialogTrigger
@@ -18,6 +19,8 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import LineItemUpdateForm from "@/components/shipments/LineItemUpdateForm.tsx";
+import { getGetAllShipmentsByShopIdQueryKey, useDeleteShipment } from "@/api/generated/shipments/shipments.ts";
+import { useParams } from "react-router-dom";
 
 
 type ShipmentDetailsViewProps = {
@@ -26,11 +29,17 @@ type ShipmentDetailsViewProps = {
 
 export default function ShipmentDetails( { shipment }: Readonly<ShipmentDetailsViewProps> ) {
 
+    const { shopId } = useParams();
+
+    const [ dialogOpen, setDialogOpen ] = useState( false );
+
+    const closeDialog = () => setDialogOpen( false );
 
     const [ editingItemIds, setEditingItemIds ] = useState<Set<string>>( new Set() );
 
     const queryClient = useQueryClient();
     const deleteLineItem = useDeleteShipmentLineItem();
+    const deleteShipment = useDeleteShipment();
 
     const {
         data: shipmentLineItems
@@ -66,12 +75,36 @@ export default function ShipmentDetails( { shipment }: Readonly<ShipmentDetailsV
         } );
     };
 
-    const handleOpenChange = () => {
+    const handleOpenChange = ( open: boolean ) => {
         setEditingItemIds( new Set() );
+        setDialogOpen( open );
+    }
+
+    const handleDeleteShipment = () => {
+
+        if ( shipment.status === "COMPLETED" ) {
+            toast.error( "Cannot delete a completed shipment." );
+        }
+
+        deleteShipment.mutate( { id: shipment.id || "" },
+            {
+                onSuccess: () => {
+                    toast.success( "Shipment deleted successfully" );
+                    console.log( "Deleted shipment" );
+                    queryClient.invalidateQueries( {
+                        queryKey: getGetAllShipmentsByShopIdQueryKey( shopId || "" )
+                    } );
+                    closeDialog();
+                },
+                onError: ( error ) => {
+                    console.error( "Error deleting shipment", error );
+                    toast.error( error.response?.data.message || error.message || "Failed to delete shipment." );
+                }
+            } )
     }
 
     return (
-        <Dialog onOpenChange={ handleOpenChange }>
+        <Dialog open={ dialogOpen } onOpenChange={ handleOpenChange }>
             <DialogTrigger asChild>
                 <Button variant={ "link" }>
                     Details
@@ -95,7 +128,7 @@ export default function ShipmentDetails( { shipment }: Readonly<ShipmentDetailsV
                     <p>{ shipment.warehouse.name }</p>
                 </div>
                 <Separator orientation={ "horizontal" }/>
-                <h2>OrderedItems</h2>
+                <h2>Ordered Items</h2>
                 { !shipmentLineItems?.data?.length && (
                     <div className={ "p-4 text-sm text-muted-foreground" }>
                         No items in this shipment.
@@ -132,13 +165,23 @@ export default function ShipmentDetails( { shipment }: Readonly<ShipmentDetailsV
                                         size={ "sm" }
                                         onClick={
                                             () => handleDeleteLineItem( lineItem.id || "" ) }>
-                                    Delete
+                                    Delete Item
                                 </Button>
                             </div>
                         }
                     </div>
                 ) }
 
+                <DialogFooter>
+                    { shipment.status !== "COMPLETED" &&
+                        <Button
+                            className={ "mr-auto" }
+                            onClick={ handleDeleteShipment }
+                            variant={ "destructive" }>
+                            Delete Shipment
+                        </Button>
+                    }
+                </DialogFooter>
             </DialogContent>
 
         </Dialog>

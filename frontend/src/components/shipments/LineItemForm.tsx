@@ -2,7 +2,7 @@ import type { FieldValues } from "react-hook-form";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field.tsx";
+import { Field, FieldDescription } from "@/components/ui/field.tsx";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover.tsx";
 import {
     Command,
@@ -26,7 +26,7 @@ export default function LineItemForm<F extends FieldValues>( { form }: Readonly<
 
     const { data: allItemsData } = useGetAllItems();
 
-    const disableSubmitButton = form.formState.isSubmitting || !form.formState.isDirty || !form.formState.isValid;
+    const disableSubmitButton = form.formState.isSubmitting || !form.formState.isDirty;
     return (
         <div className={ "space-y-6 my-4" }>
             <FormField
@@ -35,17 +35,20 @@ export default function LineItemForm<F extends FieldValues>( { form }: Readonly<
                 render={
                     ( { field } ) => (
                         <Field>
-                            <FieldLabel>
-                                Select an Item
-                            </FieldLabel>
+                            <div className={ "flex items-center justify-between" }>
+                                <FormLabel>Select an Item</FormLabel>
+                                <FormMessage className={ "text-xs" }/>
+                            </div>
                             <Popover open={ showItems } onOpenChange={ setShowItems }>
                                 <PopoverTrigger asChild>
-                                    <Input
-                                        placeholder="Search items..."
-                                        value={ selectedItem || "" }
-                                        readOnly
-                                        onClick={ () => setShowItems( true ) }
-                                    />
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Search items..."
+                                            value={ selectedItem || "" }
+                                            readOnly
+                                            onClick={ () => setShowItems( true ) }
+                                        />
+                                    </FormControl>
                                 </PopoverTrigger>
                                 <PopoverContent className={ "w-full p-0" } align={ "start" }>
                                     <Command>
@@ -65,8 +68,8 @@ export default function LineItemForm<F extends FieldValues>( { form }: Readonly<
                                                         } }>
                                                         { item.name }
                                                         <span className={ "text-xs ml-auto text-muted-foreground" }>
-                                            { item.sku }
-                                        </span>
+                                                            { item.sku }
+                                                        </span>
                                                     </CommandItem>
                                                 ) ) }
                                             </CommandGroup>

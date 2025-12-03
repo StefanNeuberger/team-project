@@ -38,7 +38,10 @@ export default function ShipmentForm( { form }: Readonly<ShipmentFormProps> ) {
                 name="warehouseId"
                 render={ ( { field } ) => (
                     <FormItem>
-                        <FormLabel>Select a Warehouse</FormLabel>
+                        <div className={ "flex items-center justify-between" }>
+                            <FormLabel>Select a Warehouse</FormLabel>
+                            <FormMessage className={ "text-xs" }/>
+                        </div>
                         <Select onValueChange={ field.onChange } defaultValue={ field.value }>
                             <FormControl>
                                 <SelectTrigger>
@@ -53,7 +56,6 @@ export default function ShipmentForm( { form }: Readonly<ShipmentFormProps> ) {
                                 ) ) }
                             </SelectContent>
                         </Select>
-                        <FormMessage/>
                     </FormItem>
                 ) }
             />
@@ -63,11 +65,13 @@ export default function ShipmentForm( { form }: Readonly<ShipmentFormProps> ) {
                 name="expectedArrivalDate"
                 render={ ( { field } ) => (
                     <FormItem>
-                        <FormLabel>Expected Arrival Date</FormLabel>
+                        <div className={ "flex items-center justify-between" }>
+                            <FormLabel>Expected Arrival Date</FormLabel>
+                            <FormMessage className={ "text-xs" }/>
+                        </div>
                         <FormControl>
                             <Input type="date" { ...field } />
                         </FormControl>
-                        <FormMessage/>
                     </FormItem>
                 ) }
             />

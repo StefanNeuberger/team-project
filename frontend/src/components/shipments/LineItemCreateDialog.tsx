@@ -40,7 +40,7 @@ export default function LineItemCreateDialog( { shipmentId, status }: Readonly<L
                     </DialogDescription>
                 </DialogHeader>
                 { status === "COMPLETED" ?
-                    <p>Items cannot be added to a completed shipment</p>
+                    <p className={ "italic" }>Items cannot be added to a completed shipment</p>
                     :
                     <LineItemCreateForm closeDialog={ toggleDialog } shipmentId={ shipmentId }/>
                 }
