@@ -1,6 +1,6 @@
 import { useGetAllItems } from "@/api/generated/items/items.ts";
 import Loading from "@/components/custom-ui/Loading.tsx";
-import ItemsView from "@/components/ItemsPage Comps/ItemsView.tsx";
+import ItemsView from "@/components/items/ItemsView.tsx";
 import { useGetAllInventory } from "@/api/generated/inventory/inventory.ts";
 import { useEffect, useState } from "react";
 
